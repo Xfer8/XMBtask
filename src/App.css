@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { BuilderComponent, builder } from "@builder.io/react";
 
 // Replace with your actual Public API Key from Builder.io settings
-builder.init("YOUR_BUILDER_PUBLIC_KEY");
+builder.init("76d30dc4efc8465aa381751038fbe946");
 
 export default function App() {
   const [content, setContent] = useState(null);
