@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { getPalette } from "../../../colors";
+import SplitBadge from "../../ui/SplitBadge";
 
 const LINK_TYPES       = ["Source", "Sherlock", "Jira", "Email", "Other"];
 const LINK_TYPE_COLORS = { Source:"yellow", Sherlock:"orange", Jira:"purple", Email:"teal", Other:"gray" };
@@ -97,17 +98,30 @@ export default function LinksSection({ links, onChange }) {
         );
 
         const p = getPalette(LINK_TYPE_COLORS[l.type] ?? "gray");
+        const isSplit = l.type === "Sherlock" || l.type === "Jira";
+        const splitColor = l.type === "Sherlock" ? "orange" : "blue";
         return (
           <div key={l.id} style={{ display:"flex", alignItems:"center", gap:"10px", background:"#1a1a1e", borderRadius:"8px", padding:"8px 12px" }}>
-            <span style={{ fontSize:"10px", fontWeight:700, padding:"2px 7px", borderRadius:"9999px", background:p.bg, color:p.text, whiteSpace:"nowrap", flexShrink:0 }}>{l.type}</span>
-            <div
-              onClick={() => startEdit(l)}
-              style={{ flex:1, minWidth:0, cursor:"pointer" }}
-            >
-              <span style={{ fontSize:"13px", color:p.text, display:"block", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                {l.displayName || l.url || "(no URL)"}
-              </span>
-            </div>
+            {isSplit ? (
+              <>
+                <SplitBadge
+                  label={l.type}
+                  value={l.displayName || l.url || ""}
+                  colorKey={splitColor}
+                  onClick={() => startEdit(l)}
+                />
+                <div style={{ flex:1 }} />
+              </>
+            ) : (
+              <>
+                <span style={{ fontSize:"10px", fontWeight:700, padding:"2px 7px", borderRadius:"4px", background:p.bg, color:p.text, whiteSpace:"nowrap", flexShrink:0 }}>{l.type}</span>
+                <div onClick={() => startEdit(l)} style={{ flex:1, minWidth:0, cursor:"pointer" }}>
+                  <span style={{ fontSize:"13px", color:p.text, display:"block", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                    {l.displayName || l.url || "(no URL)"}
+                  </span>
+                </div>
+              </>
+            )}
             {confirmDel === l.id ? (
               <div style={{ display:"flex", alignItems:"center", gap:"6px", flexShrink:0 }}>
                 <span style={{ fontSize:"11px", color:"#888890" }}>Delete?</span>

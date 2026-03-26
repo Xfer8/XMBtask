@@ -586,13 +586,8 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
             </div>
           )}
 
-          {/* Status badge + Link badges — same size */}
+          {/* Link badges */}
           <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-            <StatusBadge
-              status={task.status}
-              colorKey={statusColorKey}
-              onChange={(val) => onUpdate?.({ ...task, status: val })}
-            />
             {links.map(link => {
               if (link.type === "Sherlock") {
                 return (
@@ -649,8 +644,13 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
           display: "flex", flexDirection: "column",
           justifyContent: "space-between", gap: "6px",
         }}>
-          {/* Priority + Due date + Owner — right-justified */}
+          {/* Status + Priority + Due date + Owner — right-justified */}
           <div style={{ display: "flex", flexDirection: "column", gap: "6px", alignItems: "flex-end" }}>
+            <StatusBadge
+              status={task.status}
+              colorKey={statusColorKey}
+              onChange={(val) => onUpdate?.({ ...task, status: val })}
+            />
             <PriorityBadge
               priority={task.priority}
               colorKey={priorityColorKey}
