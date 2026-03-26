@@ -78,7 +78,7 @@ function PriorityBadge({ priority, colorKey, onChange }) {
           display: "inline-block",
         }}
       >
-        {hov && !open ? "Change Priority" : priority}
+        {hov && !open ? "Edit Priority" : priority}
       </span>
 
       {open && (
@@ -173,7 +173,7 @@ function DueDateBadge({ dueDate, colorKey, onChange }) {
           display: "inline-block",
         }}
       >
-        {hov && !open ? "Change Due Date" : label}
+        {hov && !open ? "Edit Due Date" : label}
       </span>
 
       {open && (
