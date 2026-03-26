@@ -30,7 +30,7 @@ const getDueDateColorKey = (iso) => {
 };
 
 // ── Shared badge metrics (keeps all card badges the same size) ────────────────
-const BADGE = { fontSize:"11px", fontWeight:600, padding:"4px 10px", borderRadius:"4px", whiteSpace:"nowrap" };
+const BADGE = { fontSize:"12px", fontWeight:600, padding:"4px 10px", borderRadius:"4px", whiteSpace:"nowrap" };
 
 // ── GlowBadge ─────────────────────────────────────────────────────────────────
 
