@@ -44,6 +44,180 @@ function GlowBadge({ label, colorKey }) {
   );
 }
 
+// ── PriorityBadge — hover to reveal "Change Priority", click for dropdown ─────
+
+const PRIORITY_OPTIONS = ["Low", "Medium", "High"];
+
+function PriorityBadge({ priority, colorKey, onChange }) {
+  const [hov,  setHov]  = useState(false);
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const p   = getPalette(colorKey);
+
+  useEffect(() => {
+    if (!open) return;
+    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [open]);
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <span
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
+        onClick={(e) => { e.stopPropagation(); setOpen(v => !v); }}
+        style={{
+          fontSize: "10px", fontWeight: 600,
+          padding: "2px 8px", borderRadius: "9999px",
+          background: hov ? p.hoverBg  : p.bg,
+          color:      hov ? p.hoverText : p.text,
+          border: `1px solid ${hov ? p.hoverBorder : "transparent"}`,
+          whiteSpace: "nowrap", cursor: "pointer",
+          transition: "background 0.15s, color 0.15s, border-color 0.15s",
+          display: "inline-block",
+        }}
+      >
+        {hov && !open ? "Change Priority" : priority}
+      </span>
+
+      {open && (
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{
+            position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 400,
+            background: "#2a2a2e", border: "1px solid #3a3a44",
+            borderRadius: "8px", padding: "4px",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+            minWidth: "130px",
+          }}
+        >
+          {PRIORITY_OPTIONS.map(opt => {
+            const optP = getPalette(PRIORITY_COLORS[opt] ?? "gray");
+            const selected = opt === priority;
+            return (
+              <div
+                key={opt}
+                onClick={() => { onChange(opt); setOpen(false); setHov(false); }}
+                style={{
+                  padding: "5px 8px", borderRadius: "5px", cursor: "pointer",
+                  background: selected ? "#3a3a44" : "transparent",
+                  display: "flex", alignItems: "center", gap: "8px",
+                  transition: "background 0.1s",
+                }}
+              >
+                <span style={{
+                  fontSize: "10px", fontWeight: 600,
+                  padding: "2px 8px", borderRadius: "9999px",
+                  background: optP.bg, color: optP.text,
+                }}>
+                  {opt}
+                </span>
+                {selected && (
+                  <span style={{ fontSize: "10px", color: "#55555e", marginLeft: "auto" }}>✓</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── DueDateBadge — hover to reveal "Change Due Date", click for date picker ───
+
+function DueDateBadge({ dueDate, colorKey, onChange }) {
+  const [hov,  setHov]  = useState(false);
+  const [open, setOpen] = useState(false);
+  const ref      = useRef(null);
+  const inputRef = useRef(null);
+  const p = getPalette(colorKey ?? "gray");
+
+  useEffect(() => {
+    if (!open) return;
+    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [open]);
+
+  useEffect(() => {
+    if (open && inputRef.current) {
+      inputRef.current.focus();
+      try { inputRef.current.showPicker(); } catch {}
+    }
+  }, [open]);
+
+  const label = dueDate ? formatDate(dueDate) : "No due date";
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <span
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
+        onClick={(e) => { e.stopPropagation(); setOpen(v => !v); }}
+        style={{
+          fontSize: "10px", fontWeight: 600,
+          padding: "2px 8px", borderRadius: "9999px",
+          background: dueDate
+            ? (hov ? p.hoverBg   : p.bg)
+            : (hov ? "#374151"   : "#2a2a2a"),
+          color: dueDate
+            ? (hov ? p.hoverText : p.text)
+            : (hov ? "#D1D5DB"   : "#55555e"),
+          border: `1px solid ${hov
+            ? (dueDate ? p.hoverBorder : "#4B5563")
+            : "transparent"}`,
+          whiteSpace: "nowrap", cursor: "pointer",
+          transition: "background 0.15s, color 0.15s, border-color 0.15s",
+          display: "inline-block",
+        }}
+      >
+        {hov && !open ? "Change Due Date" : label}
+      </span>
+
+      {open && (
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{
+            position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 400,
+            background: "#2a2a2e", border: "1px solid #3a3a44",
+            borderRadius: "8px", padding: "10px 12px",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+          }}
+        >
+          <input
+            ref={inputRef}
+            type="date"
+            value={dueDate ?? ""}
+            onChange={(e) => { onChange(e.target.value || null); setOpen(false); setHov(false); }}
+            style={{
+              background: "#1e1e1e", border: "1px solid #3a3a3a",
+              borderRadius: "6px", color: "#f0f0f0",
+              fontSize: "12px", padding: "6px 10px",
+              colorScheme: "dark", fontFamily: "inherit", outline: "none",
+              display: "block",
+            }}
+          />
+          {dueDate && (
+            <button
+              onClick={() => { onChange(null); setOpen(false); setHov(false); }}
+              style={{
+                marginTop: "6px", background: "none", border: "none",
+                color: "#888890", fontSize: "11px",
+                cursor: "pointer", fontFamily: "inherit", padding: "2px 0",
+                display: "block",
+              }}
+            >
+              Clear date
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── ProgressBar ───────────────────────────────────────────────────────────────
 
 function ProgressBar({ pct, colorKey = "green" }) {
@@ -370,18 +544,17 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
         }}>
           {/* Priority + Due date + Owner — right-justified */}
           <div style={{ display: "flex", flexDirection: "column", gap: "6px", alignItems: "flex-end" }}>
-            <GlowBadge label={task.priority} colorKey={priorityColorKey} />
+            <PriorityBadge
+              priority={task.priority}
+              colorKey={priorityColorKey}
+              onChange={(val) => onUpdate?.({ ...task, priority: val })}
+            />
 
-            {task.dueDate && (
-              <span style={{
-                fontSize: "10px", fontWeight: 600,
-                padding: "2px 8px", borderRadius: "9999px",
-                background: duePal.bg, color: duePal.text,
-                whiteSpace: "nowrap",
-              }}>
-                {formatDate(task.dueDate)}
-              </span>
-            )}
+            <DueDateBadge
+              dueDate={task.dueDate}
+              colorKey={dueDateColorKey}
+              onChange={(val) => onUpdate?.({ ...task, dueDate: val })}
+            />
 
             {task.owner && (
               <span style={{
