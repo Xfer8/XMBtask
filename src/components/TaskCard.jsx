@@ -447,8 +447,8 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
         onMouseEnter={() => setHov(true)}
         onMouseLeave={() => setHov(false)}
         style={{
-          background: hov ? "#313131" : "#2a2a2a",
-          border: `1px solid ${hov ? "#555560" : "#444450"}`,
+          background: "#2a2a2a",
+          border: "1px solid #444450",
           borderRadius: "10px",
           padding: "14px 16px",
           transition: "background 0.15s, border-color 0.15s",
