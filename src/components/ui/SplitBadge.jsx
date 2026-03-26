@@ -41,7 +41,7 @@ export default function SplitBadge({ label, value, colorKey = "orange", href, on
         overflow: "hidden",
         cursor: "pointer",
         textDecoration: "none",
-        transform: hov ? "translateY(-1px)" : "translateY(0)",
+        transform: "translateY(0)",
         boxShadow: hov
           ? `0 0 15px rgba(251, 146, 60, 0.3), 0 4px 6px -1px rgba(0,0,0,0.2)`
           : "0 4px 6px -1px rgba(0,0,0,0.2)",
