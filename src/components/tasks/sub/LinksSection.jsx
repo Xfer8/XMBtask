@@ -100,15 +100,13 @@ export default function LinksSection({ links, onChange }) {
         return (
           <div key={l.id} style={{ display:"flex", alignItems:"center", gap:"10px", background:"#1a1a1e", borderRadius:"8px", padding:"8px 12px" }}>
             <span style={{ fontSize:"10px", fontWeight:700, padding:"2px 7px", borderRadius:"9999px", background:p.bg, color:p.text, whiteSpace:"nowrap", flexShrink:0 }}>{l.type}</span>
-            <div style={{ flex:1, minWidth:0 }}>
-              {l.url ? (
-                <a href={l.url} onClick={e => { e.preventDefault(); window.open(l.url, "_blank", "noopener,noreferrer"); }}
-                  style={{ fontSize:"13px", color:p.text, textDecoration:"none", display:"block", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                  {l.displayName || l.url}
-                </a>
-              ) : (
-                <span style={{ fontSize:"13px", color:"#888890" }}>{l.displayName || "(no URL)"}</span>
-              )}
+            <div
+              onClick={() => startEdit(l)}
+              style={{ flex:1, minWidth:0, cursor:"pointer" }}
+            >
+              <span style={{ fontSize:"13px", color:p.text, display:"block", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                {l.displayName || l.url || "(no URL)"}
+              </span>
             </div>
             {confirmDel === l.id ? (
               <div style={{ display:"flex", alignItems:"center", gap:"6px", flexShrink:0 }}>

@@ -606,6 +606,18 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
                   />
                 );
               }
+              if (link.type === "Jira") {
+                return (
+                  <SplitBadge
+                    key={link.id}
+                    label="Jira"
+                    value={link.displayName || link.url}
+                    colorKey="blue"
+                    href={link.url}
+                    onClick={e => e.stopPropagation()}
+                  />
+                );
+              }
               return (
                 <a
                   key={link.id}
