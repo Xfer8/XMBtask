@@ -409,7 +409,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
               {/* Count bubble — centered on bottom-left corner */}
               <div style={{
                 position: "absolute", bottom: 0, left: 0,
-                transform: "translate(-50%, 50%)",
+                transform: "translate(calc(-50% + 5px), calc(50% - 5px))",
                 background: "#444450", color: "#f0f0f0",
                 fontSize: "10px", fontWeight: 700,
                 width: "20px", height: "20px", borderRadius: "50%",
