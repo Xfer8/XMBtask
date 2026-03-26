@@ -485,7 +485,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
             <div
               onClick={() => onEdit(task)}
               style={{
-                fontSize: "13px", color: "#c8c8d0", lineHeight: 1.5,
+                fontSize: "12px", color: "#c8c8d0", lineHeight: 1.5,
                 overflow: "hidden", display: "-webkit-box",
                 WebkitLineClamp: 4, WebkitBoxOrient: "vertical",
                 cursor: "pointer",
@@ -506,7 +506,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
             }}
           >
             <span style={{
-              fontSize: "9px", fontWeight: 700, color: "#55555e",
+              fontSize: "12px", fontWeight: 700, color: "#55555e",
               letterSpacing: "0.1em", textTransform: "uppercase",
               whiteSpace: "nowrap", flexShrink: 0,
             }}>
@@ -521,7 +521,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
               {lastUpdate ? lastUpdate.text : "No updates yet — click to add one"}
             </span>
             {lastUpdate && (
-              <span style={{ fontSize: "10px", color: "#55555e", whiteSpace: "nowrap", flexShrink: 0 }}>
+              <span style={{ fontSize: "12px", color: "#55555e", whiteSpace: "nowrap", flexShrink: 0 }}>
                 {formatShortDate(lastUpdate.timestamp)}
               </span>
             )}
@@ -564,7 +564,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
                       )}
                     </div>
                     <span style={{
-                      fontSize: "12px", lineHeight: 1.3,
+                      fontSize: "11px", lineHeight: 1.3,
                       color: s.status === "complete" ? "#55555e" : "#c8c8d0",
                       textDecoration: s.status === "complete" ? "line-through" : "none",
                     }}>
