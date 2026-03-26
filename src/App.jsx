@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BuilderComponent, builder } from "@builder.io/react";
 import NavBar from "./components/NavBar";
+import SettingsMenu from "./components/SettingsMenu";
 import Dashboard from "./pages/Dashboard";
 import Tasks from "./pages/Tasks";
 import Projects from "./pages/Projects";
@@ -28,7 +29,10 @@ export default function App() {
             <span style={{ color: "#4ADE80" }}>XMB</span>
             <span style={{ color: "white" }}>task</span>
           </div>
-          <NavBar onNavigate={setCurrentPage} currentPage={currentPage} />
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <NavBar onNavigate={setCurrentPage} currentPage={currentPage} />
+            <SettingsMenu />
+          </div>
         </div>
 
         {/* Content area */}
