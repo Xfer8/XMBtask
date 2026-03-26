@@ -37,7 +37,7 @@ const BADGE = { fontSize:"11px", fontWeight:600, padding:"4px 10px", borderRadiu
 function GlowBadge({ label, colorKey }) {
   const p = getPalette(colorKey);
   return (
-    <span style={{ ...BADGE, background: p.bg, color: p.text, flexShrink: 0 }}>
+    <span style={{ ...BADGE, background: p.bg, color: p.text, border: `1px solid ${p.bg}`, flexShrink: 0 }}>
       {label}
     </span>
   );
@@ -70,7 +70,7 @@ function StatusBadge({ status, colorKey, onChange }) {
           ...BADGE,
           background: hov ? p.hoverBg  : p.bg,
           color:      hov ? p.hoverText : p.text,
-          border: `1px solid ${hov ? p.hoverBorder : "transparent"}`,
+          border: `1px solid ${hov ? p.hoverBorder : p.bg}`,
           cursor: "pointer",
           transition: "background 0.15s, color 0.15s, border-color 0.15s",
           display: "inline-block", flexShrink: 0,
@@ -150,7 +150,7 @@ function PriorityBadge({ priority, colorKey, onChange }) {
           ...BADGE,
           background: hov ? p.hoverBg  : p.bg,
           color:      hov ? p.hoverText : p.text,
-          border: `1px solid ${hov ? p.hoverBorder : "transparent"}`,
+          border: `1px solid ${hov ? p.hoverBorder : p.bg}`,
           cursor: "pointer",
           transition: "background 0.15s, color 0.15s, border-color 0.15s",
           display: "inline-block",
@@ -244,7 +244,7 @@ function DueDateBadge({ dueDate, colorKey, onChange }) {
             : (hov ? "#D1D5DB"   : "#55555e"),
           border: `1px solid ${hov
             ? (dueDate ? p.hoverBorder : "#4B5563")
-            : "transparent"}`,
+            : (dueDate ? p.bg : "#374151")}`,
           cursor: "pointer",
           transition: "background 0.15s, color 0.15s, border-color 0.15s",
           display: "inline-block",
@@ -655,6 +655,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
               <span style={{
                 ...BADGE,
                 background: "#374151", color: "#D1D5DB",
+                border: "1px solid #374151",
                 maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis",
               }}>
                 {task.owner}
