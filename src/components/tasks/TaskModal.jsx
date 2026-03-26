@@ -42,12 +42,19 @@ function FormSection({ title, children }) {
 // onDelete  = user clicked Delete
 export default function TaskModal({ title, task, projects = [], onUpdate, onClose, onCancel, onDelete }) {
   // Snapshot taken on mount for cancel/restore
-  const [snapshot] = useState(() => JSON.parse(JSON.stringify(task)));
+  const [snapshot]    = useState(() => JSON.parse(JSON.stringify(task)));
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  const set   = (k, v) => onUpdate({ ...task, [k]: v });
-  const valid = task.title.trim().length > 0 && !!task.projectId;
+  const set      = (k, v) => onUpdate({ ...task, [k]: v });
+  const valid    = task.title.trim().length > 0 && !!task.projectId;
+  const isDirty  = JSON.stringify(task) !== JSON.stringify(snapshot);
 
   const activeProjects = projects.filter(p => p.status === "Active");
+
+  const handleCancel = () => {
+    if (isDirty) setShowConfirm(true);
+    else onCancel(snapshot);
+  };
 
   // Escape → close (save)
   useEffect(() => {
@@ -77,7 +84,7 @@ export default function TaskModal({ title, task, projects = [], onUpdate, onClos
           padding:"24px 28px",
           width:"100%", maxWidth:"560px",
           boxShadow:"0 16px 48px rgba(0,0,0,0.6)",
-          margin:"auto",
+          margin:"auto", position:"relative",
         }}
       >
         {/* Modal heading */}
@@ -194,7 +201,7 @@ export default function TaskModal({ title, task, projects = [], onUpdate, onClos
             )}
           </div>
           <div style={{ display:"flex", gap:"8px" }}>
-            <button onClick={() => onCancel(snapshot)} style={{
+            <button onClick={handleCancel} style={{
               background:"none", border:"1px solid #3a3a3a", borderRadius:"7px",
               cursor:"pointer", color:"#888890", fontSize:"13px",
               padding:"7px 18px", fontFamily:"inherit",
@@ -211,6 +218,50 @@ export default function TaskModal({ title, task, projects = [], onUpdate, onClos
             </button>
           </div>
         </div>
+        {/* ── Discard confirmation overlay ─────────────────────────────────── */}
+        {showConfirm && (
+          <div style={{
+            position:"absolute", inset:0, zIndex:10,
+            background:"rgba(0,0,0,0.6)", borderRadius:"14px",
+            display:"flex", alignItems:"center", justifyContent:"center",
+          }}>
+            <div style={{
+              background:"#2c2c2c", border:"1px solid #3a3a3a",
+              borderRadius:"12px", padding:"24px 28px",
+              width:"280px", textAlign:"center",
+              boxShadow:"0 8px 32px rgba(0,0,0,0.5)",
+            }}>
+              <div style={{ fontSize:"14px", fontWeight:700, color:"#f0f0f0", marginBottom:"8px" }}>
+                Discard changes?
+              </div>
+              <div style={{ fontSize:"13px", color:"#888890", marginBottom:"20px", lineHeight:1.5 }}>
+                Your unsaved changes will be lost.
+              </div>
+              <div style={{ display:"flex", gap:"8px", justifyContent:"center" }}>
+                <button
+                  onClick={() => setShowConfirm(false)}
+                  style={{
+                    background:"none", border:"1px solid #3a3a3a", borderRadius:"7px",
+                    cursor:"pointer", color:"#888890", fontSize:"13px",
+                    padding:"7px 18px", fontFamily:"inherit",
+                  }}
+                >
+                  Keep Editing
+                </button>
+                <button
+                  onClick={() => onCancel(snapshot)}
+                  style={{
+                    background:"#4A1B1B", border:"1px solid #943636", borderRadius:"7px",
+                    cursor:"pointer", color:"#FF6B6B", fontSize:"13px",
+                    fontWeight:600, padding:"7px 18px", fontFamily:"inherit",
+                  }}
+                >
+                  Discard
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
