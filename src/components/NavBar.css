@@ -15,8 +15,8 @@
 
 .navbar-pill {
   position: absolute;
-  top: 4px;
-  height: calc(100% - 8px);
+  top: 1px;
+  height: calc(100% - 2px);
   background-color: #4ADE80;
   border-radius: 50px;
   transition: left 0.3s ease, width 0.3s ease;
