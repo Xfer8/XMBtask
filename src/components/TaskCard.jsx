@@ -406,13 +406,15 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
                   objectFit: "cover", borderRadius: "6px", display: "block",
                 }}
               />
-              {/* Count bubble — bottom-left */}
+              {/* Count bubble — centered on bottom-left corner */}
               <div style={{
-                position: "absolute", bottom: "4px", left: "4px",
-                background: "rgba(0,0,0,0.65)", color: "#f0f0f0",
+                position: "absolute", bottom: 0, left: 0,
+                transform: "translate(-50%, 50%)",
+                background: "#444450", color: "#f0f0f0",
                 fontSize: "10px", fontWeight: 700,
-                padding: "1px 6px", borderRadius: "9999px",
-                lineHeight: "16px",
+                width: "20px", height: "20px", borderRadius: "50%",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0,
               }}>
                 {images.length}
               </div>
