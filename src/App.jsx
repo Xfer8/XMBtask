@@ -21,7 +21,7 @@ export default function App() {
       
       {/* If Builder is empty, show a fallback message */}
       {!content && (
-        <div style={{ padding: "50px", textAlign: "center" }}>
+        <div style={{ padding: "50px", textAlign: "center", width: "700px" }}>
           <h1>Design is empty!</h1>
           <p>Go to Builder.io and drag some blocks here.</p>
         </div>
