@@ -15,17 +15,19 @@ export default function App() {
   }, []);
 
   return (
-    <div style={{ backgroundColor: "#2A2A2A", minHeight: "100vh", color: "white" }}>
+    <div style={{ backgroundColor: "#2A2A2A", minHeight: "100vh", color: "white", width: "760px", height: "878px", display: "flex", flexDirection: "column", justifyContent: "flex-start", alignItems: "center" }}>
       {/* This is the "slot" where your Builder designs will appear */}
       <BuilderComponent model="page" content={content} />
-      
+
       {/* If Builder is empty, show a fallback message */}
       {!content && (
         <div style={{ padding: "50px", textAlign: "center", width: "700px" }}>
-          <h1>Design is empty!</h1>
-          <p>Go to Builder.io and drag some blocks here.</p>
+          <div style={{ display: "flex", flexDirection: "column", position: "relative", marginTop: "20px", height: "auto", alignSelf: "start" }}>
+            XMBtask
+          </div>
         </div>
       )}
+      <div style={{ display: "flex", flexDirection: "column", position: "relative", marginTop: "20px", height: "200px" }} />
     </div>
   );
 }
