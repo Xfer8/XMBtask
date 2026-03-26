@@ -77,6 +77,7 @@ function UpdatePopover({ updates = [], onAdd, onClose }) {
     if (!trimmed) return;
     onAdd({ id: "UP" + Date.now(), text: trimmed, timestamp: new Date().toISOString() });
     setText("");
+    onClose();
   };
 
   const sorted = [...updates].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -108,8 +109,11 @@ function UpdatePopover({ updates = [], onAdd, onClose }) {
       <textarea
         value={text}
         onChange={e => setText(e.target.value)}
-        onKeyDown={e => { if (e.key === "Enter" && e.ctrlKey) { e.preventDefault(); handleAdd(); } }}
-        placeholder="Add an update… (Ctrl+Enter to save)"
+        onKeyDown={e => {
+          if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleAdd(); }
+          if (e.key === "Escape") { e.stopPropagation(); setText(""); onClose(); }
+        }}
+        placeholder="Add an update… (Enter to save, Shift+Enter for new line)"
         rows={3}
         autoFocus
         style={{
