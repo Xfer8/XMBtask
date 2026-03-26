@@ -16,24 +16,11 @@
 .navbar-pill {
   position: absolute;
   top: 4px;
-  width: calc(33.333% - 4px);
   height: calc(100% - 8px);
   background-color: white;
   border-radius: 50px;
-  transition: left 0.3s ease;
+  transition: left 0.3s ease, width 0.3s ease;
   z-index: 0;
-}
-
-.navbar-pill[style*="--index: 0"] {
-  left: 4px;
-}
-
-.navbar-pill[style*="--index: 1"] {
-  left: calc(33.333% + 4px);
-}
-
-.navbar-pill[style*="--index: 2"] {
-  left: calc(66.666% + 4px);
 }
 
 .navbar-option {
