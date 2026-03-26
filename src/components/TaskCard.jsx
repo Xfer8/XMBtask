@@ -1,55 +1,203 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { getPalette } from "../colors";
+import { STATUS_COLORS, PRIORITY_COLORS } from "../theme";
 
-const STATUS_COLORS = {
-  "Not Started": { text: "#D1D5DB", bg: "#2a2e3a" },
-  "In Progress":  { text: "#38BDF8", bg: "#0B3547" },
-  "Needs Review": { text: "#FB923C", bg: "#45260D" },
-  "Done":         { text: "#4ADE80", bg: "#0E3F24" },
-};
+// ── Helpers ────────────────────────────────────────────────────────────────────
 
-const PRIORITY_COLORS = {
-  "Low":    { text: "#4ADE80", bg: "#0E3F24" },
-  "Medium": { text: "#FACC15", bg: "#3D3208" },
-  "High":   { text: "#FF6B6B", bg: "#4A1B1B" },
-};
-
-function Badge({ label, colors }) {
-  return (
-    <span style={{
-      fontSize: "11px", fontWeight: 600, padding: "2px 9px",
-      borderRadius: "9999px", background: colors.bg, color: colors.text,
-      whiteSpace: "nowrap",
-    }}>
-      {label}
-    </span>
-  );
-}
-
-const formatDueDate = (iso) => {
+const formatDate = (iso) => {
   if (!iso) return null;
   return new Date(iso + "T00:00:00").toLocaleDateString("en-US", {
     month: "short", day: "numeric", year: "numeric",
   });
 };
 
-const getDueDateColor = (iso) => {
-  if (!iso) return "#888890";
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const diff = Math.ceil((new Date(iso + "T00:00:00") - today) / 86400000);
-  if (diff <= 0) return "#FF6B6B";
-  if (diff <= 2) return "#FB923C";
-  if (diff <= 7) return "#FACC15";
-  return "#4ADE80";
+const formatShortDate = (iso) => {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return `${d.getMonth() + 1}/${d.getDate()}/${String(d.getFullYear()).slice(2)}`;
 };
 
-export default function TaskCard({ task, projectName, onEdit }) {
-  const [hov, setHov] = useState(false);
-  const statusColors   = STATUS_COLORS[task.status]    ?? STATUS_COLORS["Not Started"];
-  const priorityColors = PRIORITY_COLORS[task.priority] ?? PRIORITY_COLORS["Medium"];
+const getDueDateColorKey = (iso) => {
+  if (!iso) return "gray";
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const diff = Math.ceil((new Date(iso + "T00:00:00") - today) / 86400000);
+  if (diff <= 0) return "red";
+  if (diff <= 2) return "orange";
+  if (diff <= 7) return "yellow";
+  return "green";
+};
+
+// ── GlowBadge ─────────────────────────────────────────────────────────────────
+
+function GlowBadge({ label, colorKey, size = "normal" }) {
+  const p = getPalette(colorKey);
+  return (
+    <span style={{
+      fontSize: size === "small" ? "10px" : "11px",
+      fontWeight: 600,
+      padding: size === "small" ? "2px 8px" : "3px 10px",
+      borderRadius: "9999px",
+      background: p.bg, color: p.text,
+      whiteSpace: "nowrap", flexShrink: 0,
+    }}>
+      {label}
+    </span>
+  );
+}
+
+// ── ProgressBar ───────────────────────────────────────────────────────────────
+
+function ProgressBar({ pct, colorKey = "green" }) {
+  const p = getPalette(colorKey);
+  return (
+    <div style={{ height: "4px", background: "#2e2e33", borderRadius: "9999px", overflow: "hidden" }}>
+      <div style={{
+        height: "100%",
+        width: `${Math.min(100, Math.max(0, pct))}%`,
+        background: p.text,
+        borderRadius: "9999px",
+        transition: "width 0.3s ease",
+      }} />
+    </div>
+  );
+}
+
+// ── UpdatePopover ─────────────────────────────────────────────────────────────
+
+function UpdatePopover({ updates = [], onAdd, onClose }) {
+  const [text, setText] = useState("");
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) onClose(); };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [onClose]);
+
+  const handleAdd = () => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    onAdd({ id: "UP" + Date.now(), text: trimmed, timestamp: new Date().toISOString() });
+    setText("");
+  };
+
+  const sorted = [...updates].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+  const formatTs = (iso) => new Date(iso).toLocaleString("en-US", {
+    month: "short", day: "numeric", year: "numeric",
+    hour: "numeric", minute: "2-digit",
+  });
 
   return (
     <div
-      onClick={() => onEdit(task)}
+      ref={ref}
+      onClick={e => e.stopPropagation()}
+      style={{
+        position: "absolute", zIndex: 600,
+        bottom: "calc(100% + 6px)", left: 0,
+        width: "300px",
+        background: "#2a2a2e", border: "1px solid #3a3a44",
+        borderRadius: "10px", padding: "14px",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+      }}
+    >
+      <div style={{
+        fontSize: "10px", fontWeight: 700, color: "#55555e",
+        letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "10px",
+      }}>
+        Updates
+      </div>
+
+      <textarea
+        value={text}
+        onChange={e => setText(e.target.value)}
+        onKeyDown={e => { if (e.key === "Enter" && e.ctrlKey) { e.preventDefault(); handleAdd(); } }}
+        placeholder="Add an update… (Ctrl+Enter to save)"
+        rows={3}
+        autoFocus
+        style={{
+          width: "100%", boxSizing: "border-box",
+          background: "#1e1e1e", border: "1px solid #3a3a3a", borderRadius: "7px",
+          color: "#f0f0f0", fontSize: "12px", padding: "8px 10px",
+          fontFamily: "inherit", outline: "none", resize: "none",
+          lineHeight: "1.5", marginBottom: "8px",
+        }}
+      />
+
+      <button
+        onClick={handleAdd}
+        disabled={!text.trim()}
+        style={{
+          background: text.trim() ? "#4ADE80" : "#1a3d2a",
+          border: "none", borderRadius: "6px",
+          cursor: text.trim() ? "pointer" : "default",
+          color: text.trim() ? "#0E3F24" : "#2e6644",
+          fontSize: "12px", fontWeight: 600,
+          padding: "5px 14px", fontFamily: "inherit",
+          marginBottom: sorted.length ? "12px" : 0,
+          display: "block",
+        }}
+      >
+        Add
+      </button>
+
+      {sorted.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "180px", overflowY: "auto" }}>
+          {sorted.map(u => (
+            <div key={u.id} style={{
+              background: "#1a1a1e", borderRadius: "7px", padding: "8px 10px",
+            }}>
+              <div style={{ fontSize: "12px", color: "#c8c8d0", lineHeight: 1.4, marginBottom: "3px" }}>
+                {u.text}
+              </div>
+              <div style={{ fontSize: "10px", color: "#55555e" }}>{formatTs(u.timestamp)}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── TaskCard ──────────────────────────────────────────────────────────────────
+
+export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
+  const [hov,         setHov]         = useState(false);
+  const [showPopover, setShowPopover] = useState(false);
+
+  const project    = projects.find(p => p.id === task.projectId);
+  const projectPal = project ? getPalette(project.color) : null;
+
+  const statusColorKey   = STATUS_COLORS[task.status]    ?? "gray";
+  const priorityColorKey = PRIORITY_COLORS[task.priority] ?? "yellow";
+  const dueDateColorKey  = getDueDateColorKey(task.dueDate);
+  const duePal           = getPalette(dueDateColorKey);
+
+  const subtasks = task.subtasks ?? [];
+  const updates  = task.updates  ?? [];
+  const links    = task.links    ?? [];
+  const images   = task.images   ?? [];
+
+  const doneCount  = subtasks.filter(s => s.status === "complete").length;
+  const subtaskPct = subtasks.length > 0 ? (doneCount / subtasks.length) * 100 : 0;
+
+  const lastUpdate = updates.length > 0
+    ? [...updates].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0]
+    : null;
+
+  const handleSubtaskToggle = (id) => {
+    const updated = subtasks.map(s =>
+      s.id === id ? { ...s, status: s.status === "complete" ? "open" : "complete" } : s
+    );
+    onUpdate?.({ ...task, subtasks: updated });
+  };
+
+  const handleAddUpdate = (update) => {
+    onUpdate?.({ ...task, updates: [...updates, update] });
+  };
+
+  return (
+    <div
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
@@ -57,40 +205,231 @@ export default function TaskCard({ task, projectName, onEdit }) {
         border: `1px solid ${hov ? "#555560" : "#444450"}`,
         borderRadius: "10px",
         padding: "14px 16px",
-        cursor: "pointer",
         transition: "background 0.15s, border-color 0.15s",
         display: "flex",
-        flexDirection: "column",
-        gap: "8px",
+        alignItems: "stretch",
+        position: "relative",
       }}
     >
-      <div style={{ fontSize: "14px", fontWeight: 700, color: "#f0f0f0", lineHeight: 1.3 }}>
-        {task.title}
+      {/* ── Left section ─────────────────────────────────────────────────────── */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "9px", minWidth: 0 }}>
+
+        {/* Title + Project badge */}
+        <div
+          onClick={() => onEdit(task)}
+          style={{ display: "flex", alignItems: "flex-start", gap: "8px", flexWrap: "wrap", cursor: "pointer" }}
+        >
+          <span style={{ fontSize: "14px", fontWeight: 700, color: "#f0f0f0", lineHeight: 1.3 }}>
+            {task.title}
+          </span>
+          {project && (
+            <span style={{
+              fontSize: "10px", fontWeight: 600,
+              padding: "2px 8px", borderRadius: "9999px",
+              background: projectPal.bg, color: projectPal.text,
+              whiteSpace: "nowrap", flexShrink: 0, marginTop: "2px",
+            }}>
+              {project.title}
+            </span>
+          )}
+        </div>
+
+        {/* Description — up to 4 lines */}
+        {task.description && (
+          <div
+            onClick={() => onEdit(task)}
+            style={{
+              fontSize: "13px", color: "#c8c8d0", lineHeight: 1.5,
+              overflow: "hidden", display: "-webkit-box",
+              WebkitLineClamp: 4, WebkitBoxOrient: "vertical",
+              cursor: "pointer",
+            }}
+          >
+            {task.description}
+          </div>
+        )}
+
+        {/* Last update row */}
+        <div
+          onClick={e => { e.stopPropagation(); setShowPopover(v => !v); }}
+          style={{
+            background: "#2e2e36", borderRadius: "6px",
+            padding: "6px 10px", cursor: "pointer",
+            position: "relative",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginBottom: lastUpdate ? "3px" : 0 }}>
+            <span style={{
+              fontSize: "9px", fontWeight: 700, color: "#55555e",
+              letterSpacing: "0.1em", textTransform: "uppercase",
+            }}>
+              Last Update
+            </span>
+            {lastUpdate && (
+              <span style={{ fontSize: "10px", color: "#55555e" }}>
+                {formatShortDate(lastUpdate.timestamp)}
+              </span>
+            )}
+          </div>
+          {lastUpdate ? (
+            <div style={{
+              fontSize: "12px", color: "#888890", lineHeight: 1.4,
+              overflow: "hidden", display: "-webkit-box",
+              WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+            }}>
+              {lastUpdate.text}
+            </div>
+          ) : (
+            <div style={{ fontSize: "12px", color: "#55555e", fontStyle: "italic" }}>
+              No updates yet — click to add one
+            </div>
+          )}
+
+          {showPopover && (
+            <UpdatePopover
+              updates={updates}
+              onAdd={handleAddUpdate}
+              onClose={() => setShowPopover(false)}
+            />
+          )}
+        </div>
+
+        {/* Subtask progress bar + checklist */}
+        {subtasks.length > 0 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ flex: 1 }}>
+                <ProgressBar pct={subtaskPct} />
+              </div>
+              <span style={{ fontSize: "10px", color: "#55555e", whiteSpace: "nowrap" }}>
+                {doneCount}/{subtasks.length}
+              </span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              {subtasks.map(s => (
+                <div
+                  key={s.id}
+                  onClick={e => { e.stopPropagation(); handleSubtaskToggle(s.id); }}
+                  style={{ display: "flex", alignItems: "center", gap: "7px", cursor: "pointer" }}
+                >
+                  <div style={{
+                    width: "14px", height: "14px", flexShrink: 0,
+                    borderRadius: "3px",
+                    border: `1.5px solid ${s.status === "complete" ? "#4ADE80" : "#3a3a3a"}`,
+                    background: s.status === "complete" ? "#4ADE80" : "transparent",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    transition: "background 0.12s, border-color 0.12s",
+                  }}>
+                    {s.status === "complete" && (
+                      <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+                        <path d="M1 3.5L3.5 6L8 1" stroke="#0E3F24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </div>
+                  <span style={{
+                    fontSize: "12px", lineHeight: 1.3,
+                    color: s.status === "complete" ? "#55555e" : "#c8c8d0",
+                    textDecoration: s.status === "complete" ? "line-through" : "none",
+                  }}>
+                    {s.title}
+                  </span>
+                  {s.url && (
+                    <a
+                      href={s.url}
+                      onClick={e => e.stopPropagation()}
+                      target="_blank" rel="noreferrer"
+                      style={{ fontSize: "10px", color: "#38BDF8", textDecoration: "none", whiteSpace: "nowrap" }}
+                    >
+                      {s.urlDisplayName || s.url}
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Status badge + Link badges */}
+        <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+          <GlowBadge label={task.status} colorKey={statusColorKey} size="small" />
+          {links.map(link => (
+            <a
+              key={link.id}
+              href={link.url}
+              onClick={e => e.stopPropagation()}
+              target="_blank" rel="noreferrer"
+              style={{ textDecoration: "none" }}
+            >
+              <span style={{
+                fontSize: "10px", fontWeight: 600,
+                padding: "2px 8px", borderRadius: "9999px",
+                background: "#0B3547", color: "#38BDF8",
+                border: "1px solid #166A8E", whiteSpace: "nowrap",
+              }}>
+                {link.displayName || link.type}
+              </span>
+            </a>
+          ))}
+        </div>
       </div>
 
-      {task.description && (
-        <div style={{
-          fontSize: "13px", color: "#c8c8d0", lineHeight: 1.5,
-          overflow: "hidden", display: "-webkit-box",
-          WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
-        }}>
-          {task.description}
-        </div>
-      )}
+      {/* ── Vertical divider ─────────────────────────────────────────────────── */}
+      <div style={{
+        width: "1px", background: "#444450",
+        margin: "0 14px", flexShrink: 0,
+      }} />
 
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginTop: "2px" }}>
-        <Badge label={task.status}   colors={statusColors} />
-        <Badge label={task.priority} colors={priorityColors} />
-        {projectName && (
-          <span style={{ fontSize: "11px", color: "#55555e", fontStyle: "italic" }}>{projectName}</span>
-        )}
-        {task.owner && (
-          <span style={{ fontSize: "11px", color: "#888890" }}>{task.owner}</span>
-        )}
-        {task.dueDate && (
-          <span style={{ fontSize: "11px", color: getDueDateColor(task.dueDate), marginLeft: "auto", whiteSpace: "nowrap" }}>
-            {formatDueDate(task.dueDate)}
-          </span>
+      {/* ── Right sidebar ─────────────────────────────────────────────────────── */}
+      <div style={{
+        width: "110px", flexShrink: 0,
+        display: "flex", flexDirection: "column",
+        justifyContent: "space-between", gap: "6px",
+      }}>
+        {/* Priority + Due date + Owner */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          <GlowBadge label={task.priority} colorKey={priorityColorKey} size="small" />
+
+          {task.dueDate && (
+            <span style={{
+              fontSize: "10px", fontWeight: 600,
+              padding: "2px 8px", borderRadius: "9999px",
+              background: duePal.bg, color: duePal.text,
+              whiteSpace: "nowrap", alignSelf: "flex-start",
+            }}>
+              {formatDate(task.dueDate)}
+            </span>
+          )}
+
+          {task.owner && (
+            <span style={{
+              fontSize: "10px", fontWeight: 600,
+              padding: "2px 8px", borderRadius: "9999px",
+              background: "#374151", color: "#D1D5DB",
+              whiteSpace: "nowrap", alignSelf: "flex-start",
+              maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis",
+            }}>
+              {task.owner}
+            </span>
+          )}
+        </div>
+
+        {/* Image thumbnail */}
+        {images.length > 0 && (
+          <div onClick={() => onEdit(task)} style={{ cursor: "pointer" }}>
+            <img
+              src={images[0]}
+              alt="attachment"
+              style={{
+                width: "100%", height: "60px",
+                objectFit: "cover", borderRadius: "6px", display: "block",
+              }}
+            />
+            {images.length > 1 && (
+              <div style={{ fontSize: "10px", color: "#55555e", textAlign: "center", marginTop: "3px" }}>
+                +{images.length - 1} more
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>

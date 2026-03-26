@@ -88,8 +88,9 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
             <TaskCard
               key={task.id}
               task={task}
-              projectName={projects.find(p => p.id === task.projectId)?.title}
+              projects={projects}
               onEdit={openEdit}
+              onUpdate={onUpdate}
             />
           ))}
         </div>
