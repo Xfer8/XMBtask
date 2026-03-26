@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import CogIcon from "./CogIcon";
 import "./SettingsMenu.css";
 
-export default function SettingsMenu() {
+export default function SettingsMenu({ onImport, onExport }) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -18,17 +18,16 @@ export default function SettingsMenu() {
   }, []);
 
   const handleImport = () => {
-    console.log("Import clicked");
     setIsOpen(false);
+    onImport?.();
   };
 
   const handleExport = () => {
-    console.log("Export clicked");
     setIsOpen(false);
+    onExport?.();
   };
 
   const handleSettings = () => {
-    console.log("Settings clicked");
     setIsOpen(false);
   };
 

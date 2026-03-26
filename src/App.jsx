@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import Tasks from "./pages/Tasks";
 import Projects from "./pages/Projects";
 import { loadProjects, saveProjects, loadTasks, saveTasks } from "./services/dataService";
+import { exportToXlsx, importFromXlsx } from "./services/xlsxService";
 
 const generateTaskId = (tasks) => {
   const max = tasks.reduce((m, t) => Math.max(m, parseInt(t.id.replace("XMB-T", "")) || 0), 0);
@@ -16,11 +17,73 @@ const generateProjectId = (projects) => {
   return `XMB-P${String(max + 1).padStart(3, "0")}`;
 };
 
+// ── Import confirmation modal ──────────────────────────────────────────────────
+function ImportConfirmModal({ preview, onConfirm, onCancel }) {
+  return (
+    <div style={{
+      position:"fixed", inset:0, zIndex:600,
+      background:"rgba(0,0,0,0.75)",
+      display:"flex", alignItems:"center", justifyContent:"center",
+    }}>
+      <div style={{
+        background:"#2c2c2c", border:"1px solid #3a3a3a", borderRadius:"14px",
+        padding:"28px 32px", width:"360px",
+        boxShadow:"0 16px 48px rgba(0,0,0,0.6)",
+      }}>
+        <div style={{ fontSize:"15px", fontWeight:700, color:"#f0f0f0", marginBottom:"10px" }}>
+          Import backup?
+        </div>
+        <div style={{
+          fontSize:"13px", color:"#888890", lineHeight:1.6, marginBottom:"16px",
+        }}>
+          This will <span style={{ color:"#FF6B6B", fontWeight:600 }}>replace all existing data</span> with
+          the contents of the selected file. This action cannot be undone.
+        </div>
+
+        {/* Preview counts */}
+        <div style={{
+          background:"#1e1e1e", border:"1px solid #3a3a3a", borderRadius:"8px",
+          padding:"12px 16px", marginBottom:"22px",
+          display:"flex", gap:"24px",
+        }}>
+          <div style={{ textAlign:"center" }}>
+            <div style={{ fontSize:"20px", fontWeight:700, color:"#f0f0f0" }}>{preview.projects}</div>
+            <div style={{ fontSize:"11px", color:"#888890", textTransform:"uppercase", letterSpacing:"0.06em" }}>Projects</div>
+          </div>
+          <div style={{ textAlign:"center" }}>
+            <div style={{ fontSize:"20px", fontWeight:700, color:"#f0f0f0" }}>{preview.tasks}</div>
+            <div style={{ fontSize:"11px", color:"#888890", textTransform:"uppercase", letterSpacing:"0.06em" }}>Tasks</div>
+          </div>
+        </div>
+
+        <div style={{ display:"flex", gap:"8px", justifyContent:"flex-end" }}>
+          <button onClick={onCancel} style={{
+            background:"none", border:"1px solid #3a3a3a", borderRadius:"7px",
+            cursor:"pointer", color:"#888890", fontSize:"13px",
+            padding:"7px 18px", fontFamily:"inherit",
+          }}>
+            Cancel
+          </button>
+          <button onClick={onConfirm} style={{
+            background:"#4A1B1B", border:"1px solid #943636", borderRadius:"7px",
+            cursor:"pointer", color:"#FF6B6B", fontSize:"13px",
+            fontWeight:600, padding:"7px 18px", fontFamily:"inherit",
+          }}>
+            Replace All Data
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [currentPage,   setCurrentPage]   = useState("Dashboard");
   const [projects,      setProjects]      = useState([]);
   const [tasks,         setTasks]         = useState([]);
   const [storageReady,  setStorageReady]  = useState(false);
+  const [pendingImport, setPendingImport] = useState(null); // { projects, tasks }
+  const [importError,   setImportError]   = useState(null);
   const fileInputRef = useRef(null);
 
   // ── Load from storage on mount ──────────────────────────────────────────────
@@ -56,12 +119,36 @@ export default function App() {
 
   // ── Export ──────────────────────────────────────────────────────────────────
   const handleExport = () => {
-    // Full XLSX export will be wired here once the xlsx package is added
-    alert("Export coming soon.");
+    exportToXlsx(projects, tasks);
   };
 
-  // ── Import ──────────────────────────────────────────────────────────────────
-  const handleImport = () => fileInputRef.current?.click();
+  // ── Import — step 1: open file picker ─────────────────────────────────────
+  const handleImport = () => {
+    setImportError(null);
+    fileInputRef.current?.click();
+  };
+
+  // ── Import — step 2: parse file, show confirmation ────────────────────────
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // reset so same file can be re-selected
+    if (!file) return;
+
+    try {
+      const data = await importFromXlsx(file);
+      setPendingImport(data);
+    } catch {
+      setImportError("Could not read the file. Make sure it's a valid XMBtask backup (.xlsx).");
+    }
+  };
+
+  // ── Import — step 3: confirmed, replace all data ──────────────────────────
+  const handleImportConfirm = () => {
+    if (!pendingImport) return;
+    setProjects(pendingImport.projects);
+    setTasks(pendingImport.tasks);
+    setPendingImport(null);
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", backgroundColor: "#212121" }}>
@@ -85,7 +172,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* Page content — full width, no max-width constraint here */}
+      {/* Page content */}
       <div style={{ flex: 1, width: "100%" }}>
         {currentPage === "Dashboard" && <Dashboard />}
         {currentPage === "Tasks" && (
@@ -114,8 +201,29 @@ export default function App() {
         type="file"
         accept=".xlsx,.xls"
         style={{ display: "none" }}
-        onChange={() => alert("Import coming soon.")}
+        onChange={handleFileChange}
       />
+
+      {/* Import error toast */}
+      {importError && (
+        <div style={{
+          position:"fixed", bottom:"24px", left:"50%", transform:"translateX(-50%)",
+          background:"#4A1B1B", border:"1px solid #943636", borderRadius:"8px",
+          padding:"10px 20px", color:"#FF6B6B", fontSize:"13px",
+          zIndex:700, cursor:"pointer",
+        }} onClick={() => setImportError(null)}>
+          {importError}
+        </div>
+      )}
+
+      {/* Import confirmation modal */}
+      {pendingImport && (
+        <ImportConfirmModal
+          preview={{ projects: pendingImport.projects.length, tasks: pendingImport.tasks.length }}
+          onConfirm={handleImportConfirm}
+          onCancel={() => setPendingImport(null)}
+        />
+      )}
     </div>
   );
 }
