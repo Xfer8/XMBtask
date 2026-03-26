@@ -78,7 +78,7 @@ function StatusBadge({ status, colorKey, onChange }) {
           display: "inline-block", flexShrink: 0,
         }}
       >
-        {hov && !open ? "Edit Status" : status}
+        {status}
       </span>
 
       {open && (
@@ -159,7 +159,7 @@ function PriorityBadge({ priority, colorKey, onChange }) {
           display: "inline-block",
         }}
       >
-        {hov && !open ? "Edit Priority" : priority}
+        {priority}
       </span>
 
       {open && (
@@ -254,7 +254,7 @@ function DueDateBadge({ dueDate, colorKey, onChange }) {
           display: "inline-block",
         }}
       >
-        {hov && !open ? "Edit Due Date" : label}
+        {label}
       </span>
 
       {open && (
