@@ -29,17 +29,15 @@ const getDueDateColorKey = (iso) => {
   return "green";
 };
 
+// ── Shared badge metrics (keeps all card badges the same size) ────────────────
+const BADGE = { fontSize:"11px", fontWeight:600, padding:"4px 10px", borderRadius:"4px", whiteSpace:"nowrap" };
+
 // ── GlowBadge ─────────────────────────────────────────────────────────────────
 
 function GlowBadge({ label, colorKey }) {
   const p = getPalette(colorKey);
   return (
-    <span style={{
-      fontSize: "10px", fontWeight: 600,
-      padding: "2px 8px", borderRadius: "9999px",
-      background: p.bg, color: p.text,
-      whiteSpace: "nowrap", flexShrink: 0,
-    }}>
+    <span style={{ ...BADGE, background: p.bg, color: p.text, flexShrink: 0 }}>
       {label}
     </span>
   );
@@ -69,12 +67,11 @@ function StatusBadge({ status, colorKey, onChange }) {
         onMouseLeave={() => setHov(false)}
         onClick={(e) => { e.stopPropagation(); setOpen(v => !v); }}
         style={{
-          fontSize: "10px", fontWeight: 600,
-          padding: "2px 8px", borderRadius: "9999px",
+          ...BADGE,
           background: hov ? p.hoverBg  : p.bg,
           color:      hov ? p.hoverText : p.text,
           border: `1px solid ${hov ? p.hoverBorder : "transparent"}`,
-          whiteSpace: "nowrap", cursor: "pointer",
+          cursor: "pointer",
           transition: "background 0.15s, color 0.15s, border-color 0.15s",
           display: "inline-block", flexShrink: 0,
         }}
@@ -109,7 +106,7 @@ function StatusBadge({ status, colorKey, onChange }) {
               >
                 <span style={{
                   fontSize: "10px", fontWeight: 600,
-                  padding: "2px 8px", borderRadius: "9999px",
+                  padding: "2px 8px", borderRadius: "4px",
                   background: optP.bg, color: optP.text,
                 }}>
                   {opt}
@@ -150,12 +147,11 @@ function PriorityBadge({ priority, colorKey, onChange }) {
         onMouseLeave={() => setHov(false)}
         onClick={(e) => { e.stopPropagation(); setOpen(v => !v); }}
         style={{
-          fontSize: "10px", fontWeight: 600,
-          padding: "2px 8px", borderRadius: "9999px",
+          ...BADGE,
           background: hov ? p.hoverBg  : p.bg,
           color:      hov ? p.hoverText : p.text,
           border: `1px solid ${hov ? p.hoverBorder : "transparent"}`,
-          whiteSpace: "nowrap", cursor: "pointer",
+          cursor: "pointer",
           transition: "background 0.15s, color 0.15s, border-color 0.15s",
           display: "inline-block",
         }}
@@ -190,7 +186,7 @@ function PriorityBadge({ priority, colorKey, onChange }) {
               >
                 <span style={{
                   fontSize: "10px", fontWeight: 600,
-                  padding: "2px 8px", borderRadius: "9999px",
+                  padding: "2px 8px", borderRadius: "4px",
                   background: optP.bg, color: optP.text,
                 }}>
                   {opt}
@@ -239,8 +235,7 @@ function DueDateBadge({ dueDate, colorKey, onChange }) {
         onMouseLeave={() => setHov(false)}
         onClick={(e) => { e.stopPropagation(); setOpen(v => !v); }}
         style={{
-          fontSize: "10px", fontWeight: 600,
-          padding: "2px 8px", borderRadius: "9999px",
+          ...BADGE,
           background: dueDate
             ? (hov ? p.hoverBg   : p.bg)
             : (hov ? "#374151"   : "#2a2a2a"),
@@ -250,7 +245,7 @@ function DueDateBadge({ dueDate, colorKey, onChange }) {
           border: `1px solid ${hov
             ? (dueDate ? p.hoverBorder : "#4B5563")
             : "transparent"}`,
-          whiteSpace: "nowrap", cursor: "pointer",
+          cursor: "pointer",
           transition: "background 0.15s, color 0.15s, border-color 0.15s",
           display: "inline-block",
         }}
@@ -305,11 +300,11 @@ function DueDateBadge({ dueDate, colorKey, onChange }) {
 function ProgressBar({ pct, colorKey = "green" }) {
   const p = getPalette(colorKey);
   return (
-    <div style={{ height: "4px", background: "#2e2e33", borderRadius: "9999px", overflow: "hidden" }}>
+    <div style={{ height: "4px", background: "#2e2e33", borderRadius: "4px", overflow: "hidden" }}>
       <div style={{
         height: "100%",
         width: `${Math.min(100, Math.max(0, pct))}%`,
-        background: p.text, borderRadius: "9999px",
+        background: p.text, borderRadius: "4px",
         transition: "width 0.3s ease",
       }} />
     </div>
@@ -476,7 +471,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
             {project && (
               <span style={{
                 fontSize: "10px", fontWeight: 600,
-                padding: "2px 8px", borderRadius: "9999px",
+                padding: "2px 8px", borderRadius: "4px",
                 background: projectPal.bg, color: projectPal.text,
                 whiteSpace: "nowrap", flexShrink: 0, marginTop: "2px",
               }}>
@@ -621,7 +616,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
                 >
                   <span style={{
                     fontSize: "10px", fontWeight: 600,
-                    padding: "2px 8px", borderRadius: "9999px",
+                    padding: "2px 8px", borderRadius: "4px",
                     background: "#0B3547", color: "#38BDF8",
                     border: "1px solid #166A8E", whiteSpace: "nowrap",
                   }}>
@@ -658,10 +653,8 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
 
             {task.owner && (
               <span style={{
-                fontSize: "10px", fontWeight: 600,
-                padding: "2px 8px", borderRadius: "9999px",
+                ...BADGE,
                 background: "#374151", color: "#D1D5DB",
-                whiteSpace: "nowrap",
                 maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis",
               }}>
                 {task.owner}
