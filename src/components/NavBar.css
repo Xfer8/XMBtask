@@ -9,7 +9,7 @@
   display: inline-flex;
   background-color: rgba(14, 63, 36, 0.2);
   border-radius: 50px;
-  padding: 4px;
+  padding: 1px 4px;
   gap: 0;
 }
 
