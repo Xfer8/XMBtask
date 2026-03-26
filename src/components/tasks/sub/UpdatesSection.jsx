@@ -84,7 +84,7 @@ function UpdateRow({ update, onEdit, onDelete }) {
         {/* Buttons — only visible on hover */}
         <div style={{
           display:"flex", alignItems:"center", gap:"2px",
-          opacity: hov ? 1 : 0, transition:"opacity 0.15s",
+          opacity: 1,
         }}>
           {confirmDel ? (
             <>
@@ -163,9 +163,9 @@ export default function UpdatesSection({ updates, onChange }) {
     <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
       {/* New update textarea */}
       <textarea
-        ref={taRef} value={text} placeholder="Add an update… (Ctrl+Enter to save)" rows={2}
+        ref={taRef} value={text} placeholder="Add an update… (Enter to save, Shift+Enter for new line)" rows={2}
         onChange={e => { setText(e.target.value); resize(); }}
-        onKeyDown={e => { if (e.key === "Enter" && e.ctrlKey) handleAdd(); }}
+        onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleAdd(); } }}
         style={{ ...inputStyle, resize:"none", lineHeight:"1.5", overflow:"hidden" }}
       />
 
@@ -206,7 +206,7 @@ export default function UpdatesSection({ updates, onChange }) {
                   ref={editTaRef}
                   value={editText}
                   onChange={e => setEditText(e.target.value)}
-                  onKeyDown={e => { if (e.key === "Enter" && e.ctrlKey) handleEditSave(); if (e.key === "Escape") handleEditCancel(); }}
+                  onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleEditSave(); } if (e.key === "Escape") handleEditCancel(); }}
                   rows={3}
                   style={{ ...inputStyle, resize:"vertical", lineHeight:"1.5", marginBottom:"8px" }}
                 />
