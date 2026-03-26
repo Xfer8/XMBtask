@@ -16,12 +16,11 @@
 .navbar-pill {
   position: absolute;
   top: 4px;
-  left: 4px;
-  width: calc(33.333% - 5.33px);
+  width: calc(33.333% - 4px);
   height: calc(100% - 8px);
   background-color: white;
   border-radius: 50px;
-  transition: left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: left 0.3s ease;
   z-index: 0;
 }
 
@@ -30,11 +29,11 @@
 }
 
 .navbar-pill[style*="--index: 1"] {
-  left: calc(33.333% + 0px);
+  left: calc(33.333% + 4px);
 }
 
 .navbar-pill[style*="--index: 2"] {
-  left: calc(66.666% - 4px);
+  left: calc(66.666% + 4px);
 }
 
 .navbar-option {
