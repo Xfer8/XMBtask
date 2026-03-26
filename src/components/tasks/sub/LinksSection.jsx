@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { getPalette } from "../../../colors";
 
-const LINK_TYPES       = ["Source", "SLG", "Jira", "Email", "Other"];
-const LINK_TYPE_COLORS = { Source:"yellow", SLG:"orange", Jira:"purple", Email:"teal", Other:"gray" };
+const LINK_TYPES       = ["Source", "Sherlock", "Jira", "Email", "Other"];
+const LINK_TYPE_COLORS = { Source:"yellow", Sherlock:"orange", Jira:"purple", Email:"teal", Other:"gray" };
 const generateLinkId   = () => `LK${Date.now()}`;
 const EMPTY_LINK       = { url:"", displayName:"", type:"" };
 
@@ -31,15 +31,15 @@ const PencilIcon = ({ size=12 }) => (
 const detectType = url => {
   try {
     const host = new URL(url).hostname.toLowerCase();
-    if (host.includes("atlassian.net"))    return "Jira";
-    if (host.includes("sherlock.epic.com")) return "SLG";
+    if (host.includes("atlassian.net"))     return "Jira";
+    if (host.includes("sherlock.epic.com")) return "Sherlock";
   } catch (_) {}
   return null;
 };
 
 const autoName = (type, url) => {
-  if (type === "SLG")  { const m = url.match(/[?&#]id=(\d+)/i);   return m ? `SLG-${m[1]}` : null; }
-  if (type === "Jira") { const m = url.match(/\/([A-Z]+-\d+)/);   return m ? m[1] : null; }
+  if (type === "Sherlock") { const m = url.match(/[?&#]id=(\d+)/i); return m ? m[1] : null; }
+  if (type === "Jira")     { const m = url.match(/\/([A-Z]+-\d+)/); return m ? m[1] : null; }
   return null;
 };
 

@@ -597,24 +597,33 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
               colorKey={statusColorKey}
               onChange={(val) => onUpdate?.({ ...task, status: val })}
             />
-            {links.map(link => (
-              <a
-                key={link.id}
-                href={link.url}
-                onClick={e => e.stopPropagation()}
-                target="_blank" rel="noreferrer"
-                style={{ textDecoration: "none" }}
-              >
-                <span style={{
-                  fontSize: "10px", fontWeight: 600,
-                  padding: "2px 8px", borderRadius: "9999px",
-                  background: "#0B3547", color: "#38BDF8",
-                  border: "1px solid #166A8E", whiteSpace: "nowrap",
-                }}>
-                  {link.displayName || link.type}
-                </span>
-              </a>
-            ))}
+            {links.map(link => {
+              const isSherlock = link.type === "Sherlock";
+              const shPal = getPalette("orange");
+              const label = isSherlock
+                ? `Sherlock${link.displayName ? ` ${link.displayName}` : ""}`
+                : (link.displayName || link.type);
+              return (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  onClick={e => e.stopPropagation()}
+                  target="_blank" rel="noreferrer"
+                  style={{ textDecoration: "none" }}
+                >
+                  <span style={{
+                    fontSize: "10px", fontWeight: 600,
+                    padding: "2px 8px", borderRadius: "9999px",
+                    background: isSherlock ? shPal.bg    : "#0B3547",
+                    color:      isSherlock ? shPal.text  : "#38BDF8",
+                    border: `1px solid ${isSherlock ? shPal.border : "#166A8E"}`,
+                    whiteSpace: "nowrap",
+                  }}>
+                    {label}
+                  </span>
+                </a>
+              );
+            })}
           </div>
         </div>
 
