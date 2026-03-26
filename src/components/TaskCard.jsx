@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { getPalette } from "../colors";
 import { STATUS_COLORS, PRIORITY_COLORS } from "../theme";
 import ImageViewer from "./tasks/sub/ImageViewer";
+import SplitBadge from "./ui/SplitBadge";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -598,11 +599,18 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
               onChange={(val) => onUpdate?.({ ...task, status: val })}
             />
             {links.map(link => {
-              const isSherlock = link.type === "Sherlock";
-              const shPal = getPalette("orange");
-              const label = isSherlock
-                ? `Sherlock${link.displayName ? ` ${link.displayName}` : ""}`
-                : (link.displayName || link.type);
+              if (link.type === "Sherlock") {
+                return (
+                  <SplitBadge
+                    key={link.id}
+                    label="Sherlock"
+                    value={link.displayName || link.url}
+                    colorKey="orange"
+                    href={link.url}
+                    onClick={e => e.stopPropagation()}
+                  />
+                );
+              }
               return (
                 <a
                   key={link.id}
@@ -614,12 +622,10 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
                   <span style={{
                     fontSize: "10px", fontWeight: 600,
                     padding: "2px 8px", borderRadius: "9999px",
-                    background: isSherlock ? shPal.bg    : "#0B3547",
-                    color:      isSherlock ? shPal.text  : "#38BDF8",
-                    border: `1px solid ${isSherlock ? shPal.border : "#166A8E"}`,
-                    whiteSpace: "nowrap",
+                    background: "#0B3547", color: "#38BDF8",
+                    border: "1px solid #166A8E", whiteSpace: "nowrap",
                   }}>
-                    {label}
+                    {link.displayName || link.type}
                   </span>
                 </a>
               );
