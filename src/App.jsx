@@ -19,7 +19,10 @@ export default function App() {
       <div style={{ width: "100%", maxWidth: "640px", minWidth: "640px", display: "flex", flexDirection: "column", color: "white" }}>
         {/* Persistent title bar */}
         <div style={{ padding: "20px 50px", display: "flex", justifyContent: "flex-start", borderBottom: "1px solid #444" }}>
-          <div style={{ fontSize: "18px", fontWeight: "bold", color: "rgba(126, 211, 33, 1)" }}>XMBtask</div>
+          <div style={{ fontSize: "18px", fontWeight: "bold" }}>
+            <span style={{ color: "rgba(126, 211, 33, 1)" }}>XMB</span>
+            <span style={{ color: "white" }}>task</span>
+          </div>
         </div>
 
         {/* Content area */}
