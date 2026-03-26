@@ -92,7 +92,7 @@ function UpdatePopover({ updates = [], onAdd, onClose }) {
       onClick={e => e.stopPropagation()}
       style={{
         position: "absolute", zIndex: 600,
-        bottom: "calc(100% + 6px)", left: 0,
+        top: "calc(100% + 6px)", left: 0,
         width: "300px",
         background: "#2a2a2e", border: "1px solid #3a3a44",
         borderRadius: "10px", padding: "14px",
