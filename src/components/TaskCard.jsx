@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { getPalette } from "../colors";
 import { STATUS_COLORS, PRIORITY_COLORS } from "../theme";
+import ImageViewer from "./tasks/sub/ImageViewer";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -29,14 +30,12 @@ const getDueDateColorKey = (iso) => {
 
 // ── GlowBadge ─────────────────────────────────────────────────────────────────
 
-function GlowBadge({ label, colorKey, size = "normal" }) {
+function GlowBadge({ label, colorKey }) {
   const p = getPalette(colorKey);
   return (
     <span style={{
-      fontSize: size === "small" ? "10px" : "11px",
-      fontWeight: 600,
-      padding: size === "small" ? "2px 8px" : "3px 10px",
-      borderRadius: "9999px",
+      fontSize: "10px", fontWeight: 600,
+      padding: "2px 8px", borderRadius: "9999px",
       background: p.bg, color: p.text,
       whiteSpace: "nowrap", flexShrink: 0,
     }}>
@@ -54,8 +53,7 @@ function ProgressBar({ pct, colorKey = "green" }) {
       <div style={{
         height: "100%",
         width: `${Math.min(100, Math.max(0, pct))}%`,
-        background: p.text,
-        borderRadius: "9999px",
+        background: p.text, borderRadius: "9999px",
         transition: "width 0.3s ease",
       }} />
     </div>
@@ -107,7 +105,6 @@ function UpdatePopover({ updates = [], onAdd, onClose }) {
       }}>
         Updates
       </div>
-
       <textarea
         value={text}
         onChange={e => setText(e.target.value)}
@@ -123,7 +120,6 @@ function UpdatePopover({ updates = [], onAdd, onClose }) {
           lineHeight: "1.5", marginBottom: "8px",
         }}
       />
-
       <button
         onClick={handleAdd}
         disabled={!text.trim()}
@@ -134,22 +130,16 @@ function UpdatePopover({ updates = [], onAdd, onClose }) {
           color: text.trim() ? "#0E3F24" : "#2e6644",
           fontSize: "12px", fontWeight: 600,
           padding: "5px 14px", fontFamily: "inherit",
-          marginBottom: sorted.length ? "12px" : 0,
-          display: "block",
+          marginBottom: sorted.length ? "12px" : 0, display: "block",
         }}
       >
         Add
       </button>
-
       {sorted.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "180px", overflowY: "auto" }}>
           {sorted.map(u => (
-            <div key={u.id} style={{
-              background: "#1a1a1e", borderRadius: "7px", padding: "8px 10px",
-            }}>
-              <div style={{ fontSize: "12px", color: "#c8c8d0", lineHeight: 1.4, marginBottom: "3px" }}>
-                {u.text}
-              </div>
+            <div key={u.id} style={{ background: "#1a1a1e", borderRadius: "7px", padding: "8px 10px" }}>
+              <div style={{ fontSize: "12px", color: "#c8c8d0", lineHeight: 1.4, marginBottom: "3px" }}>{u.text}</div>
               <div style={{ fontSize: "10px", color: "#55555e" }}>{formatTs(u.timestamp)}</div>
             </div>
           ))}
@@ -162,8 +152,9 @@ function UpdatePopover({ updates = [], onAdd, onClose }) {
 // ── TaskCard ──────────────────────────────────────────────────────────────────
 
 export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
-  const [hov,         setHov]         = useState(false);
-  const [showPopover, setShowPopover] = useState(false);
+  const [hov,          setHov]          = useState(false);
+  const [showPopover,  setShowPopover]  = useState(false);
+  const [viewerIndex,  setViewerIndex]  = useState(null); // null = closed
 
   const project    = projects.find(p => p.id === task.projectId);
   const projectPal = project ? getPalette(project.color) : null;
@@ -186,10 +177,9 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
     : null;
 
   const handleSubtaskToggle = (id) => {
-    const updated = subtasks.map(s =>
+    onUpdate?.({ ...task, subtasks: subtasks.map(s =>
       s.id === id ? { ...s, status: s.status === "complete" ? "open" : "complete" } : s
-    );
-    onUpdate?.({ ...task, subtasks: updated });
+    )});
   };
 
   const handleAddUpdate = (update) => {
@@ -197,241 +187,248 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
   };
 
   return (
-    <div
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
-      style={{
-        background: hov ? "#313131" : "#2a2a2a",
-        border: `1px solid ${hov ? "#555560" : "#444450"}`,
-        borderRadius: "10px",
-        padding: "14px 16px",
-        transition: "background 0.15s, border-color 0.15s",
-        display: "flex",
-        alignItems: "stretch",
-        position: "relative",
-      }}
-    >
-      {/* ── Left section ─────────────────────────────────────────────────────── */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "9px", minWidth: 0 }}>
+    <>
+      <div
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
+        style={{
+          background: hov ? "#313131" : "#2a2a2a",
+          border: `1px solid ${hov ? "#555560" : "#444450"}`,
+          borderRadius: "10px",
+          padding: "14px 16px",
+          transition: "background 0.15s, border-color 0.15s",
+          display: "flex",
+          alignItems: "stretch",
+          position: "relative",
+        }}
+      >
+        {/* ── Left section ───────────────────────────────────────────────────── */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "9px", minWidth: 0 }}>
 
-        {/* Title + Project badge */}
-        <div
-          onClick={() => onEdit(task)}
-          style={{ display: "flex", alignItems: "flex-start", gap: "8px", flexWrap: "wrap", cursor: "pointer" }}
-        >
-          <span style={{ fontSize: "14px", fontWeight: 700, color: "#f0f0f0", lineHeight: 1.3 }}>
-            {task.title}
-          </span>
-          {project && (
-            <span style={{
-              fontSize: "10px", fontWeight: 600,
-              padding: "2px 8px", borderRadius: "9999px",
-              background: projectPal.bg, color: projectPal.text,
-              whiteSpace: "nowrap", flexShrink: 0, marginTop: "2px",
-            }}>
-              {project.title}
-            </span>
-          )}
-        </div>
-
-        {/* Description — up to 4 lines */}
-        {task.description && (
+          {/* Title + Project badge */}
           <div
             onClick={() => onEdit(task)}
-            style={{
-              fontSize: "13px", color: "#c8c8d0", lineHeight: 1.5,
-              overflow: "hidden", display: "-webkit-box",
-              WebkitLineClamp: 4, WebkitBoxOrient: "vertical",
-              cursor: "pointer",
-            }}
+            style={{ display: "flex", alignItems: "flex-start", gap: "8px", flexWrap: "wrap", cursor: "pointer" }}
           >
-            {task.description}
-          </div>
-        )}
-
-        {/* Last update row */}
-        <div
-          onClick={e => { e.stopPropagation(); setShowPopover(v => !v); }}
-          style={{
-            background: "#2e2e36", borderRadius: "6px",
-            padding: "6px 10px", cursor: "pointer",
-            position: "relative",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginBottom: lastUpdate ? "3px" : 0 }}>
-            <span style={{
-              fontSize: "9px", fontWeight: 700, color: "#55555e",
-              letterSpacing: "0.1em", textTransform: "uppercase",
-            }}>
-              Last Update
+            <span style={{ fontSize: "14px", fontWeight: 700, color: "#f0f0f0", lineHeight: 1.3 }}>
+              {task.title}
             </span>
-            {lastUpdate && (
-              <span style={{ fontSize: "10px", color: "#55555e" }}>
-                {formatShortDate(lastUpdate.timestamp)}
-              </span>
-            )}
-          </div>
-          {lastUpdate ? (
-            <div style={{
-              fontSize: "12px", color: "#888890", lineHeight: 1.4,
-              overflow: "hidden", display: "-webkit-box",
-              WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
-            }}>
-              {lastUpdate.text}
-            </div>
-          ) : (
-            <div style={{ fontSize: "12px", color: "#55555e", fontStyle: "italic" }}>
-              No updates yet — click to add one
-            </div>
-          )}
-
-          {showPopover && (
-            <UpdatePopover
-              updates={updates}
-              onAdd={handleAddUpdate}
-              onClose={() => setShowPopover(false)}
-            />
-          )}
-        </div>
-
-        {/* Subtask progress bar + checklist */}
-        {subtasks.length > 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <div style={{ flex: 1 }}>
-                <ProgressBar pct={subtaskPct} />
-              </div>
-              <span style={{ fontSize: "10px", color: "#55555e", whiteSpace: "nowrap" }}>
-                {doneCount}/{subtasks.length}
-              </span>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              {subtasks.map(s => (
-                <div
-                  key={s.id}
-                  onClick={e => { e.stopPropagation(); handleSubtaskToggle(s.id); }}
-                  style={{ display: "flex", alignItems: "center", gap: "7px", cursor: "pointer" }}
-                >
-                  <div style={{
-                    width: "14px", height: "14px", flexShrink: 0,
-                    borderRadius: "3px",
-                    border: `1.5px solid ${s.status === "complete" ? "#4ADE80" : "#3a3a3a"}`,
-                    background: s.status === "complete" ? "#4ADE80" : "transparent",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    transition: "background 0.12s, border-color 0.12s",
-                  }}>
-                    {s.status === "complete" && (
-                      <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
-                        <path d="M1 3.5L3.5 6L8 1" stroke="#0E3F24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    )}
-                  </div>
-                  <span style={{
-                    fontSize: "12px", lineHeight: 1.3,
-                    color: s.status === "complete" ? "#55555e" : "#c8c8d0",
-                    textDecoration: s.status === "complete" ? "line-through" : "none",
-                  }}>
-                    {s.title}
-                  </span>
-                  {s.url && (
-                    <a
-                      href={s.url}
-                      onClick={e => e.stopPropagation()}
-                      target="_blank" rel="noreferrer"
-                      style={{ fontSize: "10px", color: "#38BDF8", textDecoration: "none", whiteSpace: "nowrap" }}
-                    >
-                      {s.urlDisplayName || s.url}
-                    </a>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Status badge + Link badges */}
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-          <GlowBadge label={task.status} colorKey={statusColorKey} size="small" />
-          {links.map(link => (
-            <a
-              key={link.id}
-              href={link.url}
-              onClick={e => e.stopPropagation()}
-              target="_blank" rel="noreferrer"
-              style={{ textDecoration: "none" }}
-            >
+            {project && (
               <span style={{
                 fontSize: "10px", fontWeight: 600,
                 padding: "2px 8px", borderRadius: "9999px",
-                background: "#0B3547", color: "#38BDF8",
-                border: "1px solid #166A8E", whiteSpace: "nowrap",
+                background: projectPal.bg, color: projectPal.text,
+                whiteSpace: "nowrap", flexShrink: 0, marginTop: "2px",
               }}>
-                {link.displayName || link.type}
+                {project.title}
               </span>
-            </a>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Vertical divider ─────────────────────────────────────────────────── */}
-      <div style={{
-        width: "1px", background: "#444450",
-        margin: "0 14px", flexShrink: 0,
-      }} />
-
-      {/* ── Right sidebar ─────────────────────────────────────────────────────── */}
-      <div style={{
-        width: "110px", flexShrink: 0,
-        display: "flex", flexDirection: "column",
-        justifyContent: "space-between", gap: "6px",
-      }}>
-        {/* Priority + Due date + Owner */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-          <GlowBadge label={task.priority} colorKey={priorityColorKey} size="small" />
-
-          {task.dueDate && (
-            <span style={{
-              fontSize: "10px", fontWeight: 600,
-              padding: "2px 8px", borderRadius: "9999px",
-              background: duePal.bg, color: duePal.text,
-              whiteSpace: "nowrap", alignSelf: "flex-start",
-            }}>
-              {formatDate(task.dueDate)}
-            </span>
-          )}
-
-          {task.owner && (
-            <span style={{
-              fontSize: "10px", fontWeight: 600,
-              padding: "2px 8px", borderRadius: "9999px",
-              background: "#374151", color: "#D1D5DB",
-              whiteSpace: "nowrap", alignSelf: "flex-start",
-              maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis",
-            }}>
-              {task.owner}
-            </span>
-          )}
-        </div>
-
-        {/* Image thumbnail */}
-        {images.length > 0 && (
-          <div onClick={() => onEdit(task)} style={{ cursor: "pointer" }}>
-            <img
-              src={images[0]}
-              alt="attachment"
-              style={{
-                width: "100%", height: "60px",
-                objectFit: "cover", borderRadius: "6px", display: "block",
-              }}
-            />
-            {images.length > 1 && (
-              <div style={{ fontSize: "10px", color: "#55555e", textAlign: "center", marginTop: "3px" }}>
-                +{images.length - 1} more
-              </div>
             )}
           </div>
-        )}
+
+          {/* Description — up to 4 lines */}
+          {task.description && (
+            <div
+              onClick={() => onEdit(task)}
+              style={{
+                fontSize: "13px", color: "#c8c8d0", lineHeight: 1.5,
+                overflow: "hidden", display: "-webkit-box",
+                WebkitLineClamp: 4, WebkitBoxOrient: "vertical",
+                cursor: "pointer",
+              }}
+            >
+              {task.description}
+            </div>
+          )}
+
+          {/* Last update row — label | text | date, all inline */}
+          <div
+            onClick={e => { e.stopPropagation(); setShowPopover(v => !v); }}
+            style={{
+              background: "#2e2e36", borderRadius: "6px",
+              padding: "6px 10px", cursor: "pointer",
+              position: "relative",
+              display: "flex", alignItems: "center", gap: "8px",
+            }}
+          >
+            <span style={{
+              fontSize: "9px", fontWeight: 700, color: "#55555e",
+              letterSpacing: "0.1em", textTransform: "uppercase",
+              whiteSpace: "nowrap", flexShrink: 0,
+            }}>
+              Last Update
+            </span>
+            <span style={{
+              flex: 1, fontSize: "12px",
+              color: lastUpdate ? "#888890" : "#55555e",
+              fontStyle: lastUpdate ? "normal" : "italic",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}>
+              {lastUpdate ? lastUpdate.text : "No updates yet — click to add one"}
+            </span>
+            {lastUpdate && (
+              <span style={{ fontSize: "10px", color: "#55555e", whiteSpace: "nowrap", flexShrink: 0 }}>
+                {formatShortDate(lastUpdate.timestamp)}
+              </span>
+            )}
+
+            {showPopover && (
+              <UpdatePopover
+                updates={updates}
+                onAdd={handleAddUpdate}
+                onClose={() => setShowPopover(false)}
+              />
+            )}
+          </div>
+
+          {/* Subtask progress bar + "N/M subtasks" label below + checklist */}
+          {subtasks.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              <ProgressBar pct={subtaskPct} />
+              <span style={{ fontSize: "10px", color: "#55555e" }}>
+                {doneCount}/{subtasks.length} subtasks
+              </span>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                {subtasks.map(s => (
+                  <div
+                    key={s.id}
+                    onClick={e => { e.stopPropagation(); handleSubtaskToggle(s.id); }}
+                    style={{ display: "flex", alignItems: "center", gap: "7px", cursor: "pointer" }}
+                  >
+                    <div style={{
+                      width: "14px", height: "14px", flexShrink: 0,
+                      borderRadius: "3px",
+                      border: `1.5px solid ${s.status === "complete" ? "#4ADE80" : "#3a3a3a"}`,
+                      background: s.status === "complete" ? "#4ADE80" : "transparent",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      transition: "background 0.12s, border-color 0.12s",
+                    }}>
+                      {s.status === "complete" && (
+                        <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+                          <path d="M1 3.5L3.5 6L8 1" stroke="#0E3F24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </div>
+                    <span style={{
+                      fontSize: "12px", lineHeight: 1.3,
+                      color: s.status === "complete" ? "#55555e" : "#c8c8d0",
+                      textDecoration: s.status === "complete" ? "line-through" : "none",
+                    }}>
+                      {s.title}
+                    </span>
+                    {s.url && (
+                      <a
+                        href={s.url}
+                        onClick={e => e.stopPropagation()}
+                        target="_blank" rel="noreferrer"
+                        style={{ fontSize: "10px", color: "#38BDF8", textDecoration: "none", whiteSpace: "nowrap" }}
+                      >
+                        {s.urlDisplayName || s.url}
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Status badge + Link badges — same size */}
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+            <GlowBadge label={task.status} colorKey={statusColorKey} />
+            {links.map(link => (
+              <a
+                key={link.id}
+                href={link.url}
+                onClick={e => e.stopPropagation()}
+                target="_blank" rel="noreferrer"
+                style={{ textDecoration: "none" }}
+              >
+                <span style={{
+                  fontSize: "10px", fontWeight: 600,
+                  padding: "2px 8px", borderRadius: "9999px",
+                  background: "#0B3547", color: "#38BDF8",
+                  border: "1px solid #166A8E", whiteSpace: "nowrap",
+                }}>
+                  {link.displayName || link.type}
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Vertical divider ───────────────────────────────────────────────── */}
+        <div style={{ width: "1px", background: "#444450", margin: "0 14px", flexShrink: 0 }} />
+
+        {/* ── Right sidebar (110px, right-aligned) ───────────────────────────── */}
+        <div style={{
+          width: "110px", flexShrink: 0,
+          display: "flex", flexDirection: "column",
+          justifyContent: "space-between", gap: "6px",
+        }}>
+          {/* Priority + Due date + Owner — right-justified */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px", alignItems: "flex-end" }}>
+            <GlowBadge label={task.priority} colorKey={priorityColorKey} />
+
+            {task.dueDate && (
+              <span style={{
+                fontSize: "10px", fontWeight: 600,
+                padding: "2px 8px", borderRadius: "9999px",
+                background: duePal.bg, color: duePal.text,
+                whiteSpace: "nowrap",
+              }}>
+                {formatDate(task.dueDate)}
+              </span>
+            )}
+
+            {task.owner && (
+              <span style={{
+                fontSize: "10px", fontWeight: 600,
+                padding: "2px 8px", borderRadius: "9999px",
+                background: "#374151", color: "#D1D5DB",
+                whiteSpace: "nowrap",
+                maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis",
+              }}>
+                {task.owner}
+              </span>
+            )}
+          </div>
+
+          {/* Image thumbnail with count bubble */}
+          {images.length > 0 && (
+            <div
+              onClick={e => { e.stopPropagation(); setViewerIndex(0); }}
+              style={{ position: "relative", cursor: "pointer" }}
+            >
+              <img
+                src={images[0]}
+                alt="attachment"
+                style={{
+                  width: "100%", height: "60px",
+                  objectFit: "cover", borderRadius: "6px", display: "block",
+                }}
+              />
+              {/* Count bubble — bottom-left */}
+              <div style={{
+                position: "absolute", bottom: "4px", left: "4px",
+                background: "rgba(0,0,0,0.65)", color: "#f0f0f0",
+                fontSize: "10px", fontWeight: 700,
+                padding: "1px 6px", borderRadius: "9999px",
+                lineHeight: "16px",
+              }}>
+                {images.length}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* ── Image viewer modal ─────────────────────────────────────────────────── */}
+      {viewerIndex !== null && (
+        <ImageViewer
+          images={images}
+          startIndex={viewerIndex}
+          onClose={() => setViewerIndex(null)}
+        />
+      )}
+    </>
   );
 }
