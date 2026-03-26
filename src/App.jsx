@@ -32,7 +32,7 @@ export default function App() {
 
           {/* If Builder is empty, show a fallback message */}
           {!content && (
-            <div style={{ padding: "50px", textAlign: "center", width: "700px" }}>
+            <div style={{ padding: "50px", textAlign: "center", width: "100%", boxSizing: "border-box" }}>
               <div style={{ display: "flex", flexDirection: "column", position: "relative", marginTop: "20px", height: "auto", alignSelf: "start" }}>
               </div>
             </div>
