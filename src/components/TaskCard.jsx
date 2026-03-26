@@ -44,7 +44,88 @@ function GlowBadge({ label, colorKey }) {
   );
 }
 
-// ── PriorityBadge — hover to reveal "Change Priority", click for dropdown ─────
+// ── StatusBadge — hover to reveal "Edit Status", click for dropdown ──────────
+
+const STATUS_OPTIONS = ["Not Started", "In Progress", "Needs Review", "Done"];
+
+function StatusBadge({ status, colorKey, onChange }) {
+  const [hov,  setHov]  = useState(false);
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const p   = getPalette(colorKey);
+
+  useEffect(() => {
+    if (!open) return;
+    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [open]);
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <span
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
+        onClick={(e) => { e.stopPropagation(); setOpen(v => !v); }}
+        style={{
+          fontSize: "10px", fontWeight: 600,
+          padding: "2px 8px", borderRadius: "9999px",
+          background: hov ? p.hoverBg  : p.bg,
+          color:      hov ? p.hoverText : p.text,
+          border: `1px solid ${hov ? p.hoverBorder : "transparent"}`,
+          whiteSpace: "nowrap", cursor: "pointer",
+          transition: "background 0.15s, color 0.15s, border-color 0.15s",
+          display: "inline-block", flexShrink: 0,
+        }}
+      >
+        {hov && !open ? "Edit Status" : status}
+      </span>
+
+      {open && (
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{
+            position: "absolute", left: 0, top: "calc(100% + 4px)", zIndex: 400,
+            background: "#2a2a2e", border: "1px solid #3a3a44",
+            borderRadius: "8px", padding: "4px",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+            minWidth: "150px",
+          }}
+        >
+          {STATUS_OPTIONS.map(opt => {
+            const optP = getPalette(STATUS_COLORS[opt] ?? "gray");
+            const selected = opt === status;
+            return (
+              <div
+                key={opt}
+                onClick={() => { onChange(opt); setOpen(false); setHov(false); }}
+                style={{
+                  padding: "5px 8px", borderRadius: "5px", cursor: "pointer",
+                  background: selected ? "#3a3a44" : "transparent",
+                  display: "flex", alignItems: "center", gap: "8px",
+                  transition: "background 0.1s",
+                }}
+              >
+                <span style={{
+                  fontSize: "10px", fontWeight: 600,
+                  padding: "2px 8px", borderRadius: "9999px",
+                  background: optP.bg, color: optP.text,
+                }}>
+                  {opt}
+                </span>
+                {selected && (
+                  <span style={{ fontSize: "10px", color: "#55555e", marginLeft: "auto" }}>✓</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── PriorityBadge — hover to reveal "Edit Priority", click for dropdown ───────
 
 const PRIORITY_OPTIONS = ["Low", "Medium", "High"];
 
@@ -511,7 +592,11 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
 
           {/* Status badge + Link badges — same size */}
           <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-            <GlowBadge label={task.status} colorKey={statusColorKey} />
+            <StatusBadge
+              status={task.status}
+              colorKey={statusColorKey}
+              onChange={(val) => onUpdate?.({ ...task, status: val })}
+            />
             {links.map(link => (
               <a
                 key={link.id}
