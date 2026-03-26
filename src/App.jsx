@@ -16,9 +16,9 @@ export default function App() {
 
   return (
     <div style={{ display: "flex", justifyContent: "center", minHeight: "100vh", backgroundColor: "#2A2A2A" }}>
-      <div style={{ width: "100%", maxWidth: "760px", minWidth: "760px", display: "flex", flexDirection: "column", color: "white" }}>
+      <div style={{ width: "100%", maxWidth: "640px", minWidth: "640px", display: "flex", flexDirection: "column", color: "white" }}>
         {/* Persistent title bar */}
-        <div style={{ padding: "20px 50px", display: "flex", justifyContent: "flex-end", borderBottom: "1px solid #444" }}>
+        <div style={{ padding: "20px 50px", display: "flex", justifyContent: "flex-start", borderBottom: "1px solid #444" }}>
           <div style={{ fontSize: "18px", fontWeight: "bold" }}>XMBtask</div>
         </div>
 
