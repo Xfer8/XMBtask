@@ -21,6 +21,7 @@
 body {
   margin: 0;
   background: #212121;
+  scrollbar-gutter: stable;
 }
 
 /* ─── View-switch slide animations ───────────────────────────────────────── */
