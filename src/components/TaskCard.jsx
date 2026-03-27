@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { getPalette } from "../colors";
 import { STATUS_COLORS, PRIORITY_COLORS } from "../theme";
 import ImageViewer from "./tasks/sub/ImageViewer";
-import SplitBadge from "./ui/SplitBadge";
+import MutedBadge from "./ui/MutedBadge";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -482,7 +482,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
               {links.map(link => {
                 const colorMap = { Source:"yellow", Sherlock:"orange", Jira:"blue", Email:"purple", Link:"gray", Other:"gray" };
                 return (
-                  <SplitBadge
+                  <MutedBadge
                     key={link.id}
                     label={link.type}
                     value={link.displayName || link.url || "(none)"}
