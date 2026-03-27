@@ -153,27 +153,41 @@ export default function App() {
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", backgroundColor: "#212121" }}>
 
-      {/* Full-width sticky header */}
+      {/* Floating header */}
       <div style={{
-        width: "100%", backgroundColor: "#252525",
-        position: "sticky", top: 0, zIndex: 100,
+        maxWidth:    "720px",
+        width:       "100%",
+        margin:      "20px auto 0",
+        background:  "#222228",
+        height:      "48px",
+        display:     "flex",
+        alignItems:  "center",
+        padding:     "0 20px",
+        borderRadius:"6px",
+        border:      "1px solid rgba(255,255,255,0.05)",
+        boxShadow:   "0 10px 40px rgba(0,0,0,0.5)",
+        boxSizing:   "border-box",
+        position:    "sticky",
+        top:         "20px",
+        zIndex:      100,
+        // Centering trick: left/right sections are equal width so nav stays perfectly centered
+        display:     "grid",
+        gridTemplateColumns: "1fr auto 1fr",
       }}>
-        {/* Inner constrained to match page content width */}
-        <div style={{
-          maxWidth: "720px", margin: "0 auto",
-          padding: "0 20px", height: "48px",
-          display: "flex", alignItems: "center",
-          justifyContent: "space-between",
-          boxSizing: "border-box",
-        }}>
-          <div style={{ fontSize: "18px", fontWeight: 700, letterSpacing: "-0.3px" }}>
-            <span style={{ color: "#2DB86A" }}>XMB</span>
-            <span style={{ color: "#f0f0f0" }}>task</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <NavBar onNavigate={setCurrentPage} currentPage={currentPage} />
-            <SettingsMenu onImport={handleImport} onExport={handleExport} />
-          </div>
+        {/* Logo — left */}
+        <div style={{ display:"flex", alignItems:"center", fontSize:"18px", fontWeight:700, letterSpacing:"-0.3px" }}>
+          <span style={{ color:"#2DB86A" }}>XMB</span>
+          <span style={{ color:"#f0f0f0" }}>task</span>
+        </div>
+
+        {/* Nav — center */}
+        <div style={{ display:"flex", alignItems:"center" }}>
+          <NavBar onNavigate={setCurrentPage} currentPage={currentPage} />
+        </div>
+
+        {/* Cog — right */}
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"flex-end" }}>
+          <SettingsMenu onImport={handleImport} onExport={handleExport} />
         </div>
       </div>
 

@@ -1,49 +1,47 @@
-import { useState, useRef, useEffect } from "react";
-import "./NavBar.css";
+import { useState } from "react";
+
+const OPTIONS = ["Dashboard", "Tasks", "Projects"];
 
 export default function NavBar({ onNavigate, currentPage }) {
-  const [selected, setSelected] = useState(currentPage || "Dashboard");
-  const [pillStyle, setPillStyle] = useState({ width: 0, left: 0 });
-  const buttonRefs = useRef({});
-  const sliderRef = useRef(null);
-
-  const options = ["Dashboard", "Tasks", "Projects"];
-
-  const updatePillPosition = () => {
-    const activeButton = buttonRefs.current[selected];
-    if (activeButton && sliderRef.current) {
-      const buttonWidth = activeButton.offsetWidth;
-      const buttonLeft = activeButton.offsetLeft;
-      setPillStyle({ width: buttonWidth, left: buttonLeft });
-    }
-  };
-
-  useEffect(() => {
-    updatePillPosition();
-    window.addEventListener("resize", updatePillPosition);
-    return () => window.removeEventListener("resize", updatePillPosition);
-  }, [selected]);
-
-  const handleSelect = (page) => {
-    setSelected(page);
-    onNavigate(page);
-  };
+  const [hovered, setHovered] = useState(null);
 
   return (
-    <div className="navbar-container">
-      <div className="navbar-slider" ref={sliderRef}>
-        <div className="navbar-pill" style={{ width: `${pillStyle.width}px`, left: `${pillStyle.left}px` }}></div>
-        {options.map((option) => (
+    <div style={{
+      display:      "flex",
+      background:   "#111",
+      padding:      "3px",
+      borderRadius: "4px",
+      gap:          "2px",
+    }}>
+      {OPTIONS.map(option => {
+        const isActive = currentPage === option;
+        const isHov    = hovered === option && !isActive;
+        return (
           <button
             key={option}
-            ref={(el) => buttonRefs.current[option] = el}
-            className={`navbar-option ${selected === option ? "active" : ""}`}
-            onClick={() => handleSelect(option)}
+            onClick={() => onNavigate(option)}
+            onMouseEnter={() => setHovered(option)}
+            onMouseLeave={() => setHovered(null)}
+            style={{
+              background:     isActive ? "#2DB86A" : isHov ? "rgba(255,255,255,0.04)" : "transparent",
+              border:         "none",
+              borderRadius:   "2px",
+              cursor:         "pointer",
+              color:          isActive ? "#111" : isHov ? "#aaa" : "#666",
+              fontSize:       "10px",
+              fontWeight:     900,
+              textTransform:  "uppercase",
+              letterSpacing:  "0.5px",
+              padding:        "6px 16px",
+              fontFamily:     "inherit",
+              transition:     "background 0.2s, color 0.2s",
+              whiteSpace:     "nowrap",
+            }}
           >
             {option}
           </button>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }
