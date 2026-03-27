@@ -69,7 +69,7 @@ function MetaDropdown({ options, selected, getColorKey, onSelect }) {
 
 const CELL_W = 85; // px — all three cells identical
 
-function DockCell({ value, placeholder, colorKey, onClick, refProp, children }) {
+function DockCell({ value, placeholder, colorKey, onClick, refProp, style: extraStyle, children }) {
   const [hov, setHov] = useState(false);
   const p   = getPalette(colorKey);
   const rgb = hexToRgb(p.text);
@@ -80,12 +80,14 @@ function DockCell({ value, placeholder, colorKey, onClick, refProp, children }) 
       style={{
         position: "relative",
         borderLeft: "1px solid rgba(255,255,255,0.03)",
+        ...extraStyle,
       }}
     >
       {/* Top glow bar — 2px, visible at rest, vivid on hover */}
       <div
         style={{
           position: "absolute", top: 0, left: 0, right: 0, height: "2px",
+          borderTopRightRadius: extraStyle?.borderTopRightRadius,
           background: hov ? `rgba(${rgb}, 1)` : `rgba(${rgb}, 0.55)`,
           boxShadow: hov ? `0 0 12px rgba(${rgb}, 0.8)` : `0 0 4px rgba(${rgb}, 0.3)`,
           transition: "background 0.2s ease, box-shadow 0.2s ease",
@@ -103,6 +105,7 @@ function DockCell({ value, placeholder, colorKey, onClick, refProp, children }) 
           width: `${CELL_W}px`, height: "30px",
           display: "flex", alignItems: "center", justifyContent: "center",
           cursor: "pointer",
+          borderTopRightRadius: extraStyle?.borderTopRightRadius,
           background: hov ? `rgba(${rgb}, 0.22)` : `rgba(${rgb}, 0.13)`,
           transition: "background 0.2s ease",
         }}
@@ -220,6 +223,7 @@ function DueDateCell({ dueDate, colorKey, onChange }) {
       colorKey={colorKey}
       onClick={e => { e.stopPropagation(); setOpen(v => !v); }}
       refProp={ref}
+      style={{ borderTopRightRadius: "9px" }}
     >
       {open && (
         <div
