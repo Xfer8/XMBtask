@@ -223,7 +223,6 @@ function DueDateCell({ dueDate, colorKey, onChange }) {
       colorKey={colorKey}
       onClick={e => { e.stopPropagation(); setOpen(v => !v); }}
       refProp={ref}
-      style={{ borderTopRightRadius: "9px" }}
     >
       {open && (
         <div
@@ -397,9 +396,9 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
         style={{
           background: "#2a2a2a",
           border: "1px solid #444450",
-          borderRadius: "10px",
+          borderRadius: "10px 0px 10px 10px", // top-right is square to match the dock
           position: "relative",
-          // No overflow:hidden so dropdowns can escape — dock gets its own borderRadius
+          // No overflow:hidden so dropdowns can escape
         }}
       >
 
@@ -451,7 +450,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
             flexShrink: 0,
             background: "rgba(0,0,0,0.2)",
             borderLeft: "1px solid rgba(255,255,255,0.08)",
-            borderTopRightRadius: "9px",
+            marginRight: "-1px", // overlap the card's right border so dock is flush
           }}>
             <StatusCell
               status={task.status}
