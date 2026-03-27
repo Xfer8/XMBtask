@@ -57,10 +57,9 @@ function MetaBadge({ abbr, value, color, hov, setHov, onClick, refProp, children
           display: "flex", alignItems: "stretch",
           background: "#222222", borderRadius: "2px",
           overflow: "hidden",
-          border: "1px solid rgba(255,255,255,0.06)",
+          border: hov ? `1px solid ${color}` : "1px solid rgba(255,255,255,0.06)",
           cursor: "pointer",
-          filter: hov ? `drop-shadow(0 0 6px ${color})` : "none",
-          transition: "filter 0.3s ease",
+          transition: "border-color 0.3s ease",
           width: "100%",
         }}
       >
