@@ -156,19 +156,24 @@ export default function App() {
       {/* Full-width sticky header */}
       <div style={{
         width: "100%", backgroundColor: "#252525",
-        padding: "0 20px", height: "48px",
-        display: "flex", alignItems: "center",
-        justifyContent: "space-between",
-        boxSizing: "border-box",
         position: "sticky", top: 0, zIndex: 100,
       }}>
-        <div style={{ fontSize: "18px", fontWeight: 700, letterSpacing: "-0.3px" }}>
-          <span style={{ color: "#2DB86A" }}>XMB</span>
-          <span style={{ color: "#f0f0f0" }}>task</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <NavBar onNavigate={setCurrentPage} currentPage={currentPage} />
-          <SettingsMenu onImport={handleImport} onExport={handleExport} />
+        {/* Inner constrained to match page content width */}
+        <div style={{
+          maxWidth: "720px", margin: "0 auto",
+          padding: "0 20px", height: "48px",
+          display: "flex", alignItems: "center",
+          justifyContent: "space-between",
+          boxSizing: "border-box",
+        }}>
+          <div style={{ fontSize: "18px", fontWeight: 700, letterSpacing: "-0.3px" }}>
+            <span style={{ color: "#2DB86A" }}>XMB</span>
+            <span style={{ color: "#f0f0f0" }}>task</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <NavBar onNavigate={setCurrentPage} currentPage={currentPage} />
+            <SettingsMenu onImport={handleImport} onExport={handleExport} />
+          </div>
         </div>
       </div>
 
