@@ -75,24 +75,13 @@ function DockCell({ value, placeholder, colorKey, onClick, refProp, style: extra
   const rgb    = hexToRgb(p.text);
   const hasVal = !!value;
 
-  // Empty cells use a much dimmer neutral gray so they read as "unset"
-  // rather than matching the gray used by real values like "Not Started"
-  const emptyRgb = "65, 65, 72";
-
-  const activeRgb = hasVal ? rgb : emptyRgb;
-  const barBg     = hasVal
-    ? (hov ? `rgba(${rgb}, 1)`    : `rgba(${rgb}, 0.55)`)
-    : (hov ? `rgba(${emptyRgb}, 0.25)` : `rgba(${emptyRgb}, 0.1)`);
-  const barGlow   = hasVal
-    ? (hov ? `0 0 12px rgba(${rgb}, 0.8)` : `0 0 4px rgba(${rgb}, 0.3)`)
-    : "none";
-  const cellBg    = hasVal
-    ? (hov ? `rgba(${rgb}, 0.22)`      : `rgba(${rgb}, 0.13)`)
-    : (hov ? `rgba(${emptyRgb}, 0.07)` : `rgba(${emptyRgb}, 0.03)`);
-  const textColor = hasVal
-    ? (hov ? `rgba(${rgb}, 1)`         : `rgba(${rgb}, 0.8)`)
-    : (hov ? `rgba(${emptyRgb}, 0.45)` : `rgba(${emptyRgb}, 0.28)`);
-  const textGlow  = hasVal && hov ? `0 0 10px rgba(${rgb}, 0.5)` : "none";
+  // Empty cells use the same gray palette but italic text — italic is a
+  // universally understood "placeholder/unset" signal without hurting readability.
+  const barBg    = hov ? `rgba(${rgb}, 1)`    : `rgba(${rgb}, 0.55)`;
+  const barGlow  = hov ? `0 0 12px rgba(${rgb}, 0.8)` : `0 0 4px rgba(${rgb}, 0.3)`;
+  const cellBg   = hov ? `rgba(${rgb}, 0.22)` : `rgba(${rgb}, 0.13)`;
+  const textColor = hov ? `rgba(${rgb}, 1)`   : `rgba(${rgb}, 0.8)`;
+  const textGlow  = hov ? `0 0 10px rgba(${rgb}, 0.5)` : "none";
 
   return (
     <div
@@ -137,6 +126,7 @@ function DockCell({ value, placeholder, colorKey, onClick, refProp, style: extra
           maxWidth: `${CELL_W - 10}px`,
           color: textColor,
           textShadow: textGlow,
+          fontStyle: hasVal ? "normal" : "italic",
           transition: "color 0.2s ease, text-shadow 0.2s ease",
           userSelect: "none",
         }}>
