@@ -459,8 +459,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
             {project && (
               <span style={{
                 display: "inline-flex", alignItems: "center",
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.07)",
+                background: "#2a2a2a",
                 padding: "4px 10px 4px 6px",
                 borderRadius: "2px",
                 whiteSpace: "nowrap", flexShrink: 0,
@@ -534,11 +533,11 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
                 cursor: "pointer",
               }}
             >
-              {/* Orange vertical bar */}
+              {/* Project-colored vertical bar */}
               <div style={{
                 width: "2px", height: "24px", flexShrink: 0,
-                background: "#FB923C",
-                boxShadow: "0 0 8px rgba(251,146,60,0.4)",
+                background: projectPal ? projectPal.text : "#FB923C",
+                boxShadow: projectPal ? `0 0 8px ${projectPal.text}40` : "0 0 8px rgba(251,146,60,0.4)",
                 borderRadius: "2px",
                 marginRight: "12px",
               }} />
