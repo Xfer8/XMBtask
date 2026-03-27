@@ -70,8 +70,19 @@ export default function SubtasksSection({ subtasks, onChange }) {
                 {s.title}
               </span>
               {s.url && (
-                <a href={s.url} onClick={e => { e.preventDefault(); window.open(s.url, "_blank", "noopener,noreferrer"); }}
-                  style={{ marginLeft:"8px", fontSize:"11px", color:"#38BDF8", textDecoration:"none" }}>
+                <a
+                  href={s.url}
+                  onClick={e => { e.preventDefault(); window.open(s.url, "_blank", "noopener,noreferrer"); }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "#38BDF8"; e.currentTarget.style.color = "#0B1E2D"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#38BDF8"; }}
+                  style={{
+                    marginLeft:"8px", fontSize:"11px", fontWeight:600, textDecoration:"none",
+                    color:"#38BDF8", background:"transparent",
+                    border:"1px solid #38BDF8", borderRadius:"999px",
+                    padding:"1px 7px", transition:"background 0.15s, color 0.15s",
+                    whiteSpace:"nowrap",
+                  }}
+                >
                   {s.urlDisplayName || s.url}
                 </a>
               )}

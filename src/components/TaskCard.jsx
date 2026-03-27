@@ -541,7 +541,14 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
                         href={s.url}
                         onClick={e => e.stopPropagation()}
                         target="_blank" rel="noreferrer"
-                        style={{ fontSize: "10px", color: "#38BDF8", textDecoration: "none", whiteSpace: "nowrap" }}
+                        onMouseEnter={e => { e.currentTarget.style.background = "#38BDF8"; e.currentTarget.style.color = "#0B1E2D"; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#38BDF8"; }}
+                        style={{
+                          fontSize: "10px", fontWeight: 600, textDecoration: "none",
+                          whiteSpace: "nowrap", color: "#38BDF8", background: "transparent",
+                          border: "1px solid #38BDF8", borderRadius: "999px",
+                          padding: "1px 7px", transition: "background 0.15s, color 0.15s",
+                        }}
                       >
                         {s.urlDisplayName || s.url}
                       </a>
