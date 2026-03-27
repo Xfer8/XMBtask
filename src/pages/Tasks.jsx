@@ -2,6 +2,7 @@ import { useState } from "react";
 import TaskCard     from "../components/TaskCard";
 import TaskModal    from "../components/tasks/TaskModal";
 import ProjectGroup from "../components/tasks/ProjectGroup";
+import ProjectBar   from "../components/tasks/ProjectBar";
 
 const EMPTY_TASK = {
   title:"", description:"", status:"Not Started", priority:"Medium",
@@ -52,9 +53,10 @@ function ToggleSegment({ label, active, onClick }) {
 // ── Tasks page ─────────────────────────────────────────────────────────────────
 
 export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDelete }) {
-  const [editing,  setEditing]  = useState(null);
-  const [search,   setSearch]   = useState("");
-  const [viewMode, setViewMode] = useState("by-project"); // "by-project" | "all-tasks"
+  const [editing,         setEditing]         = useState(null);
+  const [search,          setSearch]          = useState("");
+  const [viewMode,        setViewMode]        = useState("by-project"); // "by-project" | "all-tasks"
+  const [activeProjectId, setActiveProjectId] = useState(null);
 
   // ── Open handlers ──────────────────────────────────────────────────────────
   const openNew = () => {
@@ -94,11 +96,23 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
     : tasks;
 
   // ── By-project grouping ────────────────────────────────────────────────────
-  const activeProjects  = projects.filter(p => p.status === "Active");
-  const uncategorized   = filteredTasks.filter(t => !t.projectId || !projects.find(p => p.id === t.projectId));
+  const activeProjects = projects.filter(p =>
+    p.status === "Active" && (!activeProjectId || p.id === activeProjectId)
+  );
+  const uncategorized = activeProjectId
+    ? [] // hide uncategorized when a specific project filter is active
+    : filteredTasks.filter(t => !t.projectId || !projects.find(p => p.id === t.projectId));
 
   return (
     <div style={{ width:"100%", padding:"24px 20px", boxSizing:"border-box", maxWidth:"720px", margin:"0 auto" }}>
+
+      {/* ── Project bar ─────────────────────────────────────────────────────── */}
+      <ProjectBar
+        tasks={tasks}
+        projects={projects}
+        activeProjectId={activeProjectId}
+        onSelect={setActiveProjectId}
+      />
 
       {/* ── Toolbar ─────────────────────────────────────────────────────────── */}
       <div style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"24px" }}>
@@ -163,7 +177,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
           <ToggleSegment
             label="All Tasks"
             active={viewMode === "all-tasks"}
-            onClick={() => setViewMode("all-tasks")}
+            onClick={() => { setViewMode("all-tasks"); setActiveProjectId(null); }}
           />
         </div>
       </div>
