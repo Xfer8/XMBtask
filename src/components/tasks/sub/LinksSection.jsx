@@ -2,8 +2,8 @@ import { useState } from "react";
 import { getPalette } from "../../../colors";
 import SplitBadge from "../../ui/SplitBadge";
 
-const LINK_TYPES       = ["Source", "Sherlock", "Jira", "Email", "Other"];
-const LINK_TYPE_COLORS = { Source:"yellow", Sherlock:"orange", Jira:"blue", Email:"purple", Other:"gray" };
+const LINK_TYPES       = ["Source", "Sherlock", "Jira", "Email", "Link"];
+const LINK_TYPE_COLORS = { Source:"yellow", Sherlock:"orange", Jira:"blue", Email:"purple", Link:"gray", Other:"gray" };
 const generateLinkId   = () => `LK${Date.now()}`;
 const EMPTY_LINK       = { url:"", displayName:"", type:"" };
 

@@ -471,7 +471,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
           {links.length > 0 && (
             <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
               {links.map(link => {
-                const colorMap = { Source:"yellow", Sherlock:"orange", Jira:"blue", Email:"purple", Other:"gray" };
+                const colorMap = { Source:"yellow", Sherlock:"orange", Jira:"blue", Email:"purple", Link:"gray", Other:"gray" };
                 return (
                   <SplitBadge
                     key={link.id}
