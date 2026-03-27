@@ -104,15 +104,11 @@ function StatusBadge({ status, colorKey, onChange }) {
                   transition: "background 0.1s",
                 }}
               >
-                <span style={{
-                  fontSize: "10px", fontWeight: 600,
-                  padding: "2px 8px", borderRadius: "4px",
-                  background: optP.bg, color: optP.text,
-                }}>
+                <span style={{ ...BADGE, background: optP.bg, color: optP.text, border: `1px solid ${optP.bg}` }}>
                   {opt}
                 </span>
                 {selected && (
-                  <span style={{ fontSize: "10px", color: "#55555e", marginLeft: "auto" }}>✓</span>
+                  <span style={{ fontSize: "12px", color: "#55555e", marginLeft: "auto" }}>✓</span>
                 )}
               </div>
             );
@@ -184,15 +180,11 @@ function PriorityBadge({ priority, colorKey, onChange }) {
                   transition: "background 0.1s",
                 }}
               >
-                <span style={{
-                  fontSize: "10px", fontWeight: 600,
-                  padding: "2px 8px", borderRadius: "4px",
-                  background: optP.bg, color: optP.text,
-                }}>
+                <span style={{ ...BADGE, background: optP.bg, color: optP.text, border: `1px solid ${optP.bg}` }}>
                   {opt}
                 </span>
                 {selected && (
-                  <span style={{ fontSize: "10px", color: "#55555e", marginLeft: "auto" }}>✓</span>
+                  <span style={{ fontSize: "12px", color: "#55555e", marginLeft: "auto" }}>✓</span>
                 )}
               </div>
             );
