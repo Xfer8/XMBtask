@@ -520,11 +520,11 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
                 <span style={{
                   fontSize: "9px", fontWeight: 800,
                   letterSpacing: "0.1em", textTransform: "uppercase",
-                  color: getPalette("orange","glow").text, whiteSpace: "nowrap",
+                  color: "#888890", whiteSpace: "nowrap",
                 }}>
                   Last Update
                 </span>
-                <span style={{ fontSize: "10px", fontWeight: 600, color: getPalette("orange","glow").text, whiteSpace: "nowrap" }}>
+                <span style={{ fontSize: "10px", fontWeight: 600, color: "#888890", whiteSpace: "nowrap" }}>
                   {lastUpdate ? formatShortDate(lastUpdate.timestamp) : "—"}
                 </span>
               </div>
