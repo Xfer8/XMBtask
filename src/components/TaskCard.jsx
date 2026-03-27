@@ -509,37 +509,48 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
                 background: "#1E1E1E",
                 cursor: "pointer",
                 transition: "border-color 0.2s",
-                minHeight: "32px",
               }}
             >
-              {/* Label — no fill, just text + right divider */}
+              {/* Left: stacked label + date */}
               <div style={{
-                color: showRibbonHov ? "#888890" : "#55555e",
-                fontSize: "10px", fontWeight: 700,
-                letterSpacing: "0.1em", textTransform: "uppercase",
-                padding: "0 12px",
-                borderRight: `1px solid ${showRibbonHov ? "#555560" : "#3a3a3a"}`,
-                display: "flex", alignItems: "center",
-                whiteSpace: "nowrap", flexShrink: 0,
-                transition: "color 0.2s, border-color 0.2s",
+                display: "flex", flexDirection: "column",
+                alignItems: "flex-start", justifyContent: "center",
+                padding: "6px 12px", gap: "2px", flexShrink: 0,
               }}>
-                Last Update
-              </div>
-              {/* Text + date */}
-              <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "8px", padding: "6px 10px", minWidth: 0 }}>
                 <span style={{
-                  flex: 1, fontSize: "12px",
-                  color: lastUpdate ? "#888890" : "#55555e",
+                  fontSize: "9px", fontWeight: 800,
+                  letterSpacing: "0.1em", textTransform: "uppercase",
+                  color: getPalette("orange","glow").text, whiteSpace: "nowrap",
+                }}>
+                  Last Update
+                </span>
+                <span style={{ fontSize: "10px", fontWeight: 600, color: getPalette("orange","glow").text, whiteSpace: "nowrap" }}>
+                  {lastUpdate ? formatShortDate(lastUpdate.timestamp) : "—"}
+                </span>
+              </div>
+
+              {/* Orange separator line */}
+              <div style={{
+                width: "2px", flexShrink: 0,
+                background: getPalette("orange","glow").border,
+                margin: "6px 0",
+                borderRadius: "2px",
+              }} />
+
+              {/* Right: 2-line text */}
+              <div style={{ flex: 1, display: "flex", alignItems: "center", padding: "6px 10px", minWidth: 0 }}>
+                <span style={{
+                  fontSize: "12px",
+                  color: lastUpdate ? "#c8c8d0" : "#55555e",
                   fontStyle: lastUpdate ? "normal" : "italic",
-                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                  lineHeight: "1.4",
                 }}>
                   {lastUpdate ? lastUpdate.text : "No updates yet — click to add one"}
                 </span>
-                {lastUpdate && (
-                  <span style={{ fontSize: "11px", color: "#55555e", whiteSpace: "nowrap", flexShrink: 0 }}>
-                    {formatShortDate(lastUpdate.timestamp)}
-                  </span>
-                )}
               </div>
             </div>
             {showPopover && (
