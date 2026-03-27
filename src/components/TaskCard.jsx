@@ -497,49 +497,51 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
           )}
 
           {/* Last update ribbon */}
-          <div
-            onClick={e => { e.stopPropagation(); setShowPopover(v => !v); }}
-            onMouseEnter={() => setShowRibbonHov(true)}
-            onMouseLeave={() => setShowRibbonHov(false)}
-            style={{
-              display: "flex", alignItems: "stretch",
-              overflow: "hidden", borderRadius: "6px",
-              border: `1px solid ${showRibbonHov ? getPalette("orange","glow").hoverBorder : getPalette("orange","glow").border}`,
-              background: "linear-gradient(to right, #1E1E26, #14141A)",
-              cursor: "pointer", position: "relative",
-              boxShadow: showRibbonHov ? "0 0 14px rgba(251,146,60,0.22)" : "none",
-              transition: "box-shadow 0.2s, border-color 0.2s",
-              minHeight: "32px",
-            }}
-          >
-            {/* Slanted orange label */}
-            <div style={{
-              background: getPalette("orange","solid").bg,
-              color: getPalette("orange","solid").text,
-              fontSize: "10px", fontWeight: 900,
-              letterSpacing: "0.1em", textTransform: "uppercase",
-              padding: "0 24px 0 12px",
-              clipPath: "polygon(0 0, 100% 0, 88% 100%, 0% 100%)",
-              display: "flex", alignItems: "center",
-              whiteSpace: "nowrap", flexShrink: 0,
-            }}>
-              Last Update
-            </div>
-            {/* Text + date */}
-            <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "8px", padding: "6px 10px", minWidth: 0 }}>
-              <span style={{
-                flex: 1, fontSize: "12px",
-                color: lastUpdate ? "#D1D5DB" : "#55555e",
-                fontStyle: lastUpdate ? "normal" : "italic",
-                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          <div style={{ position: "relative" }}>
+            <div
+              onClick={e => { e.stopPropagation(); setShowPopover(v => !v); }}
+              onMouseEnter={() => setShowRibbonHov(true)}
+              onMouseLeave={() => setShowRibbonHov(false)}
+              style={{
+                display: "flex", alignItems: "stretch",
+                overflow: "hidden", borderRadius: "6px",
+                border: `1px solid ${showRibbonHov ? getPalette("gray","glow").hoverBorder : getPalette("gray","glow").border}`,
+                background: "linear-gradient(to right, #1E1E26, #14141A)",
+                cursor: "pointer",
+                boxShadow: showRibbonHov ? "0 0 12px rgba(209,213,219,0.12)" : "none",
+                transition: "box-shadow 0.2s, border-color 0.2s",
+                minHeight: "32px",
+              }}
+            >
+              {/* Slanted label — gray-glow bg with light text */}
+              <div style={{
+                background: getPalette("gray","glow").bg,
+                color: getPalette("gray","glow").text,
+                fontSize: "10px", fontWeight: 900,
+                letterSpacing: "0.1em", textTransform: "uppercase",
+                padding: "0 24px 0 12px",
+                clipPath: "polygon(0 0, 100% 0, 88% 100%, 0% 100%)",
+                display: "flex", alignItems: "center",
+                whiteSpace: "nowrap", flexShrink: 0,
               }}>
-                {lastUpdate ? lastUpdate.text : "No updates yet — click to add one"}
-              </span>
-              {lastUpdate && (
-                <span style={{ fontSize: "11px", color: "#55555e", whiteSpace: "nowrap", flexShrink: 0 }}>
-                  {formatShortDate(lastUpdate.timestamp)}
+                Last Update
+              </div>
+              {/* Text + date */}
+              <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "8px", padding: "6px 10px", minWidth: 0 }}>
+                <span style={{
+                  flex: 1, fontSize: "12px",
+                  color: lastUpdate ? "#c8c8d0" : "#55555e",
+                  fontStyle: lastUpdate ? "normal" : "italic",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                }}>
+                  {lastUpdate ? lastUpdate.text : "No updates yet — click to add one"}
                 </span>
-              )}
+                {lastUpdate && (
+                  <span style={{ fontSize: "11px", color: "#55555e", whiteSpace: "nowrap", flexShrink: 0 }}>
+                    {formatShortDate(lastUpdate.timestamp)}
+                  </span>
+                )}
+              </div>
             </div>
             {showPopover && (
               <UpdatePopover
