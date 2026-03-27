@@ -75,13 +75,12 @@ function DockCell({ value, placeholder, colorKey, onClick, refProp, style: extra
   const rgb    = hexToRgb(p.text);
   const hasVal = !!value;
 
-  // Empty cells use the same gray palette but italic text — italic is a
-  // universally understood "placeholder/unset" signal without hurting readability.
-  const barBg    = hov ? `rgba(${rgb}, 1)`    : `rgba(${rgb}, 0.55)`;
-  const barGlow  = hov ? `0 0 12px rgba(${rgb}, 0.8)` : `0 0 4px rgba(${rgb}, 0.3)`;
-  const cellBg   = hov ? `rgba(${rgb}, 0.22)` : `rgba(${rgb}, 0.13)`;
-  const textColor = hov ? `rgba(${rgb}, 1)`   : `rgba(${rgb}, 0.8)`;
-  const textGlow  = hov ? `0 0 10px rgba(${rgb}, 0.5)` : "none";
+  const barBg    = hasVal ? (hov ? `rgba(${rgb}, 1)`    : `rgba(${rgb}, 0.55)`) : "transparent";
+  const barGlow  = hasVal ? (hov ? `0 0 12px rgba(${rgb}, 0.8)` : `0 0 4px rgba(${rgb}, 0.3)`) : "none";
+  const cellBg   = hasVal ? (hov ? `rgba(${rgb}, 0.22)` : `rgba(${rgb}, 0.13)`) : (hov ? "#222226" : "#1e1e22");
+  const textColor = hasVal ? (hov ? `rgba(${rgb}, 1)` : `rgba(${rgb}, 0.8)`) : "#555560";
+  const textGlow  = hasVal && hov ? `0 0 10px rgba(${rgb}, 0.5)` : "none";
+  const textWeight = hasVal ? 900 : 400;
 
   return (
     <div
@@ -120,13 +119,12 @@ function DockCell({ value, placeholder, colorKey, onClick, refProp, style: extra
         }}
       >
         <span style={{
-          fontSize: "9px", fontWeight: 900, letterSpacing: "0.8px",
+          fontSize: "9px", fontWeight: textWeight, letterSpacing: "0.8px",
           textTransform: "uppercase", whiteSpace: "nowrap",
           overflow: "hidden", textOverflow: "ellipsis",
           maxWidth: `${CELL_W - 10}px`,
           color: textColor,
           textShadow: textGlow,
-          fontStyle: hasVal ? "normal" : "italic",
           transition: "color 0.2s ease, text-shadow 0.2s ease",
           userSelect: "none",
         }}>
