@@ -451,7 +451,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
           {/* Title + Project badge */}
           <div
             onClick={() => onEdit(task)}
-            style={{ display: "flex", alignItems: "flex-start", gap: "8px", flexWrap: "wrap", cursor: "pointer" }}
+            style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", cursor: "pointer" }}
           >
             <span style={{ fontSize: "16px", fontWeight: 700, color: "#f0f0f0", lineHeight: 1.3 }}>
               {task.title}
@@ -463,7 +463,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
                 border: "1px solid rgba(255,255,255,0.07)",
                 padding: "4px 10px 4px 6px",
                 borderRadius: "2px",
-                whiteSpace: "nowrap", flexShrink: 0, marginTop: "2px",
+                whiteSpace: "nowrap", flexShrink: 0,
               }}>
                 {/* Colored neon bar */}
                 <span style={{
