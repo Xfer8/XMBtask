@@ -75,7 +75,7 @@ export function exportToXlsx(projects, tasks) {
       taskId:  t.id,
       id:      l.id ?? "",
       url:     l.url ?? "",
-      display: l.display ?? "",
+      display: l.displayName ?? "",
       type:    l.type ?? "",
     }))
   );
@@ -141,7 +141,7 @@ export function importFromXlsx(file) {
             images:   [],
             updates:  updateRows .filter(u => String(u.taskId) === id).map(u => ({ text: u.text ?? "", createdAt: u.createdAt ?? "" })),
             subtasks: subtaskRows.filter(s => String(s.taskId) === id).map(s => ({ id: String(s.id ?? ""), title: s.title ?? "", status: s.status ?? "open", url: s.url ?? "", urlDisplay: s.urlDisplay ?? "" })),
-            links:    linkRows   .filter(l => String(l.taskId) === id).map(l => ({ id: String(l.id ?? ""), url: l.url ?? "", display: l.display ?? "", type: l.type ?? "" })),
+            links:    linkRows   .filter(l => String(l.taskId) === id).map(l => ({ id: String(l.id ?? ""), url: l.url ?? "", displayName: l.display ?? "", type: l.type ?? "" })),
           };
         });
 
