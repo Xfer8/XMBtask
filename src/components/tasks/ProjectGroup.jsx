@@ -115,8 +115,8 @@ export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProj
         display:       "flex",
         alignItems:    "center",
         gap:           "10px",
-        marginBottom:  "12px",
-        paddingBottom: "10px",
+        marginBottom:  "8px",
+        paddingBottom: "6px",
         flexWrap:      "wrap",
       }}>
         {/* Color dot */}

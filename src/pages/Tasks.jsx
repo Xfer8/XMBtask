@@ -201,7 +201,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
         {viewMode === "by-project" ? (
 
           // ── By Project view ────────────────────────────────────────────────
-          <div style={{ display:"flex", flexDirection:"column", gap:"28px" }}>
+          <div style={{ display:"flex", flexDirection:"column", gap:"40px" }}>
             {activeProjects.map(project => {
               const projectTasks = filteredTasks.filter(t => t.projectId === project.id);
               if (projectTasks.length === 0) return null;
