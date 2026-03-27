@@ -18,10 +18,13 @@
   box-sizing: border-box;
 }
 
+html {
+  overflow-y: scroll; /* always reserve scrollbar track — prevents layout shift */
+}
+
 body {
   margin: 0;
   background: #212121;
-  scrollbar-gutter: stable;
 }
 
 /* ─── View-switch slide animations ───────────────────────────────────────── */
