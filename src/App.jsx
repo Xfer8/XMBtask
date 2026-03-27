@@ -153,26 +153,30 @@ export default function App() {
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", backgroundColor: "#212121" }}>
 
-      {/* Floating header */}
+      {/* Floating header — outer wrapper matches page content column (720px, 20px padding) */}
       <div style={{
-        maxWidth:    "720px",
+        width:      "100%",
+        maxWidth:   "720px",
+        margin:     "20px auto 0",
+        padding:    "0 20px",
+        boxSizing:  "border-box",
+        position:   "sticky",
+        top:        "20px",
+        zIndex:     100,
+      }}>
+      {/* Inner floating pill fills the padded column, matching task card width */}
+      <div style={{
         width:       "100%",
-        margin:      "20px auto 0",
         background:  "#222228",
         height:      "48px",
-        display:     "flex",
+        display:     "grid",
+        gridTemplateColumns: "1fr auto 1fr",
         alignItems:  "center",
         padding:     "0 20px",
         borderRadius:"6px",
         border:      "1px solid rgba(255,255,255,0.05)",
         boxShadow:   "0 10px 40px rgba(0,0,0,0.5)",
         boxSizing:   "border-box",
-        position:    "sticky",
-        top:         "20px",
-        zIndex:      100,
-        // Centering trick: left/right sections are equal width so nav stays perfectly centered
-        display:     "grid",
-        gridTemplateColumns: "1fr auto 1fr",
       }}>
         {/* Logo — left */}
         <div style={{ display:"flex", alignItems:"center", fontSize:"18px", fontWeight:700, letterSpacing:"-0.3px" }}>
@@ -189,6 +193,7 @@ export default function App() {
         <div style={{ display:"flex", alignItems:"center", justifyContent:"flex-end" }}>
           <SettingsMenu onImport={handleImport} onExport={handleExport} />
         </div>
+      </div>
       </div>
 
       {/* Page content */}
