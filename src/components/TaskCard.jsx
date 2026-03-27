@@ -22,13 +22,12 @@ const getDueDateColorKey = (iso) => {
   return "green";
 };
 
-// Convert a hex color string (#RRGGBB) to "r, g, b" for use in rgba()
 const hexToRgb = (hex) => {
   if (!hex || !hex.startsWith("#") || hex.length < 7) return "136, 136, 144";
   return [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)).join(", ");
 };
 
-// ── MetaDropdown — shared dropdown list ───────────────────────────────────────
+// ── MetaDropdown ───────────────────────────────────────────────────────────────
 
 function MetaDropdown({ options, selected, getColorKey, onSelect }) {
   return (
@@ -61,78 +60,78 @@ function MetaDropdown({ options, selected, getColorKey, onSelect }) {
   );
 }
 
-// ── DockCell — one integrated cell in the slim data dock ──────────────────────
-// Inspired by the "slim-data-dock" pattern:
-//   - Persistent low-opacity color tint on bg + text at rest
-//   - Full-color text + brighter bg + glowing top bar on hover
-//   - Top glow bar is always faintly visible, becomes vivid on hover
+// ── HeaderBadge ────────────────────────────────────────────────────────────────
+// Fixed 120 × 52 px badge integrated flush into the card header.
+// Top row: small uppercase label ("STATUS", "PRIORITY", "DUE").
+// Bottom row: value, dynamically color-tinted.
+// Hover: brighter background + full-opacity text + soft glow.
 
-const CELL_W = 85; // px — all three cells identical
+const BADGE_W = 120;
+const HEADER_H = 52;
 
-function DockCell({ value, placeholder, colorKey, onClick, refProp, style: extraStyle, children }) {
+function HeaderBadge({ label, value, placeholder, colorKey, onClick, refProp, children }) {
   const [hov, setHov] = useState(false);
   const p      = getPalette(colorKey);
   const rgb    = hexToRgb(p.text);
   const hasVal = !!value;
 
-  const barBg    = hasVal ? (hov ? `rgba(${rgb}, 1)`    : `rgba(${rgb}, 0.55)`) : "transparent";
-  const barGlow  = hasVal ? (hov ? `0 0 12px rgba(${rgb}, 0.8)` : `0 0 4px rgba(${rgb}, 0.3)`) : "none";
-  const cellBg   = hasVal ? (hov ? `rgba(${rgb}, 0.22)` : `rgba(${rgb}, 0.13)`) : (hov ? "#222226" : "#1e1e22");
-  const textColor = hasVal ? (hov ? `rgba(${rgb}, 1)` : `rgba(${rgb}, 0.8)`) : "#555560";
-  const textGlow  = hasVal && hov ? `0 0 10px rgba(${rgb}, 0.5)` : "none";
-  const textWeight = hasVal ? 900 : 400;
-
   return (
-    <div
-      ref={refProp}
-      style={{
-        position: "relative",
-        borderLeft: "1px solid rgba(255,255,255,0.03)",
-        ...extraStyle,
-      }}
-    >
-      {/* Top glow bar */}
-      <div
-        style={{
-          position: "absolute", top: 0, left: 0, right: 0, height: "2px",
-          borderTopRightRadius: extraStyle?.borderTopRightRadius,
-          background: barBg,
-          boxShadow: barGlow,
-          transition: "background 0.2s ease, box-shadow 0.2s ease",
-          pointerEvents: "none",
-          zIndex: 1,
-        }}
-      />
-
-      {/* Clickable cell body */}
+    <div ref={refProp} style={{ position: "relative" }}>
       <div
         onMouseEnter={() => setHov(true)}
         onMouseLeave={() => setHov(false)}
         onClick={onClick}
         style={{
-          width: `${CELL_W}px`, height: "30px",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer",
-          borderTopRightRadius: extraStyle?.borderTopRightRadius,
-          background: cellBg,
+          width:          `${BADGE_W}px`,
+          height:         `${HEADER_H}px`,
+          display:        "flex",
+          flexDirection:  "column",
+          justifyContent: "center",
+          alignItems:     "center",
+          borderLeft:     "1px solid #3d3d3d",
+          cursor:         "pointer",
+          background: hov
+            ? `rgba(${rgb}, 0.25)`
+            : hasVal ? `rgba(${rgb}, 0.08)` : "rgba(80,80,90,0.04)",
           transition: "background 0.2s ease",
         }}
       >
+        {/* Label row */}
         <span style={{
-          fontSize: "9px", fontWeight: textWeight, letterSpacing: "0.8px",
-          textTransform: "uppercase", whiteSpace: "nowrap",
-          overflow: "hidden", textOverflow: "ellipsis",
-          maxWidth: `${CELL_W - 10}px`,
-          color: textColor,
-          textShadow: textGlow,
-          transition: "color 0.2s ease, text-shadow 0.2s ease",
-          userSelect: "none",
+          fontSize:      "8.5px",
+          fontWeight:    900,
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          marginBottom:  "3px",
+          color:         hasVal ? `rgba(${rgb}, 0.6)` : "#3a3a44",
+          userSelect:    "none",
         }}>
-          {value || placeholder}
+          {label}
+        </span>
+
+        {/* Value row */}
+        <span style={{
+          fontSize:      "11px",
+          fontWeight:    800,
+          letterSpacing: "0.04em",
+          textTransform: "uppercase",
+          whiteSpace:    "nowrap",
+          overflow:      "hidden",
+          textOverflow:  "ellipsis",
+          maxWidth:      `${BADGE_W - 12}px`,
+          textAlign:     "center",
+          color: hov
+            ? `rgba(${rgb}, 1)`
+            : hasVal ? `rgba(${rgb}, 0.85)` : "#3a3a44",
+          textShadow:  hov && hasVal ? `0 0 8px rgba(${rgb}, 0.5)` : "none",
+          transition:  "color 0.2s ease, text-shadow 0.2s ease",
+          userSelect:  "none",
+        }}>
+          {hasVal ? value : placeholder}
         </span>
       </div>
 
-      {/* Dropdown / picker portal */}
+      {/* Dropdown / date picker portal */}
       {children}
     </div>
   );
@@ -154,8 +153,8 @@ function StatusCell({ status, colorKey, onChange }) {
   }, [open]);
 
   return (
-    <DockCell
-      value={status} placeholder="Status"
+    <HeaderBadge
+      label="Status" value={status} placeholder="—"
       colorKey={colorKey}
       onClick={e => { e.stopPropagation(); setOpen(v => !v); }}
       refProp={ref}
@@ -167,7 +166,7 @@ function StatusCell({ status, colorKey, onChange }) {
           onSelect={opt => { onChange(opt); setOpen(false); }}
         />
       )}
-    </DockCell>
+    </HeaderBadge>
   );
 }
 
@@ -187,8 +186,8 @@ function PriorityCell({ priority, colorKey, onChange }) {
   }, [open]);
 
   return (
-    <DockCell
-      value={priority} placeholder="Priority"
+    <HeaderBadge
+      label="Priority" value={priority} placeholder="—"
       colorKey={colorKey}
       onClick={e => { e.stopPropagation(); setOpen(v => !v); }}
       refProp={ref}
@@ -200,7 +199,7 @@ function PriorityCell({ priority, colorKey, onChange }) {
           onSelect={opt => { onChange(opt); setOpen(false); }}
         />
       )}
-    </DockCell>
+    </HeaderBadge>
   );
 }
 
@@ -226,8 +225,8 @@ function DueDateCell({ dueDate, colorKey, onChange }) {
   }, [open]);
 
   return (
-    <DockCell
-      value={formatShortDate(dueDate)} placeholder="Due Date"
+    <HeaderBadge
+      label="Due" value={formatShortDate(dueDate)} placeholder="—"
       colorKey={colorKey}
       onClick={e => { e.stopPropagation(); setOpen(v => !v); }}
       refProp={ref}
@@ -270,11 +269,11 @@ function DueDateCell({ dueDate, colorKey, onChange }) {
           )}
         </div>
       )}
-    </DockCell>
+    </HeaderBadge>
   );
 }
 
-// ── UpdatePopover ─────────────────────────────────────────────────────────────
+// ── UpdatePopover ──────────────────────────────────────────────────────────────
 
 function UpdatePopover({ updates = [], onAdd, onClose }) {
   const [text, setText] = useState("");
@@ -367,7 +366,7 @@ function UpdatePopover({ updates = [], onAdd, onClose }) {
   );
 }
 
-// ── TaskCard ──────────────────────────────────────────────────────────────────
+// ── TaskCard ───────────────────────────────────────────────────────────────────
 
 export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
   const [showPopover, setShowPopover] = useState(false);
@@ -376,18 +375,16 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
   const project    = projects.find(p => p.id === task.projectId);
   const projectPal = project ? getPalette(project.color) : null;
 
-  // Use "gray" as the colorKey when no value is set so empty cells look neutral
-  const statusColorKey   = task.status   ? (STATUS_COLORS[task.status]     ?? "gray") : "gray";
-  const priorityColorKey = task.priority ? (PRIORITY_COLORS[task.priority]  ?? "gray") : "gray";
-  const dueDateColorKey  = task.dueDate  ? getDueDateColorKey(task.dueDate)            : "gray";
+  const statusColorKey   = task.status   ? (STATUS_COLORS[task.status]    ?? "gray") : "gray";
+  const priorityColorKey = task.priority ? (PRIORITY_COLORS[task.priority] ?? "gray") : "gray";
+  const dueDateColorKey  = task.dueDate  ? getDueDateColorKey(task.dueDate)           : "gray";
 
   const subtasks = task.subtasks ?? [];
   const updates  = task.updates  ?? [];
   const links    = task.links    ?? [];
   const images   = task.images   ?? [];
 
-  const doneCount = subtasks.filter(s => s.status === "complete").length;
-
+  const doneCount  = subtasks.filter(s => s.status === "complete").length;
   const lastUpdate = updates.length > 0
     ? [...updates].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0]
     : null;
@@ -398,107 +395,94 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
     )});
   };
 
-  // Notch dimensions — must match CELL_W × 3 cells, CELL_H = 30px
-  const NOTCH_W = 3 * CELL_W;  // 255px
-  const NOTCH_H = 30;           // dock cell height
+  // Project tag: "XMB-P001 – PROJECT TITLE"
+  const projectLabel = project
+    ? `${project.id} – ${project.title.toUpperCase()}`
+    : null;
 
   return (
     <>
-      <div
-        style={{
-          position: "relative",
-          background: "#2a2a2a",
-          border: "1px solid #444450",
-          borderRadius: "10px",
-        }}
-      >
-        {/*
-          ── Notch mask ──────────────────────────────────────────────────────────
-          Covers the card's own border (top + right + corner arc) in the notch
-          region by painting the page background color over it. This "erases"
-          those border segments so only the notch walls drawn below are visible.
-          top/right: -1px to extend 1px into the card border.
-          borderTopRightRadius matches the card's corner arc.
-        */}
-        <div style={{
-          position: "absolute", top: -1, right: -1, zIndex: 2, pointerEvents: "none",
-          width: NOTCH_W + 1, height: NOTCH_H + 1,
-          background: "#212121",
-          borderTopRightRadius: "10px",
-        }} />
+      <div style={{
+        background:   "#2a2a2a",
+        border:       "1px solid #3d3d3d",
+        borderRadius: "12px",
+        boxShadow:    "0 4px 16px rgba(0,0,0,0.3)",
+      }}>
 
-        {/*
-          ── Notch walls ─────────────────────────────────────────────────────────
-          Draws the two interior walls of the notch:
-            • borderLeft  = vertical line down the notch's left edge
-            • borderBottom = horizontal line along the notch's bottom
-        */}
+        {/* ── Card header ───────────────────────────────────────────────────── */}
         <div style={{
-          position: "absolute", top: -1, right: -1, zIndex: 3, pointerEvents: "none",
-          width: NOTCH_W + 1, height: NOTCH_H + 1,
-          borderLeft: "1px solid #444450",
-          borderBottom: "1px solid #444450",
-        }} />
-
-        {/* ── Dock cells: sit inside the notch ──────────────────────────────── */}
-        <div style={{
-          position: "absolute", top: 0, right: 0, zIndex: 4,
-          display: "flex",
+          display:      "flex",
+          alignItems:   "stretch",
+          height:       `${HEADER_H}px`,
+          borderBottom: "1px solid #3d3d3d",
         }}>
-          <StatusCell
-            status={task.status}
-            colorKey={statusColorKey}
-            onChange={val => onUpdate?.({ ...task, status: val })}
-          />
-          <PriorityCell
-            priority={task.priority}
-            colorKey={priorityColorKey}
-            onChange={val => onUpdate?.({ ...task, priority: val })}
-          />
-          <DueDateCell
-            dueDate={task.dueDate}
-            colorKey={dueDateColorKey}
-            onChange={val => onUpdate?.({ ...task, dueDate: val })}
-          />
-        </div>
 
-        {/* ── Title + project tag ────────────────────────────────────────────── */}
-        {/* paddingRight reserves space so title text doesn't run under the dock */}
-        <div
-          onClick={() => onEdit(task)}
-          style={{
-            padding: `14px ${NOTCH_W + 16}px 12px 16px`,
-            display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap",
-            cursor: "pointer", minWidth: 0,
-          }}
-        >
-          <span style={{ fontSize: "16px", fontWeight: 700, color: "#f0f0f0", lineHeight: 1.3 }}>
-            {task.title}
-          </span>
-          {project && (
-            <span style={{
-              display: "inline-flex", alignItems: "center",
-              padding: "2px 8px 2px 5px",
-              borderRadius: "2px", whiteSpace: "nowrap", flexShrink: 0,
-            }}>
+          {/* Title + project tag */}
+          <div
+            onClick={() => onEdit(task)}
+            style={{
+              flex:       1,
+              minWidth:   0,
+              display:    "flex",
+              alignItems: "center",
+              padding:    "0 20px",
+              cursor:     "pointer",
+              overflow:   "hidden",
+            }}
+          >
+            <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0 }}>
               <span style={{
-                width: "4px", height: "16px",
-                background: projectPal.text,
-                borderRadius: "2px", marginRight: "7px", flexShrink: 0,
-              }} />
-              <span style={{
-                fontSize: "10px", fontWeight: 900,
-                textTransform: "uppercase", letterSpacing: "1px",
-                color: projectPal.text, lineHeight: 1,
+                fontSize:     "15px",
+                fontWeight:   700,
+                color:        "#f0f0f0",
+                whiteSpace:   "nowrap",
+                overflow:     "hidden",
+                textOverflow: "ellipsis",
+                lineHeight:   1.2,
               }}>
-                {project.title}
+                {task.title}
               </span>
-            </span>
-          )}
+              {projectLabel && (
+                <span style={{
+                  fontSize:      "10px",
+                  fontWeight:    800,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  color:         projectPal.text,
+                  marginTop:     "3px",
+                  whiteSpace:    "nowrap",
+                  overflow:      "hidden",
+                  textOverflow:  "ellipsis",
+                  lineHeight:    1.2,
+                }}>
+                  {projectLabel}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Badge group */}
+          <div style={{ display: "flex", flexShrink: 0 }}>
+            <StatusCell
+              status={task.status}
+              colorKey={statusColorKey}
+              onChange={val => onUpdate?.({ ...task, status: val })}
+            />
+            <PriorityCell
+              priority={task.priority}
+              colorKey={priorityColorKey}
+              onChange={val => onUpdate?.({ ...task, priority: val })}
+            />
+            <DueDateCell
+              dueDate={task.dueDate}
+              colorKey={dueDateColorKey}
+              onChange={val => onUpdate?.({ ...task, dueDate: val })}
+            />
+          </div>
         </div>
 
-        {/* ── Card body ──────────────────────────────────────────────────────── */}
-        <div style={{ padding: "0 16px 12px", display: "flex", flexDirection: "column", gap: "10px" }}>
+        {/* ── Card body ─────────────────────────────────────────────────────── */}
+        <div style={{ padding: "12px 20px 14px", display: "flex", flexDirection: "column", gap: "10px" }}>
 
           {/* Link badges */}
           {links.length > 0 && (
@@ -524,7 +508,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
             <div
               onClick={() => onEdit(task)}
               style={{
-                fontSize: "12px", color: "#c8c8d0", lineHeight: 1.5,
+                fontSize: "12px", color: "#b0b0b0", lineHeight: 1.6,
                 overflow: "hidden", display: "-webkit-box",
                 WebkitLineClamp: 4, WebkitBoxOrient: "vertical",
                 cursor: "pointer",
@@ -579,16 +563,16 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
                 borderRadius: "2px", marginRight: "12px",
               }} />
               <div style={{ display: "flex", flexDirection: "column", gap: "1px", flexShrink: 0, marginRight: "12px" }}>
-                <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#AAA" }}>
+                <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#888" }}>
                   Last Update
                 </span>
-                <span style={{ fontSize: "10px", fontWeight: 600, color: "#777" }}>
+                <span style={{ fontSize: "10px", fontWeight: 600, color: "#666" }}>
                   {lastUpdate ? formatShortDate(lastUpdate.timestamp) : "—"}
                 </span>
               </div>
               <span style={{
                 flex: 1, fontSize: "12px", lineHeight: 1.4, minWidth: 0,
-                color: "#777", fontStyle: "italic",
+                color: "#666", fontStyle: "italic",
                 overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
               }}>
                 {lastUpdate ? lastUpdate.text : "No updates yet — click to add one"}
@@ -660,7 +644,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
           )}
 
         </div>
-      </div>{/* end card */}
+      </div>
 
       {/* Image viewer modal */}
       {viewerIndex !== null && (
