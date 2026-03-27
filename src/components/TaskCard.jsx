@@ -83,7 +83,7 @@ function StatusBadge({ status, colorKey, onChange }) {
         <div
           onClick={e => e.stopPropagation()}
           style={{
-            position: "absolute", left: 0, top: "calc(100% + 4px)", zIndex: 400,
+            position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 400,
             background: "#2a2a2e", border: "1px solid #3a3a44",
             borderRadius: "8px", padding: "4px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
@@ -100,16 +100,16 @@ function StatusBadge({ status, colorKey, onChange }) {
                 style={{
                   padding: "5px 8px", borderRadius: "5px", cursor: "pointer",
                   background: selected ? "#3a3a44" : "transparent",
-                  display: "flex", alignItems: "center", gap: "8px",
+                  display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px",
                   transition: "background 0.1s",
                 }}
               >
+                {selected && (
+                  <span style={{ fontSize: "12px", color: "#55555e" }}>✓</span>
+                )}
                 <span style={{ ...BADGE, background: optP.bg, color: optP.text, border: `1px solid ${optP.bg}` }}>
                   {opt}
                 </span>
-                {selected && (
-                  <span style={{ fontSize: "12px", color: "#55555e", marginLeft: "auto" }}>✓</span>
-                )}
               </div>
             );
           })}
@@ -176,16 +176,16 @@ function PriorityBadge({ priority, colorKey, onChange }) {
                 style={{
                   padding: "5px 8px", borderRadius: "5px", cursor: "pointer",
                   background: selected ? "#3a3a44" : "transparent",
-                  display: "flex", alignItems: "center", gap: "8px",
+                  display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px",
                   transition: "background 0.1s",
                 }}
               >
+                {selected && (
+                  <span style={{ fontSize: "12px", color: "#55555e" }}>✓</span>
+                )}
                 <span style={{ ...BADGE, background: optP.bg, color: optP.text, border: `1px solid ${optP.bg}` }}>
                   {opt}
                 </span>
-                {selected && (
-                  <span style={{ fontSize: "12px", color: "#55555e", marginLeft: "auto" }}>✓</span>
-                )}
               </div>
             );
           })}
