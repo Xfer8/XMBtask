@@ -1,16 +1,15 @@
-import { useState } from "react";
 import { getPalette } from "../../colors";
 
 // ── BarSegment ─────────────────────────────────────────────────────────────────
 // One proportional slice of the project bar.
-// flex value = task count, so segments are automatically proportional.
+// Uses flex to fill its wrapper div.
 
 function BarSegment({ project, isActive, anyActive, onClick }) {
   const pal = getPalette(project.color);
 
-  // No filter active → all segments at default (mid) brightness
-  // Filter active    → selected = full bright, others = dim
-  const opacity = anyActive ? (isActive ? 1 : 0.45) : 0.75;
+  // No filter active → all at comfortable default brightness (0.75)
+  // Filter active    → selected = full bright (1.0), others = dim (0.45)
+  const opacity = anyActive ? (isActive ? 1.0 : 0.45) : 0.75;
 
   return (
     <div
@@ -18,7 +17,6 @@ function BarSegment({ project, isActive, anyActive, onClick }) {
       title={project.title}
       style={{
         flex:       1,
-        height:     "100%",
         background: pal.text,
         opacity,
         cursor:     "pointer",
@@ -29,18 +27,15 @@ function BarSegment({ project, isActive, anyActive, onClick }) {
 }
 
 // ── LegendItem ─────────────────────────────────────────────────────────────────
-// One row in the legend strip below the bar.
-// Active state gets a colored border + tinted background.
+// One entry in the legend strip.
+// The dot sits outside the highlight box; only name+(count) gets the border/bg.
 
 function LegendItem({ project, count, isActive, onClick }) {
-  const [hov, setHov] = useState(false);
   const pal = getPalette(project.color);
 
   return (
     <div
       onClick={onClick}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
       style={{
         display:    "flex",
         alignItems: "center",
@@ -60,17 +55,17 @@ function LegendItem({ project, count, isActive, onClick }) {
         transition:   "opacity 0.15s",
       }} />
 
-      {/* Name + count — this is the part that gets the highlight box */}
+      {/* Name (count) — this is the part that gets the highlight box */}
       <span style={{
         fontSize:     "11px",
         fontWeight:   600,
         color:        isActive ? pal.text : "#888890",
         transition:   "color 0.15s, background 0.15s, border-color 0.15s",
         whiteSpace:   "nowrap",
-        padding:      "2px 8px",
-        borderRadius: "6px",
+        padding:      "2px 6px",
+        borderRadius: "5px",
         border:       isActive ? `1px solid ${pal.border}` : `1px solid transparent`,
-        background:   isActive ? pal.bg : hov ? "rgba(255,255,255,0.04)" : "transparent",
+        background:   isActive ? pal.bg : "transparent",
       }}>
         {project.title} ({count})
       </span>
@@ -81,15 +76,8 @@ function LegendItem({ project, count, isActive, onClick }) {
 // ── ProjectBar ─────────────────────────────────────────────────────────────────
 // Full-width proportional bar + legend showing non-done tasks per project.
 // Only renders if at least one active project has open tasks.
-//
-// Props:
-//   tasks           — full task list
-//   projects        — full project list
-//   activeProjectId — currently selected project id (null = no filter)
-//   onSelect        — called with project id to select, or null to clear
 
 export default function ProjectBar({ tasks, projects, activeProjectId, onSelect }) {
-  // Count non-done tasks per active project
   const openTasks = tasks.filter(t => t.status !== "Done");
 
   const entries = projects
@@ -100,7 +88,6 @@ export default function ProjectBar({ tasks, projects, activeProjectId, onSelect 
     }))
     .filter(e => e.count > 0);
 
-  // Nothing to show
   if (entries.length === 0) return null;
 
   const toggle = (id) => onSelect(activeProjectId === id ? null : id);
@@ -111,17 +98,19 @@ export default function ProjectBar({ tasks, projects, activeProjectId, onSelect 
       {/* ── Proportional bar ──────────────────────────────────────────────── */}
       <div style={{
         display:      "flex",
+        alignItems:   "stretch",
         height:       "20px",
         borderRadius: "6px",
         overflow:     "hidden",
         gap:          "2px",
-        background:   "#1a1a1e", // gap color between segments
+        background:   "#1a1a1e",
+        // Force GPU compositing to prevent sub-pixel border-radius artifact
+        transform:    "translateZ(0)",
       }}>
         {entries.map(({ project, count }) => (
-          // Wrap in a flex-proportional div so BarSegment fills it
           <div
             key={project.id}
-            style={{ flex: count, minWidth: "4px" }}
+            style={{ flex: count, minWidth: "4px", display: "flex" }}
           >
             <BarSegment
               project={project}

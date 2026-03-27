@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import TaskCard     from "../components/TaskCard";
 import TaskModal    from "../components/tasks/TaskModal";
 import ProjectGroup from "../components/tasks/ProjectGroup";
@@ -34,15 +34,16 @@ function ToggleSegment({ label, active, onClick }) {
       style={{
         background:  active ? "#4ADE80" : "transparent",
         border:      "none",
-        borderRadius:"6px",
+        borderRadius:"3px",
         cursor:      "pointer",
         color:       active ? "#0E3F24" : "#888890",
         fontSize:    "12px",
         fontWeight:  active ? 700 : 500,
-        padding:     "5px 14px",
+        padding:     "0 14px",
         fontFamily:  "inherit",
         transition:  "background 0.15s, color 0.15s",
         whiteSpace:  "nowrap",
+        alignSelf:   "stretch",
       }}
     >
       {label}
@@ -56,6 +57,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
   const [editing,         setEditing]         = useState(null);
   const [search,          setSearch]          = useState("");
   const [viewMode,        setViewMode]        = useState("by-project"); // "by-project" | "all-tasks"
+  const [slideDir,        setSlideDir]        = useState("right");
   const [activeProjectId, setActiveProjectId] = useState(null);
 
   // ── Open handlers ──────────────────────────────────────────────────────────
@@ -115,7 +117,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
       />
 
       {/* ── Toolbar ─────────────────────────────────────────────────────────── */}
-      <div style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"24px" }}>
+      <div style={{ display:"flex", alignItems:"stretch", gap:"10px", marginBottom:"24px" }}>
 
         {/* New Task button */}
         <button
@@ -123,12 +125,13 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
           style={{
             background:   "#4ADE80",
             border:       "none",
-            borderRadius: "7px",
+            borderRadius: "5px",
             cursor:       "pointer",
             color:        "#0E3F24",
             fontSize:     "13px",
             fontWeight:   600,
-            padding:      "7px 16px",
+            padding:      "0 16px",
+            height:       "34px",
             fontFamily:   "inherit",
             whiteSpace:   "nowrap",
             flexShrink:   0,
@@ -138,112 +141,124 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
         </button>
 
         {/* Search input */}
-        <div style={{ flex: 1 }}>
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search..."
-            style={{
-              width:        "100%",
-              boxSizing:    "border-box",
-              background:   "#1e1e1e",
-              border:       "1px solid #3a3a3a",
-              borderRadius: "7px",
-              color:        "#f0f0f0",
-              fontSize:     "13px",
-              padding:      "7px 12px",
-              fontFamily:   "inherit",
-              outline:      "none",
-            }}
-          />
-        </div>
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search..."
+          style={{
+            flex:         1,
+            background:   "#1e1e1e",
+            border:       "1px solid #3a3a3a",
+            borderRadius: "5px",
+            color:        "#f0f0f0",
+            fontSize:     "13px",
+            padding:      "0 12px",
+            height:       "34px",
+            fontFamily:   "inherit",
+            outline:      "none",
+          }}
+        />
 
         {/* View toggle */}
         <div style={{
           display:      "flex",
-          alignItems:   "center",
+          alignItems:   "stretch",
           background:   "#1e1e1e",
           border:       "1px solid #3a3a3a",
-          borderRadius: "8px",
-          padding:      "2px",
-          gap:          "2px",
+          borderRadius: "5px",
+          padding:      "3px",
+          gap:          0,
           flexShrink:   0,
+          height:       "34px",
+          boxSizing:    "border-box",
         }}>
           <ToggleSegment
             label="By Project"
             active={viewMode === "by-project"}
-            onClick={() => setViewMode("by-project")}
+            onClick={() => { setSlideDir("left"); setViewMode("by-project"); }}
           />
+          {/* Vertical divider */}
+          <div style={{
+            width:        "1px",
+            background:   "#3a3a3a",
+            alignSelf:    "stretch",
+            margin:       "2px 0",
+            flexShrink:   0,
+          }} />
           <ToggleSegment
             label="All Tasks"
             active={viewMode === "all-tasks"}
-            onClick={() => { setViewMode("all-tasks"); setActiveProjectId(null); }}
+            onClick={() => { setSlideDir("right"); setViewMode("all-tasks"); setActiveProjectId(null); }}
           />
         </div>
       </div>
 
       {/* ── Content ─────────────────────────────────────────────────────────── */}
-      {viewMode === "by-project" ? (
+      <div
+        key={viewMode}
+        className={slideDir === "right" ? "slide-from-right" : "slide-from-left"}
+      >
+        {viewMode === "by-project" ? (
 
-        // ── By Project view ──────────────────────────────────────────────────
-        <div style={{ display:"flex", flexDirection:"column", gap:"28px" }}>
-          {activeProjects.map(project => {
-            const projectTasks = filteredTasks.filter(t => t.projectId === project.id);
-            // Hide projects with no tasks (unless searching, show empties so user knows)
-            if (projectTasks.length === 0) return null;
-            return (
+          // ── By Project view ────────────────────────────────────────────────
+          <div style={{ display:"flex", flexDirection:"column", gap:"28px" }}>
+            {activeProjects.map(project => {
+              const projectTasks = filteredTasks.filter(t => t.projectId === project.id);
+              if (projectTasks.length === 0) return null;
+              return (
+                <ProjectGroup
+                  key={project.id}
+                  project={project}
+                  tasks={projectTasks}
+                  onEdit={openEdit}
+                  onUpdate={onUpdate}
+                  allProjects={projects}
+                />
+              );
+            })}
+
+            {/* Uncategorized tasks */}
+            {uncategorized.length > 0 && (
               <ProjectGroup
-                key={project.id}
-                project={project}
-                tasks={projectTasks}
+                key="uncategorized"
+                project={null}
+                tasks={uncategorized}
                 onEdit={openEdit}
                 onUpdate={onUpdate}
                 allProjects={projects}
               />
-            );
-          })}
+            )}
 
-          {/* Uncategorized tasks */}
-          {uncategorized.length > 0 && (
-            <ProjectGroup
-              key="uncategorized"
-              project={null}
-              tasks={uncategorized}
-              onEdit={openEdit}
-              onUpdate={onUpdate}
-              allProjects={projects}
-            />
-          )}
+            {/* Empty state */}
+            {filteredTasks.length === 0 && (
+              <div style={{ fontSize:"13px", color:"#55555e", textAlign:"center", padding:"40px 0" }}>
+                {q ? "No tasks match your search." : "No tasks yet — click \"New Task\" to get started."}
+              </div>
+            )}
+          </div>
 
-          {/* Empty state */}
-          {filteredTasks.length === 0 && (
+        ) : (
+
+          // ── All Tasks view ─────────────────────────────────────────────────
+          filteredTasks.length === 0 ? (
             <div style={{ fontSize:"13px", color:"#55555e", textAlign:"center", padding:"40px 0" }}>
               {q ? "No tasks match your search." : "No tasks yet — click \"New Task\" to get started."}
             </div>
-          )}
-        </div>
-
-      ) : (
-
-        // ── All Tasks view ───────────────────────────────────────────────────
-        filteredTasks.length === 0 ? (
-          <div style={{ fontSize:"13px", color:"#55555e", textAlign:"center", padding:"40px 0" }}>
-            {q ? "No tasks match your search." : "No tasks yet — click \"New Task\" to get started."}
-          </div>
-        ) : (
-          <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
-            {sortTasks(filteredTasks).map(task => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                projects={projects}
-                onEdit={openEdit}
-                onUpdate={onUpdate}
-              />
-            ))}
-          </div>
-        )
-      )}
+          ) : (
+            <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
+              {sortTasks(filteredTasks).map(task => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  projects={projects}
+                  onEdit={openEdit}
+                  onUpdate={onUpdate}
+                />
+              ))}
+            </div>
+          )
+        )}
+      </div>
 
       {/* ── Modal ───────────────────────────────────────────────────────────── */}
       {editing && (
