@@ -560,62 +560,51 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
             </div>
           )}
 
-          {/* Last update ribbon */}
+          {/* Last update ghost strip */}
           <div style={{ position: "relative" }}>
             <div
               onClick={e => { e.stopPropagation(); setShowPopover(v => !v); }}
               onMouseEnter={() => setShowRibbonHov(true)}
               onMouseLeave={() => setShowRibbonHov(false)}
               style={{
-                display: "flex", alignItems: "stretch",
-                borderRadius: "6px",
-                border: `1px solid ${showRibbonHov ? "#555560" : "#3a3a3a"}`,
-                background: "#1E1E1E",
+                display: "flex", alignItems: "center",
+                borderTop: `1px dashed ${showRibbonHov ? "#444450" : "#2A2A2A"}`,
+                padding: "12px 0 0 0",
                 cursor: "pointer",
                 transition: "border-color 0.2s",
               }}
             >
-              {/* Left: stacked label + date */}
+              {/* Orange vertical bar */}
               <div style={{
-                display: "flex", flexDirection: "column",
-                alignItems: "flex-start", justifyContent: "center",
-                padding: "6px 12px", gap: "2px", flexShrink: 0,
-              }}>
+                width: "2px", height: "24px", flexShrink: 0,
+                background: "#FB923C",
+                boxShadow: "0 0 8px rgba(251,146,60,0.4)",
+                borderRadius: "2px",
+                marginRight: "12px",
+              }} />
+
+              {/* Stacked label + date */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "1px", flexShrink: 0, marginRight: "12px" }}>
                 <span style={{
-                  fontSize: "9px", fontWeight: 800,
-                  letterSpacing: "0.1em", textTransform: "uppercase",
-                  color: "#888890", whiteSpace: "nowrap",
+                  fontSize: "9px", fontWeight: 700, letterSpacing: "0.1em",
+                  textTransform: "uppercase", color: "#AAA",
                 }}>
                   Last Update
                 </span>
-                <span style={{ fontSize: "10px", fontWeight: 600, color: "#888890", whiteSpace: "nowrap" }}>
+                <span style={{ fontSize: "10px", fontWeight: 600, color: "#777" }}>
                   {lastUpdate ? formatShortDate(lastUpdate.timestamp) : "—"}
                 </span>
               </div>
 
-              {/* Orange separator line */}
-              <div style={{
-                width: "2px", flexShrink: 0,
-                background: getPalette("orange","glow").border,
-                margin: "6px 0",
-                borderRadius: "2px",
-              }} />
-
-              {/* Right: 2-line text */}
-              <div style={{ flex: 1, display: "flex", alignItems: "center", padding: "6px 10px", minWidth: 0 }}>
-                <span style={{
-                  fontSize: "12px",
-                  color: lastUpdate ? "#c8c8d0" : "#55555e",
-                  fontStyle: lastUpdate ? "normal" : "italic",
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                  lineHeight: "1.4",
-                }}>
-                  {lastUpdate ? lastUpdate.text : "No updates yet — click to add one"}
-                </span>
-              </div>
+              {/* Update text */}
+              <span style={{
+                flex: 1, fontSize: "12px", lineHeight: 1.4, minWidth: 0,
+                color: lastUpdate ? "#AAA" : "#777",
+                fontStyle: lastUpdate ? "normal" : "italic",
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>
+                {lastUpdate ? lastUpdate.text : "No updates yet — click to add one"}
+              </span>
             </div>
             {showPopover && (
               <UpdatePopover
