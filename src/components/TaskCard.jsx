@@ -560,7 +560,6 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
           {/* Subtask progress bar + "N/M subtasks" label below + checklist */}
           {subtasks.length > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <ProgressBar pct={subtaskPct} />
               <span style={{ fontSize: "10px", color: "#55555e" }}>
                 {doneCount}/{subtasks.length} subtasks
               </span>
