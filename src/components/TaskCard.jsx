@@ -400,30 +400,63 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
 
   return (
     <>
-      <div
-        style={{
-          background: "#2a2a2a",
-          border: "1px solid #444450",
-          borderRadius: "10px 0px 10px 10px", // top-right is square to match the dock
-          position: "relative",
-          // No overflow:hidden so dropdowns can escape
-        }}
-      >
+      {/*
+        Outer wrapper creates space above the card for the dock tab.
+        paddingTop = dock cell height (30px) + dock top border (1px) - 1px overlap = 30px.
+        The 1px overlap lets the dock's opaque background cover the card's top border
+        in the dock region, making the two borders appear seamlessly connected.
+      */}
+      <div style={{ position: "relative", paddingTop: "30px" }}>
 
-        {/* ── Card header: title area + integrated dock ───────────────────────── */}
+        {/* ── Dock: floats above the card's top-right corner ─────────────────── */}
+        {/*
+          Three-sided border (top + left + right, no bottom).
+          The card's top border provides the bottom closure below the dock.
+          Opaque background (#232323) covers the card's top border in this region
+          so only the dock's own border outline is visible there.
+        */}
         <div style={{
+          position: "absolute", top: 0, right: 0, zIndex: 5,
           display: "flex",
-          alignItems: "flex-start",
+          background: "#232323",
+          border: "1px solid #444450",
+          borderBottom: "none",
         }}>
+          <StatusCell
+            status={task.status}
+            colorKey={statusColorKey}
+            onChange={val => onUpdate?.({ ...task, status: val })}
+          />
+          <PriorityCell
+            priority={task.priority}
+            colorKey={priorityColorKey}
+            onChange={val => onUpdate?.({ ...task, priority: val })}
+          />
+          <DueDateCell
+            dueDate={task.dueDate}
+            colorKey={dueDateColorKey}
+            onChange={val => onUpdate?.({ ...task, dueDate: val })}
+          />
+        </div>
+
+        {/* ── Card ───────────────────────────────────────────────────────────── */}
+        <div
+          style={{
+            background: "#2a2a2a",
+            border: "1px solid #444450",
+            borderRadius: "10px 0px 10px 10px",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
 
           {/* Title + project tag */}
           <div
             onClick={() => onEdit(task)}
             style={{
-              flex: 1, minWidth: 0,
               padding: "14px 16px 12px",
               display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap",
-              cursor: "pointer",
+              cursor: "pointer", minWidth: 0,
             }}
           >
             <span style={{ fontSize: "16px", fontWeight: 700, color: "#f0f0f0", lineHeight: 1.3 }}>
@@ -450,33 +483,6 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
               </span>
             )}
           </div>
-
-          {/* ── Slim data dock: Status | Priority | Due Date ── */}
-          {/* borderTopRightRadius matches the card's corner (10px outer - 1px border = 9px inner) */}
-          <div style={{
-            display: "flex",
-            flexShrink: 0,
-            background: "rgba(0,0,0,0.2)",
-            borderLeft: "1px solid rgba(255,255,255,0.08)",
-            marginRight: "-1px", // overlap the card's right border so dock is flush
-          }}>
-            <StatusCell
-              status={task.status}
-              colorKey={statusColorKey}
-              onChange={val => onUpdate?.({ ...task, status: val })}
-            />
-            <PriorityCell
-              priority={task.priority}
-              colorKey={priorityColorKey}
-              onChange={val => onUpdate?.({ ...task, priority: val })}
-            />
-            <DueDateCell
-              dueDate={task.dueDate}
-              colorKey={dueDateColorKey}
-              onChange={val => onUpdate?.({ ...task, dueDate: val })}
-            />
-          </div>
-        </div>
 
         {/* ── Card body ──────────────────────────────────────────────────────── */}
         <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -641,7 +647,8 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
           )}
 
         </div>
-      </div>
+        </div>{/* end card */}
+      </div>{/* end outer wrapper */}
 
       {/* Image viewer modal */}
       {viewerIndex !== null && (
