@@ -36,7 +36,7 @@ export default function SplitBadge({ label, value, colorKey = "orange", href, on
       style={{
         display: "inline-flex",
         alignItems: "center",
-        border: `1px solid ${hov ? glow.hoverBorder : glow.border}`,
+        border: `1px solid ${hov ? glow.border : "rgba(255,255,255,0.08)"}`,
         borderRadius: "4px",
         overflow: "hidden",
         cursor: "pointer",
@@ -46,29 +46,28 @@ export default function SplitBadge({ label, value, colorKey = "orange", href, on
         flexShrink: 0,
       }}
     >
-      {/* Left: label section — dark bg, white text */}
+      {/* Left: label section — dark bg, muted text */}
       <span style={{
-        background: solid.text,      // #2A2A2A
-        color: "#FFFFFF",
-        padding: "4px 10px",
-        fontWeight: 700,
+        background: "#1e1e1e",
+        color: "#888890",
+        padding: "3px 8px",
+        fontWeight: 600,
         fontSize: "10px",
-        letterSpacing: "1px",
+        letterSpacing: "0.05em",
         textTransform: "uppercase",
-        borderRight: `1px solid ${hov ? glow.hoverBorder : glow.border}`,
+        borderRight: "1px solid rgba(255,255,255,0.06)",
         whiteSpace: "nowrap",
-        transition: "border-color 0.2s ease",
       }}>
         {label}
       </span>
 
-      {/* Right: value section — brightens on hover */}
+      {/* Right: value section — subtle color tint, brightens on hover */}
       <span style={{
-        background: hov ? solid.hoverBg : solid.bg,
-        color: solid.text,
-        padding: "4px 10px",
-        fontWeight: 800,
-        fontSize: "12px",
+        background: hov ? `${glow.border}44` : `${glow.border}22`,
+        color: glow.text ?? "#c8c8d0",
+        padding: "3px 8px",
+        fontWeight: 600,
+        fontSize: "11px",
         whiteSpace: "nowrap",
         transition: "background 0.2s ease",
       }}>

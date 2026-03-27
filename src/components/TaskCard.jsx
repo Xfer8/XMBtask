@@ -57,30 +57,21 @@ function MetaBadge({ abbr, value, color, hov, setHov, onClick, refProp, children
           display: "flex", alignItems: "stretch",
           background: "#222222", borderRadius: "2px",
           overflow: "hidden",
-          border: hov ? `1px solid ${color}` : "1px solid rgba(255,255,255,0.06)",
+          border: hov ? `1px solid ${color}` : `1px solid ${color}44`,
           cursor: "pointer",
-          transition: "border-color 0.3s ease",
+          transition: "border-color 0.2s ease",
           width: "100%",
         }}
       >
-        {/* Label section with animated left-to-right fill */}
+        {/* Label section — fully colored */}
         <div style={{
-          position: "relative", width: "44px", flexShrink: 0,
+          width: "44px", flexShrink: 0,
           display: "flex", alignItems: "center", justifyContent: "center",
-          background: "rgba(0,0,0,0.25)", overflow: "hidden",
+          background: color,
         }}>
-          <div style={{
-            position: "absolute", top: 0, left: 0, height: "100%",
-            width: hov ? "100%" : "3px",
-            background: color,
-            transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-            zIndex: 1,
-          }} />
           <span style={{
-            position: "relative", zIndex: 2,
             fontSize: "10px", fontWeight: 900,
-            color: hov ? "#1A1A1A" : "#666",
-            transition: "color 0.3s ease",
+            color: "#111",
             letterSpacing: "0.04em", userSelect: "none",
           }}>
             {abbr}
@@ -663,16 +654,15 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
                 <div style={{
                   display: "flex", alignItems: "stretch",
                   background: "#222222", borderRadius: "2px",
-                  overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)",
+                  overflow: "hidden", border: "1px solid #4B563344",
                   width: "100%",
                 }}>
                   <div style={{
-                    position: "relative", width: "44px", flexShrink: 0,
+                    width: "44px", flexShrink: 0,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    background: "rgba(0,0,0,0.25)",
+                    background: "#4B5563",
                   }}>
-                    <div style={{ position: "absolute", top: 0, left: 0, height: "100%", width: "3px", background: "#4B5563" }} />
-                    <span style={{ position: "relative", zIndex: 2, fontSize: "10px", fontWeight: 900, color: "#666", letterSpacing: "0.04em" }}>
+                    <span style={{ fontSize: "10px", fontWeight: 900, color: "#111", letterSpacing: "0.04em" }}>
                       OWN
                     </span>
                   </div>
