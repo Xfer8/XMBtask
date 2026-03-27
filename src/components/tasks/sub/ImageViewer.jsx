@@ -77,27 +77,34 @@ export default function ImageViewer({ images, startIndex = 0, onClose, onDelete 
         ✕
       </button>
 
-      {/* Delete button */}
-      {onDelete && (
-        <button
-          onClick={e => { e.stopPropagation(); setConfirmDelete(true); }}
-          style={{
-            position: "absolute", top: "14px", left: "18px",
-            background: "none", border: "1px solid #943636",
-            borderRadius: "7px", color: "#FF6B6B",
-            fontSize: "12px", cursor: "pointer",
-            padding: "4px 12px", fontFamily: "inherit",
-          }}
-        >
-          Delete
-        </button>
-      )}
-
       {/* Main image */}
       <div
         onClick={e => e.stopPropagation()}
         style={{ position: "relative", maxWidth: "90vw", maxHeight: "80vh", display: "flex", alignItems: "center" }}
       >
+        {/* Delete button — above top-left of image */}
+        {onDelete && (
+          <button
+            onClick={e => { e.stopPropagation(); setConfirmDelete(true); }}
+            style={{
+              position: "absolute", bottom: "calc(100% + 8px)", left: 0,
+              background: "#4A1B1B", border: "1px solid #943636",
+              borderRadius: "7px", color: "#FF6B6B",
+              fontSize: "12px", fontWeight: 600, cursor: "pointer",
+              padding: "5px 14px", fontFamily: "inherit",
+              display: "flex", alignItems: "center", gap: "6px",
+              zIndex: 2,
+            }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+              <path d="M10 11v6M14 11v6"/>
+              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+            </svg>
+            Delete Image
+          </button>
+        )}
         {images.length > 1 && (
           <button onClick={e => { e.stopPropagation(); prev(); }} style={{ ...btnStyle, left: "-52px" }}>‹</button>
         )}
