@@ -71,8 +71,28 @@ const CELL_W = 85; // px — all three cells identical
 
 function DockCell({ value, placeholder, colorKey, onClick, refProp, style: extraStyle, children }) {
   const [hov, setHov] = useState(false);
-  const p   = getPalette(colorKey);
-  const rgb = hexToRgb(p.text);
+  const p      = getPalette(colorKey);
+  const rgb    = hexToRgb(p.text);
+  const hasVal = !!value;
+
+  // Empty cells use a much dimmer neutral gray so they read as "unset"
+  // rather than matching the gray used by real values like "Not Started"
+  const emptyRgb = "65, 65, 72";
+
+  const activeRgb = hasVal ? rgb : emptyRgb;
+  const barBg     = hasVal
+    ? (hov ? `rgba(${rgb}, 1)`    : `rgba(${rgb}, 0.55)`)
+    : (hov ? `rgba(${emptyRgb}, 0.25)` : `rgba(${emptyRgb}, 0.1)`);
+  const barGlow   = hasVal
+    ? (hov ? `0 0 12px rgba(${rgb}, 0.8)` : `0 0 4px rgba(${rgb}, 0.3)`)
+    : "none";
+  const cellBg    = hasVal
+    ? (hov ? `rgba(${rgb}, 0.22)`      : `rgba(${rgb}, 0.13)`)
+    : (hov ? `rgba(${emptyRgb}, 0.07)` : `rgba(${emptyRgb}, 0.03)`);
+  const textColor = hasVal
+    ? (hov ? `rgba(${rgb}, 1)`         : `rgba(${rgb}, 0.8)`)
+    : (hov ? `rgba(${emptyRgb}, 0.45)` : `rgba(${emptyRgb}, 0.28)`);
+  const textGlow  = hasVal && hov ? `0 0 10px rgba(${rgb}, 0.5)` : "none";
 
   return (
     <div
@@ -83,13 +103,13 @@ function DockCell({ value, placeholder, colorKey, onClick, refProp, style: extra
         ...extraStyle,
       }}
     >
-      {/* Top glow bar — 2px, visible at rest, vivid on hover */}
+      {/* Top glow bar */}
       <div
         style={{
           position: "absolute", top: 0, left: 0, right: 0, height: "2px",
           borderTopRightRadius: extraStyle?.borderTopRightRadius,
-          background: hov ? `rgba(${rgb}, 1)` : `rgba(${rgb}, 0.55)`,
-          boxShadow: hov ? `0 0 12px rgba(${rgb}, 0.8)` : `0 0 4px rgba(${rgb}, 0.3)`,
+          background: barBg,
+          boxShadow: barGlow,
           transition: "background 0.2s ease, box-shadow 0.2s ease",
           pointerEvents: "none",
           zIndex: 1,
@@ -106,7 +126,7 @@ function DockCell({ value, placeholder, colorKey, onClick, refProp, style: extra
           display: "flex", alignItems: "center", justifyContent: "center",
           cursor: "pointer",
           borderTopRightRadius: extraStyle?.borderTopRightRadius,
-          background: hov ? `rgba(${rgb}, 0.22)` : `rgba(${rgb}, 0.13)`,
+          background: cellBg,
           transition: "background 0.2s ease",
         }}
       >
@@ -115,8 +135,8 @@ function DockCell({ value, placeholder, colorKey, onClick, refProp, style: extra
           textTransform: "uppercase", whiteSpace: "nowrap",
           overflow: "hidden", textOverflow: "ellipsis",
           maxWidth: `${CELL_W - 10}px`,
-          color: hov ? `rgba(${rgb}, 1)` : `rgba(${rgb}, 0.8)`,
-          textShadow: hov ? `0 0 10px rgba(${rgb}, 0.5)` : "none",
+          color: textColor,
+          textShadow: textGlow,
           transition: "color 0.2s ease, text-shadow 0.2s ease",
           userSelect: "none",
         }}>
