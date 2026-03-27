@@ -708,6 +708,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
           images={images}
           startIndex={viewerIndex}
           onClose={() => setViewerIndex(null)}
+          onDelete={newImages => onUpdate?.({ ...task, images: newImages })}
         />
       )}
     </>

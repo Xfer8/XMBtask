@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import LinksSection    from "./sub/LinksSection";
 import ImagePasteZone  from "./sub/ImagePasteZone";
 import SubtasksSection from "./sub/SubtasksSection";
@@ -44,6 +44,16 @@ export default function TaskModal({ title, task, projects = [], onUpdate, onClos
   // Snapshot taken on mount for cancel/restore
   const [snapshot]    = useState(() => JSON.parse(JSON.stringify(task)));
   const [showConfirm, setShowConfirm] = useState(false);
+  const descRef = useRef(null);
+
+  // Auto-resize description textarea up to 450px
+  useEffect(() => {
+    const el = descRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 450) + "px";
+    el.style.overflowY = el.scrollHeight > 450 ? "auto" : "hidden";
+  }, [task.description]);
 
   const set      = (k, v) => onUpdate({ ...task, [k]: v });
   const valid    = task.title.trim().length > 0 && !!task.projectId;
@@ -106,9 +116,10 @@ export default function TaskModal({ title, task, projects = [], onUpdate, onClos
             <div>
               <label style={labelStyle}>Description</label>
               <textarea
+                ref={descRef}
                 value={task.description} placeholder="Optional description" rows={3}
                 onChange={e => set("description", e.target.value)}
-                style={{ ...inputStyle, resize:"vertical", lineHeight:"1.5" }}
+                style={{ ...inputStyle, resize:"none", lineHeight:"1.5", overflowY:"hidden" }}
               />
             </div>
           </div>
