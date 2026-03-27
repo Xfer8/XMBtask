@@ -458,12 +458,31 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
             </span>
             {project && (
               <span style={{
-                fontSize: "10px", fontWeight: 600,
-                padding: "2px 8px", borderRadius: "4px",
-                background: projectPal.bg, color: projectPal.text,
+                display: "inline-flex", alignItems: "center",
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.07)",
+                padding: "4px 10px 4px 6px",
+                borderRadius: "2px",
                 whiteSpace: "nowrap", flexShrink: 0, marginTop: "2px",
               }}>
-                {project.title}
+                {/* Colored neon bar */}
+                <span style={{
+                  width: "3px", height: "14px",
+                  background: projectPal.text,
+                  boxShadow: `0 0 8px ${projectPal.text}`,
+                  borderRadius: "1px",
+                  marginRight: "8px",
+                  flexShrink: 0,
+                  display: "inline-block",
+                }} />
+                <span style={{
+                  fontSize: "10px", fontWeight: 900,
+                  textTransform: "uppercase", letterSpacing: "1px",
+                  color: "#DDD",
+                  textShadow: "0 0 2px rgba(255,255,255,0.2)",
+                }}>
+                  {project.title}
+                </span>
               </span>
             )}
           </div>
