@@ -166,7 +166,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
           background:   "#1e1e1e",
           border:       "1px solid #3a3a3a",
           borderRadius: "5px",
-          padding:      "3px",
+          padding:      "2px",
           gap:          0,
           flexShrink:   0,
           height:       "34px",
@@ -182,7 +182,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
             width:        "1px",
             background:   "#3a3a3a",
             alignSelf:    "stretch",
-            margin:       "2px 0",
+            margin:       "1px 0",
             flexShrink:   0,
           }} />
           <ToggleSegment
