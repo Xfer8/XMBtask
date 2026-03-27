@@ -41,11 +41,7 @@ export default function SplitBadge({ label, value, colorKey = "orange", href, on
         overflow: "hidden",
         cursor: "pointer",
         textDecoration: "none",
-        transform: "translateY(0)",
-        boxShadow: hov
-          ? `0 0 15px rgba(251, 146, 60, 0.3), 0 4px 6px -1px rgba(0,0,0,0.2)`
-          : "0 4px 6px -1px rgba(0,0,0,0.2)",
-        transition: "border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
+        transition: "border-color 0.2s ease",
         fontFamily: "inherit",
         flexShrink: 0,
       }}
@@ -66,14 +62,15 @@ export default function SplitBadge({ label, value, colorKey = "orange", href, on
         {label}
       </span>
 
-      {/* Right: value section — solid orange bg, dark text */}
+      {/* Right: value section — brightens on hover */}
       <span style={{
-        background: solid.bg,        // #FB923C
-        color: solid.text,           // #2A2A2A
+        background: hov ? solid.hoverBg : solid.bg,
+        color: solid.text,
         padding: "4px 10px",
         fontWeight: 800,
         fontSize: "12px",
         whiteSpace: "nowrap",
+        transition: "background 0.2s ease",
       }}>
         {value}
       </span>
