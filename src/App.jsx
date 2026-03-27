@@ -174,6 +174,7 @@ export default function App() {
         position:   "sticky",
         top:        "20px",
         zIndex:     100,
+        background: "#212121", // fills the padding on each side, masking rounded-corner gaps
       }}>
       {/* Inner floating pill fills the padded column, matching task card width */}
       <div style={{
