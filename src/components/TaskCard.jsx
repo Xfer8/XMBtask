@@ -482,25 +482,6 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
         {/* ── Card body ─────────────────────────────────────────────────────── */}
         <div style={{ padding: "12px 20px 14px", display: "flex", flexDirection: "column", gap: "10px" }}>
 
-          {/* Link badges */}
-          {links.length > 0 && (
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-              {links.map(link => {
-                const colorMap = { Source: "yellow", Sherlock: "orange", Jira: "blue", Email: "purple", Link: "gray", Other: "gray" };
-                return (
-                  <MutedBadge
-                    key={link.id}
-                    label={link.type}
-                    value={link.displayName || link.url || "(none)"}
-                    colorKey={colorMap[link.type] ?? "gray"}
-                    href={link.url || undefined}
-                    onClick={e => e.stopPropagation()}
-                  />
-                );
-              })}
-            </div>
-          )}
-
           {/* Description */}
           {task.description && (
             <div
@@ -638,6 +619,25 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Link badges */}
+          {links.length > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+              {links.map(link => {
+                const colorMap = { Source: "yellow", Sherlock: "orange", Jira: "blue", Email: "purple", Link: "gray", Other: "gray" };
+                return (
+                  <MutedBadge
+                    key={link.id}
+                    label={link.type}
+                    value={link.displayName || link.url || "(none)"}
+                    colorKey={colorMap[link.type] ?? "gray"}
+                    href={link.url || undefined}
+                    onClick={e => e.stopPropagation()}
+                  />
+                );
+              })}
             </div>
           )}
 
