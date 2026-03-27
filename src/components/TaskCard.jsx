@@ -546,6 +546,57 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
             </div>
           )}
 
+          {/* Subtask progress bar + "N/M subtasks" label below + checklist */}
+          {subtasks.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              <ProgressBar pct={subtaskPct} />
+              <span style={{ fontSize: "10px", color: "#55555e" }}>
+                {doneCount}/{subtasks.length} subtasks
+              </span>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                {subtasks.map(s => (
+                  <div
+                    key={s.id}
+                    onClick={e => { e.stopPropagation(); handleSubtaskToggle(s.id); }}
+                    style={{ display: "flex", alignItems: "center", gap: "7px", cursor: "pointer" }}
+                  >
+                    <div style={{
+                      width: "14px", height: "14px", flexShrink: 0,
+                      borderRadius: "3px",
+                      border: `1.5px solid ${s.status === "complete" ? "#4ADE80" : "#3a3a3a"}`,
+                      background: s.status === "complete" ? "#4ADE80" : "transparent",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      transition: "background 0.12s, border-color 0.12s",
+                    }}>
+                      {s.status === "complete" && (
+                        <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+                          <path d="M1 3.5L3.5 6L8 1" stroke="#0E3F24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </div>
+                    <span style={{
+                      fontSize: "12px", lineHeight: 1.3,
+                      color: s.status === "complete" ? "#55555e" : "#c8c8d0",
+                      textDecoration: s.status === "complete" ? "line-through" : "none",
+                    }}>
+                      {s.title}
+                    </span>
+                    {s.url && (
+                      <a
+                        href={s.url}
+                        onClick={e => e.stopPropagation()}
+                        target="_blank" rel="noreferrer"
+                        style={{ fontSize: "10px", color: "#38BDF8", textDecoration: "none", whiteSpace: "nowrap" }}
+                      >
+                        {s.urlDisplayName || s.url}
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Last update ribbon */}
           <div style={{ position: "relative" }}>
             <div
@@ -611,57 +662,6 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
               />
             )}
           </div>
-
-          {/* Subtask progress bar + "N/M subtasks" label below + checklist */}
-          {subtasks.length > 0 && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <ProgressBar pct={subtaskPct} />
-              <span style={{ fontSize: "10px", color: "#55555e" }}>
-                {doneCount}/{subtasks.length} subtasks
-              </span>
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                {subtasks.map(s => (
-                  <div
-                    key={s.id}
-                    onClick={e => { e.stopPropagation(); handleSubtaskToggle(s.id); }}
-                    style={{ display: "flex", alignItems: "center", gap: "7px", cursor: "pointer" }}
-                  >
-                    <div style={{
-                      width: "14px", height: "14px", flexShrink: 0,
-                      borderRadius: "3px",
-                      border: `1.5px solid ${s.status === "complete" ? "#4ADE80" : "#3a3a3a"}`,
-                      background: s.status === "complete" ? "#4ADE80" : "transparent",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      transition: "background 0.12s, border-color 0.12s",
-                    }}>
-                      {s.status === "complete" && (
-                        <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
-                          <path d="M1 3.5L3.5 6L8 1" stroke="#0E3F24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      )}
-                    </div>
-                    <span style={{
-                      fontSize: "12px", lineHeight: 1.3,
-                      color: s.status === "complete" ? "#55555e" : "#c8c8d0",
-                      textDecoration: s.status === "complete" ? "line-through" : "none",
-                    }}>
-                      {s.title}
-                    </span>
-                    {s.url && (
-                      <a
-                        href={s.url}
-                        onClick={e => e.stopPropagation()}
-                        target="_blank" rel="noreferrer"
-                        style={{ fontSize: "10px", color: "#38BDF8", textDecoration: "none", whiteSpace: "nowrap" }}
-                      >
-                        {s.urlDisplayName || s.url}
-                      </a>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
         </div>
 
