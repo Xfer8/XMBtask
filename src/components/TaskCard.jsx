@@ -70,17 +70,13 @@ function MetaBadge({ abbr, value, color, hov, setHov, onClick, refProp, children
           background: "rgba(0,0,0,0.25)", overflow: "hidden",
         }}>
           <div style={{
-            position: "absolute", top: 0, left: 0, height: "100%",
-            width: hov ? "100%" : "3px",
-            background: color,
-            transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-            zIndex: 1,
+            position: "absolute", top: 0, left: 0, height: "100%", width: "100%",
+            background: color, zIndex: 1,
           }} />
           <span style={{
             position: "relative", zIndex: 2,
             fontSize: "10px", fontWeight: 900,
-            color: hov ? "#1A1A1A" : "#666",
-            transition: "color 0.3s ease",
+            color: "#1A1A1A",
             letterSpacing: "0.04em", userSelect: "none",
           }}>
             {abbr}
