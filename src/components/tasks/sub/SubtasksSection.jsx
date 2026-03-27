@@ -52,7 +52,7 @@ export default function SubtasksSection({ subtasks, onChange }) {
     <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
       {subtasks.map(s => {
         if (editingId === s.id) return (
-          <div key={s.id} style={{ display:"flex", flexDirection:"column", gap:"8px", background:"#1a1a1e", borderRadius:"8px", padding:"12px" }}>
+          <div key={s.id} style={{ display:"flex", flexDirection:"column", gap:"8px", background:"#1E1E1E", borderRadius:"8px", padding:"12px" }}>
             <input type="text" value={editForm.title} placeholder="Subtask title" onChange={e => setEd("title", e.target.value)} style={inputStyle}/>
             <input type="text" value={editForm.url} placeholder="URL (optional)" onChange={e => setEd("url", e.target.value)} style={inputStyle}/>
             <input type="text" value={editForm.urlDisplayName} placeholder="Link display name (optional)" onChange={e => setEd("urlDisplayName", e.target.value)} style={inputStyle}/>
@@ -64,7 +64,7 @@ export default function SubtasksSection({ subtasks, onChange }) {
         );
 
         return (
-          <div key={s.id} style={{ display:"flex", alignItems:"center", gap:"10px", background:"#1a1a1e", borderRadius:"8px", padding:"8px 12px" }}>
+          <div key={s.id} style={{ display:"flex", alignItems:"center", gap:"10px", background:"#1E1E1E", borderRadius:"8px", padding:"8px 12px" }}>
             <div style={{ flex:1, minWidth:0 }}>
               <span style={{ fontSize:"13px", color:"#f0f0f0", textDecoration: s.status==="complete" ? "line-through" : "none", opacity: s.status==="complete" ? 0.5 : 1 }}>
                 {s.title}
@@ -93,7 +93,7 @@ export default function SubtasksSection({ subtasks, onChange }) {
       })}
 
       {adding ? (
-        <div style={{ display:"flex", flexDirection:"column", gap:"8px", background:"#1a1a1e", borderRadius:"8px", padding:"12px" }}>
+        <div style={{ display:"flex", flexDirection:"column", gap:"8px", background:"#1E1E1E", borderRadius:"8px", padding:"12px" }}>
           <input type="text" value={form.title} placeholder="Subtask title (required)" onChange={e => set("title", e.target.value)} style={inputStyle}/>
           <input type="text" value={form.url} placeholder="URL (optional)" onChange={e => set("url", e.target.value)} style={inputStyle}/>
           <input type="text" value={form.urlDisplayName} placeholder="Link display name (optional)" onChange={e => set("urlDisplayName", e.target.value)} style={inputStyle}/>

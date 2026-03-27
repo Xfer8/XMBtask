@@ -84,7 +84,7 @@ function StatusBadge({ status, colorKey, onChange }) {
           onClick={e => e.stopPropagation()}
           style={{
             position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 400,
-            background: "#1E1E24", border: "1px solid #3a3a44",
+            background: "#1E1E1E", border: "1px solid #3a3a44",
             borderRadius: "8px", padding: "4px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
             minWidth: "160px",
@@ -164,7 +164,7 @@ function PriorityBadge({ priority, colorKey, onChange }) {
           onClick={e => e.stopPropagation()}
           style={{
             position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 400,
-            background: "#1E1E24", border: "1px solid #3a3a44",
+            background: "#1E1E1E", border: "1px solid #3a3a44",
             borderRadius: "8px", padding: "4px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
             minWidth: "130px",
@@ -258,7 +258,7 @@ function DueDateBadge({ dueDate, colorKey, onChange }) {
           onClick={e => e.stopPropagation()}
           style={{
             position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 400,
-            background: "#2a2a2e", border: "1px solid #3a3a44",
+            background: "#1E1E1E", border: "1px solid #3a3a44",
             borderRadius: "8px", padding: "10px 12px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
           }}
@@ -346,7 +346,7 @@ function UpdatePopover({ updates = [], onAdd, onClose }) {
         position: "absolute", zIndex: 600,
         top: "calc(100% + 6px)", left: 0,
         width: "300px",
-        background: "#2a2a2e", border: "1px solid #3a3a44",
+        background: "#1E1E1E", border: "1px solid #3a3a44",
         borderRadius: "10px", padding: "14px",
         boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
       }}

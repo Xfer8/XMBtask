@@ -81,7 +81,7 @@ export default function LinksSection({ links, onChange }) {
     <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
       {links.map(l => {
         if (editingId === l.id) return (
-          <div key={l.id} style={{ display:"flex", flexDirection:"column", gap:"8px", background:"#1a1a1e", borderRadius:"8px", padding:"12px" }}>
+          <div key={l.id} style={{ display:"flex", flexDirection:"column", gap:"8px", background:"#1E1E1E", borderRadius:"8px", padding:"12px" }}>
             <select value={editForm.type} onChange={e => setEditForm(f => ({ ...f, type: e.target.value }))} style={{ ...inputStyle, cursor:"pointer" }}>
               <option value="">Select type…</option>
               {LINK_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
@@ -101,7 +101,7 @@ export default function LinksSection({ links, onChange }) {
         const isSplit = l.type === "Sherlock" || l.type === "Jira";
         const splitColor = l.type === "Sherlock" ? "orange" : "blue";
         return (
-          <div key={l.id} style={{ display:"flex", alignItems:"center", gap:"10px", background:"#1a1a1e", borderRadius:"8px", padding:"8px 12px" }}>
+          <div key={l.id} style={{ display:"flex", alignItems:"center", gap:"10px", background:"#1E1E1E", borderRadius:"8px", padding:"8px 12px" }}>
             {isSplit ? (
               <>
                 <SplitBadge
@@ -139,7 +139,7 @@ export default function LinksSection({ links, onChange }) {
       })}
 
       {adding ? (
-        <div style={{ display:"flex", flexDirection:"column", gap:"8px", background:"#1a1a1e", borderRadius:"8px", padding:"12px" }}>
+        <div style={{ display:"flex", flexDirection:"column", gap:"8px", background:"#1E1E1E", borderRadius:"8px", padding:"12px" }}>
           <select value={form.type} onChange={e => set("type", e.target.value)} style={{ ...inputStyle, cursor:"pointer" }}>
             <option value="">Select type…</option>
             {LINK_TYPES.map(t => <option key={t} value={t}>{t}</option>)}

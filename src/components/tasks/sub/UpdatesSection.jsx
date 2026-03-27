@@ -73,7 +73,7 @@ function UpdateRow({ update, onEdit, onDelete }) {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => { setHov(false); setConfirmDel(false); }}
       style={{
-        background:"#1a1a1e", borderRadius:"8px", padding:"10px 12px",
+        background:"#1E1E1E", borderRadius:"8px", padding:"10px 12px",
         borderLeft:"2px solid #3a3a3a", position:"relative",
       }}
     >
@@ -200,7 +200,7 @@ export default function UpdatesSection({ updates, onChange }) {
           {sorted.map(u => (
             editingId === u.id ? (
               /* Inline edit form */
-              <div key={u.id} style={{ background:"#1a1a1e", borderRadius:"8px", padding:"10px 12px", borderLeft:"2px solid #2DB86A" }}>
+              <div key={u.id} style={{ background:"#1E1E1E", borderRadius:"8px", padding:"10px 12px", borderLeft:"2px solid #2DB86A" }}>
                 <div style={{ fontSize:"10px", color:"#55555e", marginBottom:"6px" }}>{formatTimestamp(u.timestamp)}</div>
                 <textarea
                   ref={editTaRef}
