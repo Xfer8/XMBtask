@@ -1,7 +1,7 @@
 import { useState } from "react";
+import { generateSubtaskId } from "../../../services/dataService";
 
-const generateSubtaskId = () => `ST${Date.now()}`;
-const EMPTY_SUBTASK     = { title:"", url:"", urlDisplayName:"", status:"open" };
+const EMPTY_SUBTASK = { title:"", url:"", urlDisplayName:"", status:"open" };
 
 const inputStyle = {
   width:"100%", boxSizing:"border-box", background:"#1e1e1e",
@@ -25,7 +25,7 @@ const PencilIcon = ({ size=12 }) => (
   </svg>
 );
 
-export default function SubtasksSection({ subtasks, onChange }) {
+export default function SubtasksSection({ subtasks, tasks = [], onChange }) {
   const [adding,    setAdding]    = useState(false);
   const [form,      setForm]      = useState(EMPTY_SUBTASK);
   const [editingId, setEditingId] = useState(null);
@@ -37,7 +37,7 @@ export default function SubtasksSection({ subtasks, onChange }) {
 
   const handleAdd = () => {
     if (!form.title.trim()) return;
-    onChange([...subtasks, { ...form, id: generateSubtaskId(), status:"open" }]);
+    onChange([...subtasks, { ...form, id: generateSubtaskId(tasks), status:"open" }]);
     setForm(EMPTY_SUBTASK);
     setAdding(false);
   };

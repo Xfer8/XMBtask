@@ -101,6 +101,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
         <TaskModal
           title={editing.isNew ? "New Task" : "Edit Task"}
           task={editing.task}
+          tasks={tasks}
           projects={projects}
           onUpdate={handleUpdate}
           onClose={handleClose}

@@ -40,7 +40,7 @@ function FormSection({ title, children }) {
 // onClose   = user clicked Save (changes already applied live)
 // onCancel  = user clicked Cancel — receives snapshot to restore
 // onDelete  = user clicked Delete
-export default function TaskModal({ title, task, projects = [], onUpdate, onClose, onCancel, onDelete }) {
+export default function TaskModal({ title, task, tasks = [], projects = [], onUpdate, onClose, onCancel, onDelete }) {
   // Snapshot taken on mount for cancel/restore
   const [snapshot]    = useState(() => JSON.parse(JSON.stringify(task)));
   const [showConfirm, setShowConfirm] = useState(false);
@@ -187,7 +187,7 @@ export default function TaskModal({ title, task, projects = [], onUpdate, onClos
 
         {/* ── Subtasks ─────────────────────────────────────────────────────── */}
         <FormSection title="Subtasks">
-          <SubtasksSection subtasks={task.subtasks ?? []} onChange={v => set("subtasks", v)}/>
+          <SubtasksSection subtasks={task.subtasks ?? []} tasks={tasks} onChange={v => set("subtasks", v)}/>
         </FormSection>
 
         {/* ── Updates ──────────────────────────────────────────────────────── */}

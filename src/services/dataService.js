@@ -49,3 +49,21 @@ export const saveTasks = async (tasks) => {
     localStorage.setItem(KEYS.tasks, JSON.stringify(tasks));
   } catch { /* storage full or unavailable */ }
 };
+
+// ── ID Generators ──────────────────────────────────────────────────────────────
+
+export const generateTaskId = (tasks) => {
+  const max = tasks.reduce((m, t) => Math.max(m, parseInt(t.id?.replace("XMB-T", "")) || 0), 0);
+  return `XMB-T${String(max + 1).padStart(4, "0")}`;
+};
+
+export const generateProjectId = (projects) => {
+  const max = projects.reduce((m, p) => Math.max(m, parseInt(p.id?.replace("XMB-P", "")) || 0), 0);
+  return `XMB-P${String(max + 1).padStart(3, "0")}`;
+};
+
+export const generateSubtaskId = (allTasks) => {
+  const allSubtasks = allTasks.flatMap(t => t.subtasks ?? []);
+  const max = allSubtasks.reduce((m, s) => Math.max(m, parseInt(s.id?.replace("XMB-S", "")) || 0), 0);
+  return `XMB-S${String(max + 1).padStart(4, "0")}`;
+};
