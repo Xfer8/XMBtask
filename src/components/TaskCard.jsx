@@ -82,12 +82,12 @@ function DockCell({ value, placeholder, colorKey, onClick, refProp, children }) 
         borderLeft: "1px solid rgba(255,255,255,0.03)",
       }}
     >
-      {/* Top glow bar — 2px, dim at rest, vivid on hover */}
+      {/* Top glow bar — 2px, visible at rest, vivid on hover */}
       <div
         style={{
           position: "absolute", top: 0, left: 0, right: 0, height: "2px",
-          background: hov ? `rgba(${rgb}, 1)` : `rgba(${rgb}, 0.25)`,
-          boxShadow: hov ? `0 0 10px rgba(${rgb}, 0.7)` : "none",
+          background: hov ? `rgba(${rgb}, 1)` : `rgba(${rgb}, 0.55)`,
+          boxShadow: hov ? `0 0 12px rgba(${rgb}, 0.8)` : `0 0 4px rgba(${rgb}, 0.3)`,
           transition: "background 0.2s ease, box-shadow 0.2s ease",
           pointerEvents: "none",
           zIndex: 1,
@@ -103,7 +103,7 @@ function DockCell({ value, placeholder, colorKey, onClick, refProp, children }) 
           width: `${CELL_W}px`, height: "30px",
           display: "flex", alignItems: "center", justifyContent: "center",
           cursor: "pointer",
-          background: hov ? `rgba(${rgb}, 0.12)` : `rgba(${rgb}, 0.07)`,
+          background: hov ? `rgba(${rgb}, 0.22)` : `rgba(${rgb}, 0.13)`,
           transition: "background 0.2s ease",
         }}
       >
@@ -112,8 +112,8 @@ function DockCell({ value, placeholder, colorKey, onClick, refProp, children }) 
           textTransform: "uppercase", whiteSpace: "nowrap",
           overflow: "hidden", textOverflow: "ellipsis",
           maxWidth: `${CELL_W - 10}px`,
-          color: hov ? `rgba(${rgb}, 1)` : `rgba(${rgb}, 0.5)`,
-          textShadow: hov ? `0 0 8px rgba(${rgb}, 0.4)` : "none",
+          color: hov ? `rgba(${rgb}, 1)` : `rgba(${rgb}, 0.8)`,
+          textShadow: hov ? `0 0 10px rgba(${rgb}, 0.5)` : "none",
           transition: "color 0.2s ease, text-shadow 0.2s ease",
           userSelect: "none",
         }}>
@@ -403,7 +403,6 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
         <div style={{
           display: "flex",
           alignItems: "flex-start",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
         }}>
 
           {/* Title + project tag */}
