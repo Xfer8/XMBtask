@@ -510,10 +510,9 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
               onMouseLeave={() => setShowRibbonHov(false)}
               style={{
                 display: "flex", alignItems: "center",
-                borderTop: `1px dashed ${showRibbonHov ? "#555560" : "#3a3a3a"}`,
+                borderTop: "1px dashed #3a3a3a",
                 padding: "12px 0 0 0",
                 cursor: "pointer",
-                transition: "border-color 0.2s",
               }}
             >
               {/* Orange vertical bar */}
@@ -541,8 +540,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
               {/* Update text */}
               <span style={{
                 flex: 1, fontSize: "12px", lineHeight: 1.4, minWidth: 0,
-                color: lastUpdate ? "#AAA" : "#777",
-                fontStyle: lastUpdate ? "normal" : "italic",
+                color: "#777", fontStyle: "italic",
                 overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
               }}>
                 {lastUpdate ? lastUpdate.text : "No updates yet — click to add one"}
@@ -559,7 +557,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
 
           {/* Subtask progress bar + "N/M subtasks" label below + checklist */}
           {subtasks.length > 0 && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px" }}>
               <span style={{ fontSize: "10px", color: "#55555e" }}>
                 {doneCount}/{subtasks.length} subtasks
               </span>
