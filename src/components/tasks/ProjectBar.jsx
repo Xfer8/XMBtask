@@ -5,24 +5,24 @@ import { getPalette } from "../../colors";
 // One proportional slice of the project bar.
 // flex value = task count, so segments are automatically proportional.
 
-function BarSegment({ project, isActive, onClick }) {
-  const [hov, setHov] = useState(false);
+function BarSegment({ project, isActive, anyActive, onClick }) {
   const pal = getPalette(project.color);
+
+  // No filter active → all segments at default (mid) brightness
+  // Filter active    → selected = full bright, others = dim
+  const opacity = anyActive ? (isActive ? 1 : 0.45) : 0.75;
 
   return (
     <div
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
       onClick={onClick}
       title={project.title}
       style={{
-        flex:       1,        // controlled by parent wrapper flex
+        flex:       1,
         height:     "100%",
         background: pal.text,
-        opacity:    isActive ? 1 : hov ? 0.75 : 0.45,
+        opacity,
         cursor:     "pointer",
         transition: "opacity 0.15s",
-        boxShadow:  "none",
       }}
     />
   );
@@ -126,6 +126,7 @@ export default function ProjectBar({ tasks, projects, activeProjectId, onSelect 
             <BarSegment
               project={project}
               isActive={activeProjectId === project.id}
+              anyActive={activeProjectId !== null}
               onClick={() => toggle(project.id)}
             />
           </div>
