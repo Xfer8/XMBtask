@@ -98,7 +98,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
   const uncategorized   = filteredTasks.filter(t => !t.projectId || !projects.find(p => p.id === t.projectId));
 
   return (
-    <div style={{ width:"100%", padding:"24px 20px", boxSizing:"border-box", maxWidth:"860px", margin:"0 auto" }}>
+    <div style={{ width:"100%", padding:"24px 20px", boxSizing:"border-box", maxWidth:"720px", margin:"0 auto" }}>
 
       {/* ── Toolbar ─────────────────────────────────────────────────────────── */}
       <div style={{ display:"flex", alignItems:"center", gap:"10px", marginBottom:"24px" }}>
