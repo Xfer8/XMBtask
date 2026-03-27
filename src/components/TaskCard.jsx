@@ -43,178 +43,181 @@ function GlowBadge({ label, colorKey }) {
   );
 }
 
-// ── StatusBadge — hover to reveal "Edit Status", click for dropdown ──────────
+// ── MetaBadge — shared base for all right-sidebar meta badges ────────────────
+// Animated left-to-right fill on hover with color glow.
+
+function MetaBadge({ abbr, value, color, hov, setHov, onClick, refProp, children }) {
+  return (
+    <div ref={refProp} style={{ position: "relative", width: "100%" }}>
+      <div
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
+        onClick={onClick}
+        style={{
+          display: "flex", alignItems: "stretch",
+          background: "#222222", borderRadius: "2px",
+          overflow: "hidden",
+          border: "1px solid rgba(255,255,255,0.06)",
+          cursor: "pointer",
+          filter: hov ? `drop-shadow(0 0 6px ${color})` : "none",
+          transition: "filter 0.3s ease",
+          width: "100%",
+        }}
+      >
+        {/* Label section with animated left-to-right fill */}
+        <div style={{
+          position: "relative", width: "44px", flexShrink: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          background: "rgba(0,0,0,0.25)", overflow: "hidden",
+        }}>
+          <div style={{
+            position: "absolute", top: 0, left: 0, height: "100%",
+            width: hov ? "100%" : "3px",
+            background: color,
+            transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+            zIndex: 1,
+          }} />
+          <span style={{
+            position: "relative", zIndex: 2,
+            fontSize: "10px", fontWeight: 900,
+            color: hov ? "#1A1A1A" : "#666",
+            transition: "color 0.3s ease",
+            letterSpacing: "0.04em", userSelect: "none",
+          }}>
+            {abbr}
+          </span>
+        </div>
+        {/* Value section */}
+        <div style={{
+          flex: 1, display: "flex", alignItems: "center",
+          padding: "7px 10px",
+          fontSize: "12px", fontWeight: 700, color: "#f0f0f0",
+          borderLeft: "1px solid rgba(0,0,0,0.3)", minWidth: 0,
+        }}>
+          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {value}
+          </span>
+        </div>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ── Shared dropdown list ───────────────────────────────────────────────────────
+
+function MetaDropdown({ options, selected, getColorKey, onSelect }) {
+  return (
+    <div
+      onClick={e => e.stopPropagation()}
+      style={{
+        position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 400,
+        background: "#1E1E1E", border: "1px solid #3a3a44",
+        borderRadius: "8px", padding: "4px",
+        boxShadow: "0 8px 24px rgba(0,0,0,0.5)", minWidth: "160px",
+      }}
+    >
+      {options.map(opt => {
+        const p = getPalette(getColorKey(opt));
+        const isSelected = opt === selected;
+        return (
+          <div key={opt} onClick={() => onSelect(opt)} style={{
+            padding: "6px 10px", borderRadius: "5px", cursor: "pointer",
+            background: isSelected ? "#2e2e3a" : "transparent",
+            display: "flex", alignItems: "center", gap: "8px",
+            transition: "background 0.1s",
+          }}>
+            <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: p.text, flexShrink: 0 }} />
+            <span style={{ fontSize: "12px", color: "#c8c8d0", fontWeight: isSelected ? 600 : 400 }}>{opt}</span>
+            {isSelected && <span style={{ fontSize: "11px", color: "#55555e", marginLeft: "auto" }}>✓</span>}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── StatusBadge ───────────────────────────────────────────────────────────────
 
 const STATUS_OPTIONS = ["Not Started", "In Progress", "Needs Review", "Done"];
 
 function StatusBadge({ status, colorKey, onChange }) {
-  const [hov,  setHov]  = useState(false);
+  const [hov, setHov] = useState(false);
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
-  const p   = getPalette(colorKey);
 
   useEffect(() => {
     if (!open) return;
-    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
   }, [open]);
 
   return (
-    <div ref={ref} style={{ position: "relative" }}>
-      <span
-        onMouseEnter={() => setHov(true)}
-        onMouseLeave={() => setHov(false)}
-        onClick={(e) => { e.stopPropagation(); setOpen(v => !v); }}
-        style={{
-          ...BADGE,
-          background: hov ? p.hoverBg  : p.bg,
-          color:      hov ? p.hoverText : p.text,
-          border: `1px solid ${hov ? p.hoverBorder : p.bg}`,
-          cursor: "pointer",
-          transition: "background 0.15s, color 0.15s, border-color 0.15s",
-          display: "inline-block", flexShrink: 0,
-        }}
-      >
-        {status}
-      </span>
-
+    <MetaBadge
+      abbr="STA" value={status}
+      color={getPalette(colorKey).text}
+      hov={hov} setHov={setHov}
+      onClick={e => { e.stopPropagation(); setOpen(v => !v); }}
+      refProp={ref}
+    >
       {open && (
-        <div
-          onClick={e => e.stopPropagation()}
-          style={{
-            position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 400,
-            background: "#1E1E1E", border: "1px solid #3a3a44",
-            borderRadius: "8px", padding: "4px",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
-            minWidth: "160px",
-          }}
-        >
-          {STATUS_OPTIONS.map(opt => {
-            const optP = getPalette(STATUS_COLORS[opt] ?? "gray");
-            const selected = opt === status;
-            return (
-              <div
-                key={opt}
-                onClick={() => { onChange(opt); setOpen(false); setHov(false); }}
-                style={{
-                  padding: "6px 10px", borderRadius: "5px", cursor: "pointer",
-                  background: selected ? "#2e2e3a" : "transparent",
-                  display: "flex", alignItems: "center", gap: "8px",
-                  transition: "background 0.1s",
-                }}
-              >
-                <div style={{
-                  width: "8px", height: "8px", borderRadius: "50%",
-                  background: optP.text, flexShrink: 0,
-                }} />
-                <span style={{ fontSize: "12px", color: "#c8c8d0", fontWeight: selected ? 600 : 400 }}>
-                  {opt}
-                </span>
-                {selected && (
-                  <span style={{ fontSize: "11px", color: "#55555e", marginLeft: "auto" }}>✓</span>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <MetaDropdown
+          options={STATUS_OPTIONS} selected={status}
+          getColorKey={opt => STATUS_COLORS[opt] ?? "gray"}
+          onSelect={opt => { onChange(opt); setOpen(false); setHov(false); }}
+        />
       )}
-    </div>
+    </MetaBadge>
   );
 }
 
-// ── PriorityBadge — hover to reveal "Edit Priority", click for dropdown ───────
+// ── PriorityBadge ─────────────────────────────────────────────────────────────
 
 const PRIORITY_OPTIONS = ["Low", "Medium", "High"];
 
 function PriorityBadge({ priority, colorKey, onChange }) {
-  const [hov,  setHov]  = useState(false);
+  const [hov, setHov] = useState(false);
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
-  const p   = getPalette(colorKey);
 
   useEffect(() => {
     if (!open) return;
-    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
   }, [open]);
 
   return (
-    <div ref={ref} style={{ position: "relative" }}>
-      <span
-        onMouseEnter={() => setHov(true)}
-        onMouseLeave={() => setHov(false)}
-        onClick={(e) => { e.stopPropagation(); setOpen(v => !v); }}
-        style={{
-          ...BADGE,
-          background: hov ? p.hoverBg  : p.bg,
-          color:      hov ? p.hoverText : p.text,
-          border: `1px solid ${hov ? p.hoverBorder : p.bg}`,
-          cursor: "pointer",
-          transition: "background 0.15s, color 0.15s, border-color 0.15s",
-          display: "inline-block",
-        }}
-      >
-        {priority}
-      </span>
-
+    <MetaBadge
+      abbr="PRY" value={priority}
+      color={getPalette(colorKey).text}
+      hov={hov} setHov={setHov}
+      onClick={e => { e.stopPropagation(); setOpen(v => !v); }}
+      refProp={ref}
+    >
       {open && (
-        <div
-          onClick={e => e.stopPropagation()}
-          style={{
-            position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 400,
-            background: "#1E1E1E", border: "1px solid #3a3a44",
-            borderRadius: "8px", padding: "4px",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
-            minWidth: "130px",
-          }}
-        >
-          {PRIORITY_OPTIONS.map(opt => {
-            const optP = getPalette(PRIORITY_COLORS[opt] ?? "gray");
-            const selected = opt === priority;
-            return (
-              <div
-                key={opt}
-                onClick={() => { onChange(opt); setOpen(false); setHov(false); }}
-                style={{
-                  padding: "6px 10px", borderRadius: "5px", cursor: "pointer",
-                  background: selected ? "#2e2e3a" : "transparent",
-                  display: "flex", alignItems: "center", gap: "8px",
-                  transition: "background 0.1s",
-                }}
-              >
-                <div style={{
-                  width: "8px", height: "8px", borderRadius: "50%",
-                  background: optP.text, flexShrink: 0,
-                }} />
-                <span style={{ fontSize: "12px", color: "#c8c8d0", fontWeight: selected ? 600 : 400 }}>
-                  {opt}
-                </span>
-                {selected && (
-                  <span style={{ fontSize: "11px", color: "#55555e", marginLeft: "auto" }}>✓</span>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <MetaDropdown
+          options={PRIORITY_OPTIONS} selected={priority}
+          getColorKey={opt => PRIORITY_COLORS[opt] ?? "gray"}
+          onSelect={opt => { onChange(opt); setOpen(false); setHov(false); }}
+        />
       )}
-    </div>
+    </MetaBadge>
   );
 }
 
-// ── DueDateBadge — hover to reveal "Change Due Date", click for date picker ───
+// ── DueDateBadge ──────────────────────────────────────────────────────────────
 
 function DueDateBadge({ dueDate, colorKey, onChange }) {
   const [hov,  setHov]  = useState(false);
   const [open, setOpen] = useState(false);
   const ref      = useRef(null);
   const inputRef = useRef(null);
-  const p = getPalette(colorKey ?? "gray");
 
   useEffect(() => {
     if (!open) return;
-    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
   }, [open]);
@@ -226,33 +229,17 @@ function DueDateBadge({ dueDate, colorKey, onChange }) {
     }
   }, [open]);
 
-  const label = dueDate ? formatDate(dueDate) : "No due date";
+  const color = dueDate ? getPalette(colorKey).text : "#4B5563";
+  const label = dueDate ? formatShortDate(dueDate) : "No date";
 
   return (
-    <div ref={ref} style={{ position: "relative" }}>
-      <span
-        onMouseEnter={() => setHov(true)}
-        onMouseLeave={() => setHov(false)}
-        onClick={(e) => { e.stopPropagation(); setOpen(v => !v); }}
-        style={{
-          ...BADGE,
-          background: dueDate
-            ? (hov ? p.hoverBg   : p.bg)
-            : (hov ? "#374151"   : "#2a2a2a"),
-          color: dueDate
-            ? (hov ? p.hoverText : p.text)
-            : (hov ? "#D1D5DB"   : "#55555e"),
-          border: `1px solid ${hov
-            ? (dueDate ? p.hoverBorder : "#4B5563")
-            : (dueDate ? p.bg : "#374151")}`,
-          cursor: "pointer",
-          transition: "background 0.15s, color 0.15s, border-color 0.15s",
-          display: "inline-block",
-        }}
-      >
-        {label}
-      </span>
-
+    <MetaBadge
+      abbr="DUE" value={label}
+      color={color}
+      hov={hov} setHov={setHov}
+      onClick={e => { e.stopPropagation(); setOpen(v => !v); }}
+      refProp={ref}
+    >
       {open && (
         <div
           onClick={e => e.stopPropagation()}
@@ -267,7 +254,7 @@ function DueDateBadge({ dueDate, colorKey, onChange }) {
             ref={inputRef}
             type="date"
             value={dueDate ?? ""}
-            onChange={(e) => { onChange(e.target.value || null); setOpen(false); setHov(false); }}
+            onChange={e => { onChange(e.target.value || null); setOpen(false); setHov(false); }}
             style={{
               background: "#1e1e1e", border: "1px solid #3a3a3a",
               borderRadius: "6px", color: "#f0f0f0",
@@ -291,7 +278,7 @@ function DueDateBadge({ dueDate, colorKey, onChange }) {
           )}
         </div>
       )}
-    </div>
+    </MetaBadge>
   );
 }
 
@@ -668,14 +655,14 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
         {/* ── Vertical divider ───────────────────────────────────────────────── */}
         <div style={{ width: "1px", background: "#444450", margin: "0 14px", flexShrink: 0 }} />
 
-        {/* ── Right sidebar (110px, right-aligned) ───────────────────────────── */}
+        {/* ── Right sidebar ───────────────────────────────────────────────────── */}
         <div style={{
-          width: "110px", flexShrink: 0,
+          width: "150px", flexShrink: 0,
           display: "flex", flexDirection: "column",
           justifyContent: "space-between", gap: "6px",
         }}>
-          {/* Status + Priority + Due date + Owner — right-justified */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px", alignItems: "flex-end" }}>
+          {/* Status + Priority + Due date + Owner */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             <StatusBadge
               status={task.status}
               colorKey={statusColorKey}
@@ -693,16 +680,35 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
               onChange={(val) => onUpdate?.({ ...task, dueDate: val })}
             />
 
-            {task.owner && (
-              <span style={{
-                ...BADGE,
-                background: "#374151", color: "#D1D5DB",
-                border: "1px solid #374151",
-                maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis",
-              }}>
-                {task.owner}
-              </span>
-            )}
+            {task.owner && (() => {
+              const [h, setH] = [false, () => {}]; // owner is display-only, no hover needed
+              return (
+                <div style={{
+                  display: "flex", alignItems: "stretch",
+                  background: "#222222", borderRadius: "2px",
+                  overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)",
+                  width: "100%",
+                }}>
+                  <div style={{
+                    position: "relative", width: "44px", flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: "rgba(0,0,0,0.25)",
+                  }}>
+                    <div style={{ position: "absolute", top: 0, left: 0, height: "100%", width: "3px", background: "#4B5563" }} />
+                    <span style={{ position: "relative", zIndex: 2, fontSize: "10px", fontWeight: 900, color: "#666", letterSpacing: "0.04em" }}>
+                      OWN
+                    </span>
+                  </div>
+                  <div style={{
+                    flex: 1, display: "flex", alignItems: "center", padding: "7px 10px",
+                    fontSize: "12px", fontWeight: 700, color: "#f0f0f0",
+                    borderLeft: "1px solid rgba(0,0,0,0.3)", minWidth: 0,
+                  }}>
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{task.owner}</span>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Image thumbnail with count bubble */}
