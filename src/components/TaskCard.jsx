@@ -407,9 +407,10 @@ function UpdatePopover({ updates = [], onAdd, onClose }) {
 // ── TaskCard ──────────────────────────────────────────────────────────────────
 
 export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
-  const [hov,          setHov]          = useState(false);
-  const [showPopover,  setShowPopover]  = useState(false);
-  const [viewerIndex,  setViewerIndex]  = useState(null); // null = closed
+  const [hov,            setHov]            = useState(false);
+  const [showPopover,    setShowPopover]    = useState(false);
+  const [viewerIndex,    setViewerIndex]    = useState(null); // null = closed
+  const [showRibbonHov,  setShowRibbonHov]  = useState(false);
 
   const project    = projects.find(p => p.id === task.projectId);
   const projectPal = project ? getPalette(project.color) : null;
@@ -495,37 +496,51 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
             </div>
           )}
 
-          {/* Last update row — label | text | date, all inline */}
+          {/* Last update ribbon */}
           <div
             onClick={e => { e.stopPropagation(); setShowPopover(v => !v); }}
+            onMouseEnter={() => setShowRibbonHov(true)}
+            onMouseLeave={() => setShowRibbonHov(false)}
             style={{
-              background: "#2e2e36", borderRadius: "6px",
-              padding: "6px 10px", cursor: "pointer",
-              position: "relative",
-              display: "flex", alignItems: "center", gap: "8px",
+              display: "flex", alignItems: "stretch",
+              overflow: "hidden", borderRadius: "6px",
+              border: `1px solid ${showRibbonHov ? getPalette("orange","glow").hoverBorder : getPalette("orange","glow").border}`,
+              background: "linear-gradient(to right, #1E1E26, #14141A)",
+              cursor: "pointer", position: "relative",
+              boxShadow: showRibbonHov ? "0 0 14px rgba(251,146,60,0.22)" : "none",
+              transition: "box-shadow 0.2s, border-color 0.2s",
+              minHeight: "32px",
             }}
           >
-            <span style={{
-              fontSize: "10px", fontWeight: 700, color: "#55555e",
+            {/* Slanted orange label */}
+            <div style={{
+              background: getPalette("orange","solid").bg,
+              color: getPalette("orange","solid").text,
+              fontSize: "10px", fontWeight: 900,
               letterSpacing: "0.1em", textTransform: "uppercase",
+              padding: "0 24px 0 12px",
+              clipPath: "polygon(0 0, 100% 0, 88% 100%, 0% 100%)",
+              display: "flex", alignItems: "center",
               whiteSpace: "nowrap", flexShrink: 0,
             }}>
               Last Update
-            </span>
-            <span style={{
-              flex: 1, fontSize: "12px",
-              color: lastUpdate ? "#888890" : "#55555e",
-              fontStyle: lastUpdate ? "normal" : "italic",
-              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-            }}>
-              {lastUpdate ? lastUpdate.text : "No updates yet — click to add one"}
-            </span>
-            {lastUpdate && (
-              <span style={{ fontSize: "11px", color: "#55555e", whiteSpace: "nowrap", flexShrink: 0 }}>
-                {formatShortDate(lastUpdate.timestamp)}
+            </div>
+            {/* Text + date */}
+            <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "8px", padding: "6px 10px", minWidth: 0 }}>
+              <span style={{
+                flex: 1, fontSize: "12px",
+                color: lastUpdate ? "#D1D5DB" : "#55555e",
+                fontStyle: lastUpdate ? "normal" : "italic",
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>
+                {lastUpdate ? lastUpdate.text : "No updates yet — click to add one"}
               </span>
-            )}
-
+              {lastUpdate && (
+                <span style={{ fontSize: "11px", color: "#55555e", whiteSpace: "nowrap", flexShrink: 0 }}>
+                  {formatShortDate(lastUpdate.timestamp)}
+                </span>
+              )}
+            </div>
             {showPopover && (
               <UpdatePopover
                 updates={updates}
