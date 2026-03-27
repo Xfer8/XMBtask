@@ -504,25 +504,24 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
               onMouseLeave={() => setShowRibbonHov(false)}
               style={{
                 display: "flex", alignItems: "stretch",
-                overflow: "hidden", borderRadius: "6px",
-                border: `1px solid ${showRibbonHov ? getPalette("gray","glow").hoverBorder : getPalette("gray","glow").border}`,
-                background: "linear-gradient(to right, #1E1E26, #14141A)",
+                borderRadius: "6px",
+                border: `1px solid ${showRibbonHov ? "#555560" : "#3a3a3a"}`,
+                background: "#1E1E1E",
                 cursor: "pointer",
-                boxShadow: showRibbonHov ? "0 0 12px rgba(209,213,219,0.12)" : "none",
-                transition: "box-shadow 0.2s, border-color 0.2s",
+                transition: "border-color 0.2s",
                 minHeight: "32px",
               }}
             >
-              {/* Slanted label — gray-glow bg with light text */}
+              {/* Label — no fill, just text + right divider */}
               <div style={{
-                background: getPalette("gray","glow").bg,
-                color: getPalette("gray","glow").text,
-                fontSize: "10px", fontWeight: 900,
+                color: showRibbonHov ? "#888890" : "#55555e",
+                fontSize: "10px", fontWeight: 700,
                 letterSpacing: "0.1em", textTransform: "uppercase",
-                padding: "0 24px 0 12px",
-                clipPath: "polygon(0 0, 100% 0, 88% 100%, 0% 100%)",
+                padding: "0 12px",
+                borderRight: `1px solid ${showRibbonHov ? "#555560" : "#3a3a3a"}`,
                 display: "flex", alignItems: "center",
                 whiteSpace: "nowrap", flexShrink: 0,
+                transition: "color 0.2s, border-color 0.2s",
               }}>
                 Last Update
               </div>
@@ -530,7 +529,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
               <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "8px", padding: "6px 10px", minWidth: 0 }}>
                 <span style={{
                   flex: 1, fontSize: "12px",
-                  color: lastUpdate ? "#c8c8d0" : "#55555e",
+                  color: lastUpdate ? "#888890" : "#55555e",
                   fontStyle: lastUpdate ? "normal" : "italic",
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                 }}>
