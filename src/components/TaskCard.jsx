@@ -481,6 +481,56 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
             )}
           </div>
 
+          {/* Link badges */}
+          {links.length > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+              {links.map(link => {
+                if (link.type === "Sherlock") {
+                  return (
+                    <SplitBadge
+                      key={link.id}
+                      label="Sherlock"
+                      value={link.displayName || link.url}
+                      colorKey="orange"
+                      href={link.url}
+                      onClick={e => e.stopPropagation()}
+                    />
+                  );
+                }
+                if (link.type === "Jira") {
+                  return (
+                    <SplitBadge
+                      key={link.id}
+                      label="Jira"
+                      value={link.displayName || link.url}
+                      colorKey="blue"
+                      href={link.url}
+                      onClick={e => e.stopPropagation()}
+                    />
+                  );
+                }
+                return (
+                  <a
+                    key={link.id}
+                    href={link.url}
+                    onClick={e => e.stopPropagation()}
+                    target="_blank" rel="noreferrer"
+                    style={{ textDecoration: "none" }}
+                  >
+                    <span style={{
+                      fontSize: "10px", fontWeight: 600,
+                      padding: "2px 8px", borderRadius: "4px",
+                      background: "#0B3547", color: "#38BDF8",
+                      border: "1px solid #166A8E", whiteSpace: "nowrap",
+                    }}>
+                      {link.displayName || link.type}
+                    </span>
+                  </a>
+                );
+              })}
+            </div>
+          )}
+
           {/* Description — up to 4 lines */}
           {task.description && (
             <div
@@ -613,53 +663,6 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
             </div>
           )}
 
-          {/* Link badges */}
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-            {links.map(link => {
-              if (link.type === "Sherlock") {
-                return (
-                  <SplitBadge
-                    key={link.id}
-                    label="Sherlock"
-                    value={link.displayName || link.url}
-                    colorKey="orange"
-                    href={link.url}
-                    onClick={e => e.stopPropagation()}
-                  />
-                );
-              }
-              if (link.type === "Jira") {
-                return (
-                  <SplitBadge
-                    key={link.id}
-                    label="Jira"
-                    value={link.displayName || link.url}
-                    colorKey="blue"
-                    href={link.url}
-                    onClick={e => e.stopPropagation()}
-                  />
-                );
-              }
-              return (
-                <a
-                  key={link.id}
-                  href={link.url}
-                  onClick={e => e.stopPropagation()}
-                  target="_blank" rel="noreferrer"
-                  style={{ textDecoration: "none" }}
-                >
-                  <span style={{
-                    fontSize: "10px", fontWeight: 600,
-                    padding: "2px 8px", borderRadius: "4px",
-                    background: "#0B3547", color: "#38BDF8",
-                    border: "1px solid #166A8E", whiteSpace: "nowrap",
-                  }}>
-                    {link.displayName || link.type}
-                  </span>
-                </a>
-              );
-            })}
-          </div>
         </div>
 
         {/* ── Vertical divider ───────────────────────────────────────────────── */}
