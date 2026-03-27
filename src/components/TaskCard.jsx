@@ -453,32 +453,32 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
             onClick={() => onEdit(task)}
             style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", cursor: "pointer" }}
           >
-            <span style={{ fontSize: "16px", fontWeight: 700, color: "#f0f0f0", lineHeight: 1.3 }}>
+            <span style={{ fontSize: "16px", fontWeight: 700, color: "#f0f0f0", lineHeight: 1 }}>
               {task.title}
             </span>
             {project && (
               <span style={{
                 display: "inline-flex", alignItems: "center",
                 background: "#2a2a2a",
-                padding: "4px 10px 4px 6px",
+                padding: "3px 10px 3px 6px",
                 borderRadius: "2px",
                 whiteSpace: "nowrap", flexShrink: 0,
               }}>
-                {/* Colored neon bar */}
+                {/* Colored bar */}
                 <span style={{
-                  width: "3px", height: "14px",
+                  width: "3px", height: "12px",
                   background: projectPal.text,
-                  boxShadow: `0 0 8px ${projectPal.text}`,
+                  boxShadow: `0 0 4px ${projectPal.text}80`,
                   borderRadius: "1px",
-                  marginRight: "8px",
+                  marginRight: "7px",
                   flexShrink: 0,
-                  display: "inline-block",
+                  alignSelf: "center",
                 }} />
                 <span style={{
                   fontSize: "10px", fontWeight: 900,
                   textTransform: "uppercase", letterSpacing: "1px",
                   color: "#DDD",
-                  textShadow: "0 0 2px rgba(255,255,255,0.2)",
+                  lineHeight: 1,
                 }}>
                   {project.title}
                 </span>
