@@ -84,10 +84,10 @@ function StatusBadge({ status, colorKey, onChange }) {
           onClick={e => e.stopPropagation()}
           style={{
             position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 400,
-            background: "#2a2a2e", border: "1px solid #3a3a44",
+            background: "#1E1E24", border: "1px solid #3a3a44",
             borderRadius: "8px", padding: "4px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
-            minWidth: "150px",
+            minWidth: "160px",
           }}
         >
           {STATUS_OPTIONS.map(opt => {
@@ -98,18 +98,22 @@ function StatusBadge({ status, colorKey, onChange }) {
                 key={opt}
                 onClick={() => { onChange(opt); setOpen(false); setHov(false); }}
                 style={{
-                  padding: "5px 8px", borderRadius: "5px", cursor: "pointer",
-                  background: selected ? "#3a3a44" : "transparent",
-                  display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px",
+                  padding: "6px 10px", borderRadius: "5px", cursor: "pointer",
+                  background: selected ? "#2e2e3a" : "transparent",
+                  display: "flex", alignItems: "center", gap: "8px",
                   transition: "background 0.1s",
                 }}
               >
-                {selected && (
-                  <span style={{ fontSize: "12px", color: "#55555e" }}>✓</span>
-                )}
-                <span style={{ ...BADGE, background: optP.bg, color: optP.text, border: `1px solid ${optP.bg}` }}>
+                <div style={{
+                  width: "8px", height: "8px", borderRadius: "50%",
+                  background: optP.text, flexShrink: 0,
+                }} />
+                <span style={{ fontSize: "12px", color: "#c8c8d0", fontWeight: selected ? 600 : 400 }}>
                   {opt}
                 </span>
+                {selected && (
+                  <span style={{ fontSize: "11px", color: "#55555e", marginLeft: "auto" }}>✓</span>
+                )}
               </div>
             );
           })}
@@ -160,7 +164,7 @@ function PriorityBadge({ priority, colorKey, onChange }) {
           onClick={e => e.stopPropagation()}
           style={{
             position: "absolute", right: 0, top: "calc(100% + 4px)", zIndex: 400,
-            background: "#2a2a2e", border: "1px solid #3a3a44",
+            background: "#1E1E24", border: "1px solid #3a3a44",
             borderRadius: "8px", padding: "4px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
             minWidth: "130px",
@@ -174,18 +178,22 @@ function PriorityBadge({ priority, colorKey, onChange }) {
                 key={opt}
                 onClick={() => { onChange(opt); setOpen(false); setHov(false); }}
                 style={{
-                  padding: "5px 8px", borderRadius: "5px", cursor: "pointer",
-                  background: selected ? "#3a3a44" : "transparent",
-                  display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px",
+                  padding: "6px 10px", borderRadius: "5px", cursor: "pointer",
+                  background: selected ? "#2e2e3a" : "transparent",
+                  display: "flex", alignItems: "center", gap: "8px",
                   transition: "background 0.1s",
                 }}
               >
-                {selected && (
-                  <span style={{ fontSize: "12px", color: "#55555e" }}>✓</span>
-                )}
-                <span style={{ ...BADGE, background: optP.bg, color: optP.text, border: `1px solid ${optP.bg}` }}>
+                <div style={{
+                  width: "8px", height: "8px", borderRadius: "50%",
+                  background: optP.text, flexShrink: 0,
+                }} />
+                <span style={{ fontSize: "12px", color: "#c8c8d0", fontWeight: selected ? 600 : 400 }}>
                   {opt}
                 </span>
+                {selected && (
+                  <span style={{ fontSize: "11px", color: "#55555e", marginLeft: "auto" }}>✓</span>
+                )}
               </div>
             );
           })}
