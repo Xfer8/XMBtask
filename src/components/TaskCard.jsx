@@ -331,8 +331,8 @@ function UpdatePopover({ updates = [], onAdd, onClose }) {
       style={{
         position: "absolute", zIndex: 600,
         top: "calc(100% + 6px)", left: 0,
-        width: "300px",
-        background: "#1E1E1E", border: "1px solid #3a3a44",
+        width: "100%",
+        background: "#2c2c2c", border: "1px solid #3a3a3a",
         borderRadius: "10px", padding: "14px",
         boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
       }}
@@ -355,7 +355,7 @@ function UpdatePopover({ updates = [], onAdd, onClose }) {
         autoFocus
         style={{
           width: "100%", boxSizing: "border-box",
-          background: "#1e1e1e", border: "1px solid #3a3a3a", borderRadius: "7px",
+          background: "#1E1E1E", border: "1px solid #3a3a3a", borderRadius: "7px",
           color: "#f0f0f0", fontSize: "12px", padding: "8px 10px",
           fontFamily: "inherit", outline: "none", resize: "none",
           lineHeight: "1.5", marginBottom: "8px",
@@ -379,7 +379,7 @@ function UpdatePopover({ updates = [], onAdd, onClose }) {
       {sorted.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "180px", overflowY: "auto" }}>
           {sorted.map(u => (
-            <div key={u.id} style={{ background: "#1a1a1e", borderRadius: "7px", padding: "8px 10px" }}>
+            <div key={u.id} style={{ background: "#1E1E1E", borderRadius: "7px", padding: "8px 10px", borderLeft: "2px solid #3a3a3a" }}>
               <div style={{ fontSize: "12px", color: "#c8c8d0", lineHeight: 1.4, marginBottom: "3px" }}>{u.text}</div>
               <div style={{ fontSize: "10px", color: "#55555e" }}>{formatTs(u.timestamp)}</div>
             </div>
