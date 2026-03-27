@@ -2,6 +2,7 @@ import { useState } from "react";
 import { getPalette } from "../../colors";
 import { STATUS_COLORS } from "../../theme";
 import TaskCard from "../TaskCard";
+import AnimatedTaskList from "./AnimatedTaskList";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -170,15 +171,12 @@ export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProj
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          {activeTasks.map(task => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              projects={allProjects}
-              onEdit={onEdit}
-              onUpdate={onUpdate}
-            />
-          ))}
+          <AnimatedTaskList
+            tasks={activeTasks}
+            projects={allProjects}
+            onEdit={onEdit}
+            onUpdate={onUpdate}
+          />
 
           {/* ── Done tasks collapsible ──────────────────────────────────── */}
           {doneTasks.length > 0 && (

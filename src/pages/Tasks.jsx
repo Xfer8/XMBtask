@@ -1,8 +1,9 @@
 import { useState, useRef } from "react";
-import TaskCard     from "../components/TaskCard";
-import TaskModal    from "../components/tasks/TaskModal";
-import ProjectGroup from "../components/tasks/ProjectGroup";
-import ProjectBar   from "../components/tasks/ProjectBar";
+import TaskCard          from "../components/TaskCard";
+import TaskModal         from "../components/tasks/TaskModal";
+import ProjectGroup      from "../components/tasks/ProjectGroup";
+import ProjectBar        from "../components/tasks/ProjectBar";
+import AnimatedTaskList  from "../components/tasks/AnimatedTaskList";
 
 const EMPTY_TASK = {
   title:"", description:"", status:"Not Started", priority:"Medium",
@@ -245,17 +246,12 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
               {q ? "No tasks match your search." : "No tasks yet — click \"New Task\" to get started."}
             </div>
           ) : (
-            <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
-              {sortTasks(filteredTasks).map(task => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  projects={projects}
-                  onEdit={openEdit}
-                  onUpdate={onUpdate}
-                />
-              ))}
-            </div>
+            <AnimatedTaskList
+              tasks={sortTasks(filteredTasks)}
+              projects={projects}
+              onEdit={openEdit}
+              onUpdate={onUpdate}
+            />
           )
         )}
       </div>
