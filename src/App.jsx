@@ -153,6 +153,17 @@ export default function App() {
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", backgroundColor: "#212121" }}>
 
+      {/* Top mask — fixed strip that hides content scrolling into the header gap */}
+      <div style={{
+        position:   "fixed",
+        top:        0,
+        left:       0,
+        right:      0,
+        height:     "20px",
+        background: "#212121",
+        zIndex:     99,
+      }} />
+
       {/* Floating header — outer wrapper matches page content column (720px, 20px padding) */}
       <div style={{
         width:      "100%",
