@@ -22,6 +22,12 @@ const getDueDateColorKey = (iso) => {
   return "green";
 };
 
+// Convert a hex color string (#RRGGBB) to "r, g, b" for use in rgba()
+const hexToRgb = (hex) => {
+  if (!hex || !hex.startsWith("#") || hex.length < 7) return "136, 136, 144";
+  return [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)).join(", ");
+};
+
 // ── MetaDropdown — shared dropdown list ───────────────────────────────────────
 
 function MetaDropdown({ options, selected, getColorKey, onSelect }) {
@@ -55,18 +61,40 @@ function MetaDropdown({ options, selected, getColorKey, onSelect }) {
   );
 }
 
-// ── StripCell — one cell in the top data strip ────────────────────────────────
-// Fixed 105 × 30 px. Colored text when value present, muted when empty.
+// ── DockCell — one integrated cell in the slim data dock ──────────────────────
+// Inspired by the "slim-data-dock" pattern:
+//   - Persistent low-opacity color tint on bg + text at rest
+//   - Full-color text + brighter bg + glowing top bar on hover
+//   - Top glow bar is always faintly visible, becomes vivid on hover
 
-const CELL_W = 105; // px — all three cells are identical width
+const CELL_W = 85; // px — all three cells identical
 
-function StripCell({ value, placeholder, colorKey, onClick, refProp, children }) {
+function DockCell({ value, placeholder, colorKey, onClick, refProp, children }) {
   const [hov, setHov] = useState(false);
-  const p = getPalette(colorKey);
-  const hasVal = !!value;
+  const p   = getPalette(colorKey);
+  const rgb = hexToRgb(p.text);
 
   return (
-    <div ref={refProp} style={{ position: "relative" }}>
+    <div
+      ref={refProp}
+      style={{
+        position: "relative",
+        borderLeft: "1px solid rgba(255,255,255,0.03)",
+      }}
+    >
+      {/* Top glow bar — 2px, dim at rest, vivid on hover */}
+      <div
+        style={{
+          position: "absolute", top: 0, left: 0, right: 0, height: "2px",
+          background: hov ? `rgba(${rgb}, 1)` : `rgba(${rgb}, 0.25)`,
+          boxShadow: hov ? `0 0 10px rgba(${rgb}, 0.7)` : "none",
+          transition: "background 0.2s ease, box-shadow 0.2s ease",
+          pointerEvents: "none",
+          zIndex: 1,
+        }}
+      />
+
+      {/* Clickable cell body */}
       <div
         onMouseEnter={() => setHov(true)}
         onMouseLeave={() => setHov(false)}
@@ -75,22 +103,25 @@ function StripCell({ value, placeholder, colorKey, onClick, refProp, children })
           width: `${CELL_W}px`, height: "30px",
           display: "flex", alignItems: "center", justifyContent: "center",
           cursor: "pointer",
-          background: hov ? "rgba(255,255,255,0.05)" : "transparent",
-          borderRadius: "3px",
-          transition: "background 0.15s",
+          background: hov ? `rgba(${rgb}, 0.12)` : `rgba(${rgb}, 0.07)`,
+          transition: "background 0.2s ease",
         }}
       >
         <span style={{
-          fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em",
+          fontSize: "9px", fontWeight: 900, letterSpacing: "0.8px",
           textTransform: "uppercase", whiteSpace: "nowrap",
           overflow: "hidden", textOverflow: "ellipsis",
-          maxWidth: `${CELL_W - 12}px`,
-          color: hasVal ? p.text : "#383840",
+          maxWidth: `${CELL_W - 10}px`,
+          color: hov ? `rgba(${rgb}, 1)` : `rgba(${rgb}, 0.5)`,
+          textShadow: hov ? `0 0 8px rgba(${rgb}, 0.4)` : "none",
+          transition: "color 0.2s ease, text-shadow 0.2s ease",
           userSelect: "none",
         }}>
-          {hasVal ? value : placeholder}
+          {value || placeholder}
         </span>
       </div>
+
+      {/* Dropdown / picker portal */}
       {children}
     </div>
   );
@@ -112,7 +143,7 @@ function StatusCell({ status, colorKey, onChange }) {
   }, [open]);
 
   return (
-    <StripCell
+    <DockCell
       value={status} placeholder="Status"
       colorKey={colorKey}
       onClick={e => { e.stopPropagation(); setOpen(v => !v); }}
@@ -125,7 +156,7 @@ function StatusCell({ status, colorKey, onChange }) {
           onSelect={opt => { onChange(opt); setOpen(false); }}
         />
       )}
-    </StripCell>
+    </DockCell>
   );
 }
 
@@ -145,7 +176,7 @@ function PriorityCell({ priority, colorKey, onChange }) {
   }, [open]);
 
   return (
-    <StripCell
+    <DockCell
       value={priority} placeholder="Priority"
       colorKey={colorKey}
       onClick={e => { e.stopPropagation(); setOpen(v => !v); }}
@@ -158,7 +189,7 @@ function PriorityCell({ priority, colorKey, onChange }) {
           onSelect={opt => { onChange(opt); setOpen(false); }}
         />
       )}
-    </StripCell>
+    </DockCell>
   );
 }
 
@@ -184,7 +215,7 @@ function DueDateCell({ dueDate, colorKey, onChange }) {
   }, [open]);
 
   return (
-    <StripCell
+    <DockCell
       value={formatShortDate(dueDate)} placeholder="Due Date"
       colorKey={colorKey}
       onClick={e => { e.stopPropagation(); setOpen(v => !v); }}
@@ -228,7 +259,7 @@ function DueDateCell({ dueDate, colorKey, onChange }) {
           )}
         </div>
       )}
-    </StripCell>
+    </DockCell>
   );
 }
 
@@ -328,15 +359,16 @@ function UpdatePopover({ updates = [], onAdd, onClose }) {
 // ── TaskCard ──────────────────────────────────────────────────────────────────
 
 export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
-  const [showPopover,  setShowPopover]  = useState(false);
-  const [viewerIndex,  setViewerIndex]  = useState(null);
+  const [showPopover, setShowPopover] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(null);
 
   const project    = projects.find(p => p.id === task.projectId);
   const projectPal = project ? getPalette(project.color) : null;
 
-  const statusColorKey   = STATUS_COLORS[task.status]     ?? "gray";
-  const priorityColorKey = PRIORITY_COLORS[task.priority]  ?? "yellow";
-  const dueDateColorKey  = getDueDateColorKey(task.dueDate);
+  // Use "gray" as the colorKey when no value is set so empty cells look neutral
+  const statusColorKey   = task.status   ? (STATUS_COLORS[task.status]     ?? "gray") : "gray";
+  const priorityColorKey = task.priority ? (PRIORITY_COLORS[task.priority]  ?? "gray") : "gray";
+  const dueDateColorKey  = task.dueDate  ? getDueDateColorKey(task.dueDate)            : "gray";
 
   const subtasks = task.subtasks ?? [];
   const updates  = task.updates  ?? [];
@@ -362,22 +394,24 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
           background: "#2a2a2a",
           border: "1px solid #444450",
           borderRadius: "10px",
-          padding: "14px 16px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "10px",
           position: "relative",
+          // No overflow:hidden so dropdowns can escape — dock gets its own borderRadius
         }}
       >
 
-        {/* ── Top row: title + project tag + data strip ──────────────────────── */}
-        <div style={{ display: "flex", alignItems: "flex-start", gap: "14px" }}>
+        {/* ── Card header: title area + integrated dock ───────────────────────── */}
+        <div style={{
+          display: "flex",
+          alignItems: "flex-start",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+        }}>
 
-          {/* Title + project tag — click to open edit */}
+          {/* Title + project tag */}
           <div
             onClick={() => onEdit(task)}
             style={{
               flex: 1, minWidth: 0,
+              padding: "14px 16px 12px",
               display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap",
               cursor: "pointer",
             }}
@@ -407,28 +441,25 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
             )}
           </div>
 
-          {/* ── Data strip: Status | Priority | Due Date ── */}
-          {/* overflow: visible so dropdowns can escape the strip bounds */}
+          {/* ── Slim data dock: Status | Priority | Due Date ── */}
+          {/* borderTopRightRadius matches the card's corner (10px outer - 1px border = 9px inner) */}
           <div style={{
-            display: "flex", alignItems: "stretch", flexShrink: 0,
-            height: "30px",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: "4px",
-            background: "#252525",
-            overflow: "visible",
+            display: "flex",
+            flexShrink: 0,
+            background: "rgba(0,0,0,0.2)",
+            borderLeft: "1px solid rgba(255,255,255,0.08)",
+            borderTopRightRadius: "9px",
           }}>
             <StatusCell
               status={task.status}
               colorKey={statusColorKey}
               onChange={val => onUpdate?.({ ...task, status: val })}
             />
-            <div style={{ width: "1px", background: "rgba(255,255,255,0.08)", alignSelf: "stretch", flexShrink: 0 }} />
             <PriorityCell
               priority={task.priority}
               colorKey={priorityColorKey}
               onChange={val => onUpdate?.({ ...task, priority: val })}
             />
-            <div style={{ width: "1px", background: "rgba(255,255,255,0.08)", alignSelf: "stretch", flexShrink: 0 }} />
             <DueDateCell
               dueDate={task.dueDate}
               colorKey={dueDateColorKey}
@@ -437,176 +468,172 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
           </div>
         </div>
 
-        {/* ── Link badges ────────────────────────────────────────────────────── */}
-        {links.length > 0 && (
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-            {links.map(link => {
-              const colorMap = { Source: "yellow", Sherlock: "orange", Jira: "blue", Email: "purple", Link: "gray", Other: "gray" };
-              return (
-                <MutedBadge
-                  key={link.id}
-                  label={link.type}
-                  value={link.displayName || link.url || "(none)"}
-                  colorKey={colorMap[link.type] ?? "gray"}
-                  href={link.url || undefined}
-                  onClick={e => e.stopPropagation()}
-                />
-              );
-            })}
-          </div>
-        )}
+        {/* ── Card body ──────────────────────────────────────────────────────── */}
+        <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: "10px" }}>
 
-        {/* ── Description ────────────────────────────────────────────────────── */}
-        {task.description && (
-          <div
-            onClick={() => onEdit(task)}
-            style={{
-              fontSize: "12px", color: "#c8c8d0", lineHeight: 1.5,
-              overflow: "hidden", display: "-webkit-box",
-              WebkitLineClamp: 4, WebkitBoxOrient: "vertical",
-              cursor: "pointer",
-            }}
-          >
-            {task.description}
-          </div>
-        )}
-
-        {/* ── Image thumbnails ────────────────────────────────────────────────── */}
-        {images.length > 0 && (
-          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-            {images.slice(0, 4).map((src, i) => (
-              <div
-                key={i}
-                onClick={e => { e.stopPropagation(); setViewerIndex(i); }}
-                style={{ position: "relative", cursor: "pointer", flexShrink: 0 }}
-              >
-                <img
-                  src={src} alt="attachment"
-                  style={{ width: "52px", height: "40px", objectFit: "cover", borderRadius: "5px", display: "block", border: "1px solid #3a3a44" }}
-                />
-                {/* "+N more" overlay on the last visible thumbnail */}
-                {i === 3 && images.length > 4 && (
-                  <div style={{
-                    position: "absolute", inset: 0, borderRadius: "5px",
-                    background: "rgba(0,0,0,0.6)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: "11px", fontWeight: 700, color: "#f0f0f0",
-                  }}>
-                    +{images.length - 4}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* ── Last update ghost strip ─────────────────────────────────────────── */}
-        <div style={{ position: "relative" }}>
-          <div
-            onClick={e => { e.stopPropagation(); setShowPopover(v => !v); }}
-            style={{
-              display: "flex", alignItems: "center",
-              borderTop: "1px dashed #3a3a3a",
-              paddingTop: "10px",
-              cursor: "pointer",
-            }}
-          >
-            {/* Project-colored vertical bar */}
-            <div style={{
-              width: "2px", height: "24px", flexShrink: 0,
-              background: projectPal ? projectPal.text : "#FB923C",
-              borderRadius: "2px",
-              marginRight: "12px",
-            }} />
-
-            {/* Stacked label + date */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "1px", flexShrink: 0, marginRight: "12px" }}>
-              <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#AAA" }}>
-                Last Update
-              </span>
-              <span style={{ fontSize: "10px", fontWeight: 600, color: "#777" }}>
-                {lastUpdate ? formatShortDate(lastUpdate.timestamp) : "—"}
-              </span>
+          {/* Link badges */}
+          {links.length > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+              {links.map(link => {
+                const colorMap = { Source: "yellow", Sherlock: "orange", Jira: "blue", Email: "purple", Link: "gray", Other: "gray" };
+                return (
+                  <MutedBadge
+                    key={link.id}
+                    label={link.type}
+                    value={link.displayName || link.url || "(none)"}
+                    colorKey={colorMap[link.type] ?? "gray"}
+                    href={link.url || undefined}
+                    onClick={e => e.stopPropagation()}
+                  />
+                );
+              })}
             </div>
-
-            {/* Update text */}
-            <span style={{
-              flex: 1, fontSize: "12px", lineHeight: 1.4, minWidth: 0,
-              color: "#777", fontStyle: "italic",
-              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-            }}>
-              {lastUpdate ? lastUpdate.text : "No updates yet — click to add one"}
-            </span>
-          </div>
-
-          {showPopover && (
-            <UpdatePopover
-              updates={updates}
-              onAdd={update => onUpdate?.({ ...task, updates: [...updates, update] })}
-              onClose={() => setShowPopover(false)}
-            />
           )}
-        </div>
 
-        {/* ── Subtasks ────────────────────────────────────────────────────────── */}
-        {subtasks.length > 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "2px" }}>
-            <span style={{ fontSize: "10px", color: "#55555e" }}>
-              {doneCount}/{subtasks.length} subtasks
-            </span>
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              {subtasks.map(s => (
+          {/* Description */}
+          {task.description && (
+            <div
+              onClick={() => onEdit(task)}
+              style={{
+                fontSize: "12px", color: "#c8c8d0", lineHeight: 1.5,
+                overflow: "hidden", display: "-webkit-box",
+                WebkitLineClamp: 4, WebkitBoxOrient: "vertical",
+                cursor: "pointer",
+              }}
+            >
+              {task.description}
+            </div>
+          )}
+
+          {/* Image thumbnails */}
+          {images.length > 0 && (
+            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+              {images.slice(0, 4).map((src, i) => (
                 <div
-                  key={s.id}
-                  onClick={e => { e.stopPropagation(); handleSubtaskToggle(s.id); }}
-                  style={{ display: "flex", alignItems: "center", gap: "7px", cursor: "pointer" }}
+                  key={i}
+                  onClick={e => { e.stopPropagation(); setViewerIndex(i); }}
+                  style={{ position: "relative", cursor: "pointer", flexShrink: 0 }}
                 >
-                  <div style={{
-                    width: "14px", height: "14px", flexShrink: 0, borderRadius: "3px",
-                    border: `1.5px solid ${s.status === "complete" ? "#4ADE80" : "#3a3a3a"}`,
-                    background: s.status === "complete" ? "#4ADE80" : "transparent",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    transition: "background 0.12s, border-color 0.12s",
-                  }}>
-                    {s.status === "complete" && (
-                      <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
-                        <path d="M1 3.5L3.5 6L8 1" stroke="#0E3F24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    )}
-                  </div>
-                  <span style={{
-                    fontSize: "12px", lineHeight: 1.3,
-                    color: s.status === "complete" ? "#55555e" : "#c8c8d0",
-                    textDecoration: s.status === "complete" ? "line-through" : "none",
-                  }}>
-                    {s.title}
-                  </span>
-                  {s.url && (
-                    <a
-                      href={s.url}
-                      onClick={e => e.stopPropagation()}
-                      target="_blank" rel="noreferrer"
-                      onMouseEnter={e => { e.currentTarget.style.background = "#38BDF8"; e.currentTarget.style.color = "#0B1E2D"; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#38BDF8"; }}
-                      style={{
-                        fontSize: "10px", fontWeight: 600, textDecoration: "none",
-                        whiteSpace: "nowrap", color: "#38BDF8", background: "transparent",
-                        border: "1px solid #38BDF8", borderRadius: "999px",
-                        padding: "1px 7px", transition: "background 0.15s, color 0.15s",
-                      }}
-                    >
-                      {s.urlDisplayName || s.url}
-                    </a>
+                  <img
+                    src={src} alt="attachment"
+                    style={{ width: "52px", height: "40px", objectFit: "cover", borderRadius: "5px", display: "block", border: "1px solid #3a3a44" }}
+                  />
+                  {i === 3 && images.length > 4 && (
+                    <div style={{
+                      position: "absolute", inset: 0, borderRadius: "5px",
+                      background: "rgba(0,0,0,0.6)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: "11px", fontWeight: 700, color: "#f0f0f0",
+                    }}>
+                      +{images.length - 4}
+                    </div>
                   )}
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
 
+          {/* Last update ghost strip */}
+          <div style={{ position: "relative" }}>
+            <div
+              onClick={e => { e.stopPropagation(); setShowPopover(v => !v); }}
+              style={{
+                display: "flex", alignItems: "center",
+                borderTop: "1px dashed #3a3a3a",
+                paddingTop: "10px",
+                cursor: "pointer",
+              }}
+            >
+              <div style={{
+                width: "2px", height: "24px", flexShrink: 0,
+                background: projectPal ? projectPal.text : "#FB923C",
+                borderRadius: "2px", marginRight: "12px",
+              }} />
+              <div style={{ display: "flex", flexDirection: "column", gap: "1px", flexShrink: 0, marginRight: "12px" }}>
+                <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#AAA" }}>
+                  Last Update
+                </span>
+                <span style={{ fontSize: "10px", fontWeight: 600, color: "#777" }}>
+                  {lastUpdate ? formatShortDate(lastUpdate.timestamp) : "—"}
+                </span>
+              </div>
+              <span style={{
+                flex: 1, fontSize: "12px", lineHeight: 1.4, minWidth: 0,
+                color: "#777", fontStyle: "italic",
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>
+                {lastUpdate ? lastUpdate.text : "No updates yet — click to add one"}
+              </span>
+            </div>
+            {showPopover && (
+              <UpdatePopover
+                updates={updates}
+                onAdd={update => onUpdate?.({ ...task, updates: [...updates, update] })}
+                onClose={() => setShowPopover(false)}
+              />
+            )}
+          </div>
+
+          {/* Subtasks */}
+          {subtasks.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "2px" }}>
+              <span style={{ fontSize: "10px", color: "#55555e" }}>
+                {doneCount}/{subtasks.length} subtasks
+              </span>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                {subtasks.map(s => (
+                  <div
+                    key={s.id}
+                    onClick={e => { e.stopPropagation(); handleSubtaskToggle(s.id); }}
+                    style={{ display: "flex", alignItems: "center", gap: "7px", cursor: "pointer" }}
+                  >
+                    <div style={{
+                      width: "14px", height: "14px", flexShrink: 0, borderRadius: "3px",
+                      border: `1.5px solid ${s.status === "complete" ? "#4ADE80" : "#3a3a3a"}`,
+                      background: s.status === "complete" ? "#4ADE80" : "transparent",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      transition: "background 0.12s, border-color 0.12s",
+                    }}>
+                      {s.status === "complete" && (
+                        <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+                          <path d="M1 3.5L3.5 6L8 1" stroke="#0E3F24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </div>
+                    <span style={{
+                      fontSize: "12px", lineHeight: 1.3,
+                      color: s.status === "complete" ? "#55555e" : "#c8c8d0",
+                      textDecoration: s.status === "complete" ? "line-through" : "none",
+                    }}>
+                      {s.title}
+                    </span>
+                    {s.url && (
+                      <a
+                        href={s.url}
+                        onClick={e => e.stopPropagation()}
+                        target="_blank" rel="noreferrer"
+                        onMouseEnter={e => { e.currentTarget.style.background = "#38BDF8"; e.currentTarget.style.color = "#0B1E2D"; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#38BDF8"; }}
+                        style={{
+                          fontSize: "10px", fontWeight: 600, textDecoration: "none",
+                          whiteSpace: "nowrap", color: "#38BDF8", background: "transparent",
+                          border: "1px solid #38BDF8", borderRadius: "999px",
+                          padding: "1px 7px", transition: "background 0.15s, color 0.15s",
+                        }}
+                      >
+                        {s.urlDisplayName || s.url}
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        </div>
       </div>
 
-      {/* ── Image viewer modal ──────────────────────────────────────────────────── */}
+      {/* Image viewer modal */}
       {viewerIndex !== null && (
         <ImageViewer
           images={images}
