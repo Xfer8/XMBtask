@@ -476,7 +476,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
                 <span style={{
                   fontSize: "10px", fontWeight: 900,
                   textTransform: "uppercase", letterSpacing: "1px",
-                  color: "#DDD",
+                  color: projectPal.text,
                   lineHeight: 1,
                 }}>
                   {project.title}
