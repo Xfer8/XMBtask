@@ -441,6 +441,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
           transition: "background 0.15s, border-color 0.15s",
           display: "flex",
           alignItems: "stretch",
+          gap: "12px",
           position: "relative",
         }}
       >
