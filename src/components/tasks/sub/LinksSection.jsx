@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { getPalette } from "../../../colors";
-import SplitBadge from "../../ui/SplitBadge";
+import MutedBadge from "../../ui/MutedBadge";
 
 const LINK_TYPES       = ["Source", "Sherlock", "Jira", "Email", "Link"];
 const LINK_TYPE_COLORS = { Source:"yellow", Sherlock:"orange", Jira:"blue", Email:"purple", Link:"gray", Other:"gray" };
@@ -101,7 +101,7 @@ export default function LinksSection({ links, onChange }) {
         return (
           <div key={l.id} style={{ display:"flex", alignItems:"center", gap:"10px", background:"#1E1E1E", borderRadius:"8px", padding:"8px 12px" }}>
             <>
-              <SplitBadge
+              <MutedBadge
                 label={l.type}
                 value={l.displayName || l.url || "(none)"}
                 colorKey={colorKey}
