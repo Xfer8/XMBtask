@@ -124,22 +124,11 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
         </button>
 
         {/* Search input */}
-        <div style={{ flex: 1, position: "relative" }}>
-          <span style={{
-            position:  "absolute",
-            left:      "10px",
-            top:       "50%",
-            transform: "translateY(-50%)",
-            color:     "#555560",
-            fontSize:  "13px",
-            pointerEvents: "none",
-          }}>
-            🔍
-          </span>
+        <div style={{ flex: 1 }}>
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search tasks…"
+            placeholder="Search..."
             style={{
               width:        "100%",
               boxSizing:    "border-box",
@@ -148,7 +137,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
               borderRadius: "7px",
               color:        "#f0f0f0",
               fontSize:     "13px",
-              padding:      "7px 12px 7px 32px",
+              padding:      "7px 12px",
               fontFamily:   "inherit",
               outline:      "none",
             }}
@@ -187,7 +176,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
           {activeProjects.map(project => {
             const projectTasks = filteredTasks.filter(t => t.projectId === project.id);
             // Hide projects with no tasks (unless searching, show empties so user knows)
-            if (projectTasks.length === 0 && !q) return null;
+            if (projectTasks.length === 0) return null;
             return (
               <ProjectGroup
                 key={project.id}
