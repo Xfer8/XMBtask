@@ -627,8 +627,6 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
 
         </div>
 
-        {/* ── Vertical divider ───────────────────────────────────────────────── */}
-        <div style={{ width: "1px", background: "#444450", margin: "0 14px", flexShrink: 0 }} />
 
         {/* ── Right sidebar ───────────────────────────────────────────────────── */}
         <div style={{
