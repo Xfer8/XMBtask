@@ -398,29 +398,52 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
     )});
   };
 
+  // Notch dimensions — must match CELL_W × 3 cells, CELL_H = 30px
+  const NOTCH_W = 3 * CELL_W;  // 255px
+  const NOTCH_H = 30;           // dock cell height
+
   return (
     <>
-      {/*
-        Outer wrapper creates space above the card for the dock tab.
-        paddingTop = dock cell height (30px) + dock top border (1px) - 1px overlap = 30px.
-        The 1px overlap lets the dock's opaque background cover the card's top border
-        in the dock region, making the two borders appear seamlessly connected.
-      */}
-      <div style={{ position: "relative", paddingTop: "30px" }}>
-
-        {/* ── Dock: floats above the card's top-right corner ─────────────────── */}
+      <div
+        style={{
+          position: "relative",
+          background: "#2a2a2a",
+          border: "1px solid #444450",
+          borderRadius: "10px",
+        }}
+      >
         {/*
-          Three-sided border (top + left + right, no bottom).
-          The card's top border provides the bottom closure below the dock.
-          Opaque background (#232323) covers the card's top border in this region
-          so only the dock's own border outline is visible there.
+          ── Notch mask ──────────────────────────────────────────────────────────
+          Covers the card's own border (top + right + corner arc) in the notch
+          region by painting the page background color over it. This "erases"
+          those border segments so only the notch walls drawn below are visible.
+          top/right: -1px to extend 1px into the card border.
+          borderTopRightRadius matches the card's corner arc.
         */}
         <div style={{
-          position: "absolute", top: 0, right: 0, zIndex: 5,
+          position: "absolute", top: -1, right: -1, zIndex: 2, pointerEvents: "none",
+          width: NOTCH_W + 1, height: NOTCH_H + 1,
+          background: "#212121",
+          borderTopRightRadius: "10px",
+        }} />
+
+        {/*
+          ── Notch walls ─────────────────────────────────────────────────────────
+          Draws the two interior walls of the notch:
+            • borderLeft  = vertical line down the notch's left edge
+            • borderBottom = horizontal line along the notch's bottom
+        */}
+        <div style={{
+          position: "absolute", top: -1, right: -1, zIndex: 3, pointerEvents: "none",
+          width: NOTCH_W + 1, height: NOTCH_H + 1,
+          borderLeft: "1px solid #444450",
+          borderBottom: "1px solid #444450",
+        }} />
+
+        {/* ── Dock cells: sit inside the notch ──────────────────────────────── */}
+        <div style={{
+          position: "absolute", top: 0, right: 0, zIndex: 4,
           display: "flex",
-          background: "#232323",
-          border: "1px solid #444450",
-          borderBottom: "none",
         }}>
           <StatusCell
             status={task.status}
@@ -439,53 +462,43 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
           />
         </div>
 
-        {/* ── Card ───────────────────────────────────────────────────────────── */}
+        {/* ── Title + project tag ────────────────────────────────────────────── */}
+        {/* paddingRight reserves space so title text doesn't run under the dock */}
         <div
+          onClick={() => onEdit(task)}
           style={{
-            background: "#2a2a2a",
-            border: "1px solid #444450",
-            borderRadius: "10px 0px 10px 10px",
-            position: "relative",
-            zIndex: 1,
+            padding: `14px ${NOTCH_W + 16}px 12px 16px`,
+            display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap",
+            cursor: "pointer", minWidth: 0,
           }}
         >
-
-          {/* Title + project tag */}
-          <div
-            onClick={() => onEdit(task)}
-            style={{
-              padding: "14px 16px 12px",
-              display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap",
-              cursor: "pointer", minWidth: 0,
-            }}
-          >
-            <span style={{ fontSize: "16px", fontWeight: 700, color: "#f0f0f0", lineHeight: 1.3 }}>
-              {task.title}
-            </span>
-            {project && (
+          <span style={{ fontSize: "16px", fontWeight: 700, color: "#f0f0f0", lineHeight: 1.3 }}>
+            {task.title}
+          </span>
+          {project && (
+            <span style={{
+              display: "inline-flex", alignItems: "center",
+              padding: "2px 8px 2px 5px",
+              borderRadius: "2px", whiteSpace: "nowrap", flexShrink: 0,
+            }}>
               <span style={{
-                display: "inline-flex", alignItems: "center",
-                padding: "2px 8px 2px 5px",
-                borderRadius: "2px", whiteSpace: "nowrap", flexShrink: 0,
+                width: "4px", height: "16px",
+                background: projectPal.text,
+                borderRadius: "2px", marginRight: "7px", flexShrink: 0,
+              }} />
+              <span style={{
+                fontSize: "10px", fontWeight: 900,
+                textTransform: "uppercase", letterSpacing: "1px",
+                color: projectPal.text, lineHeight: 1,
               }}>
-                <span style={{
-                  width: "4px", height: "16px",
-                  background: projectPal.text,
-                  borderRadius: "2px", marginRight: "7px", flexShrink: 0,
-                }} />
-                <span style={{
-                  fontSize: "10px", fontWeight: 900,
-                  textTransform: "uppercase", letterSpacing: "1px",
-                  color: projectPal.text, lineHeight: 1,
-                }}>
-                  {project.title}
-                </span>
+                {project.title}
               </span>
-            )}
-          </div>
+            </span>
+          )}
+        </div>
 
         {/* ── Card body ──────────────────────────────────────────────────────── */}
-        <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: "10px" }}>
+        <div style={{ padding: "0 16px 12px", display: "flex", flexDirection: "column", gap: "10px" }}>
 
           {/* Link badges */}
           {links.length > 0 && (
@@ -647,8 +660,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
           )}
 
         </div>
-        </div>{/* end card */}
-      </div>{/* end outer wrapper */}
+      </div>{/* end card */}
 
       {/* Image viewer modal */}
       {viewerIndex !== null && (
