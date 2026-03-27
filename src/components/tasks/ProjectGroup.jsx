@@ -32,9 +32,9 @@ function StatusFilterPill({ status, count, selected, onToggle }) {
     return [1,3,5].map(i => parseInt(h.slice(i,i+2),16)).join(",");
   })();
 
-  const bg     = selected ? p.bg     : hov ? `rgba(${rgb},0.08)` : `rgba(${rgb},0.04)`;
-  const border = selected ? p.border : hov ? `rgba(${rgb},0.3)`  : "rgba(255,255,255,0.07)";
-  const color  = selected ? p.text   : hov ? `rgba(${rgb},0.7)`  : `rgba(${rgb},0.35)`;
+  const bg     = selected ? p.bg                  : hov ? `rgba(${rgb},0.15)` : `rgba(${rgb},0.08)`;
+  const border = selected ? p.border              : hov ? p.border            : `rgba(${rgb},0.3)`;
+  const color  = selected ? p.text               : hov ? p.text               : `rgba(${rgb},0.65)`;
 
   return (
     <button
@@ -86,29 +86,23 @@ const Sep = () => (
 export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProjects }) {
   const pal = project ? getPalette(project.color) : getPalette("gray");
 
-  // Empty set = no filter active = show all tasks
-  const [selected, setSelected] = useState(() => new Set());
+  // null = no filter (show all); a status string = filter to that status
+  const [selected, setSelected] = useState(null);
   const [showDone, setShowDone] = useState(false);
 
-  const toggle = (status) => {
-    setSelected(prev => {
-      const next = new Set(prev);
-      if (next.has(status)) next.delete(status);
-      else next.add(status);
-      return next;
-    });
-  };
+  // Clicking the active filter deselects (back to all); clicking another selects it
+  const toggle = (status) => setSelected(prev => prev === status ? null : status);
 
-  const noFilter = selected.size === 0;
+  const noFilter = selected === null;
 
   // Active (non-done) tasks, filtered
   const activeTasks = sortTasks(
-    tasks.filter(t => t.status !== "Done" && (noFilter || selected.has(t.status)))
+    tasks.filter(t => t.status !== "Done" && (noFilter || t.status === selected))
   );
 
-  // Done tasks — in collapsible; filtered by selection if "Done" is selected
+  // Done tasks — in collapsible; shown when no filter or "Done" is selected
   const doneTasks = sortTasks(
-    tasks.filter(t => t.status === "Done" && (noFilter || selected.has(t.status)))
+    tasks.filter(t => t.status === "Done" && (noFilter || selected === "Done"))
   );
 
   // Only render pills for statuses that have at least one task
@@ -163,7 +157,7 @@ export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProj
               key={status}
               status={status}
               count={tasks.filter(t => t.status === status).length}
-              selected={selected.has(status)}
+              selected={selected === status}
               onToggle={() => toggle(status)}
             />
           ))}
