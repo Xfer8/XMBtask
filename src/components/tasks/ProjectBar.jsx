@@ -22,7 +22,7 @@ function BarSegment({ project, isActive, onClick }) {
         opacity:    isActive ? 1 : hov ? 0.75 : 0.45,
         cursor:     "pointer",
         transition: "opacity 0.15s",
-        boxShadow:  isActive ? "inset 0 -3px 0 rgba(255,255,255,0.4)" : "none",
+        boxShadow:  "none",
       }}
     />
   );
@@ -44,17 +44,12 @@ function LegendItem({ project, count, isActive, onClick }) {
       style={{
         display:    "flex",
         alignItems: "center",
-        gap:        "6px",
-        padding:    "3px 10px 3px 7px",
-        borderRadius: "6px",
-        border:     isActive ? `1px solid ${pal.border}` : `1px solid transparent`,
-        background: isActive ? pal.bg : hov ? "rgba(255,255,255,0.04)" : "transparent",
+        gap:        "5px",
         cursor:     "pointer",
-        transition: "background 0.15s, border-color 0.15s",
         userSelect: "none",
       }}
     >
-      {/* Color dot */}
+      {/* Color dot — outside the highlight box */}
       <div style={{
         width:        "8px",
         height:       "8px",
@@ -65,29 +60,19 @@ function LegendItem({ project, count, isActive, onClick }) {
         transition:   "opacity 0.15s",
       }} />
 
-      {/* Project name */}
+      {/* Name + count — this is the part that gets the highlight box */}
       <span style={{
-        fontSize:   "11px",
-        fontWeight: 600,
-        color:      isActive ? pal.text : "#888890",
-        transition: "color 0.15s",
-        whiteSpace: "nowrap",
+        fontSize:     "11px",
+        fontWeight:   600,
+        color:        isActive ? pal.text : "#888890",
+        transition:   "color 0.15s, background 0.15s, border-color 0.15s",
+        whiteSpace:   "nowrap",
+        padding:      "2px 8px",
+        borderRadius: "6px",
+        border:       isActive ? `1px solid ${pal.border}` : `1px solid transparent`,
+        background:   isActive ? pal.bg : hov ? "rgba(255,255,255,0.04)" : "transparent",
       }}>
-        {project.title}
-      </span>
-
-      {/* Task count badge */}
-      <span style={{
-        fontSize:     "10px",
-        fontWeight:   700,
-        color:        isActive ? pal.text : "#555560",
-        background:   isActive ? "rgba(0,0,0,0.25)" : "#1e1e1e",
-        borderRadius: "999px",
-        padding:      "0 6px",
-        lineHeight:   "16px",
-        transition:   "background 0.15s, color 0.15s",
-      }}>
-        {count}
+        {project.title} ({count})
       </span>
     </div>
   );
