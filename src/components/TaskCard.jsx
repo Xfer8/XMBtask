@@ -66,7 +66,7 @@ function MetaDropdown({ options, selected, getColorKey, onSelect }) {
 // Bottom row: value, dynamically color-tinted.
 // Hover: brighter background + full-opacity text + soft glow.
 
-const BADGE_W = 120;
+const BADGE_W = 100;
 const HEADER_H = 52;
 
 function HeaderBadge({ label, value, placeholder, colorKey, onClick, refProp, children }) {
@@ -396,9 +396,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
   };
 
   // Project tag: "XMB-P001 – PROJECT TITLE"
-  const projectLabel = project
-    ? `${project.id} – ${project.title.toUpperCase()}`
-    : null;
+  const projectLabel = project ? project.title.toUpperCase() : null;
 
   return (
     <>
