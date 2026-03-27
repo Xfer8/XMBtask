@@ -466,10 +466,9 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
               }}>
                 {/* Colored bar */}
                 <span style={{
-                  width: "3px", height: "12px",
+                  width: "4px", height: "16px",
                   background: projectPal.text,
-                  boxShadow: `0 0 4px ${projectPal.text}80`,
-                  borderRadius: "1px",
+                  borderRadius: "2px",
                   marginRight: "7px",
                   flexShrink: 0,
                   alignSelf: "center",
