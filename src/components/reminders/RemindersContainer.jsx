@@ -164,15 +164,46 @@ function ReminderRow({ reminder, complete, onToggle, overdueDate }) {
   );
 }
 
+// ── NavArrow ───────────────────────────────────────────────────────────────────
+function NavArrow({ dir, onClick }) {
+  const [hov, setHov] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        background: "none", border: "none", cursor: "pointer", padding: "2px 5px",
+        color: hov ? "#f0f0f0" : "#555560", fontSize: "14px", lineHeight: 1,
+        transition: "color 0.15s", fontFamily: "inherit",
+      }}
+    >
+      {dir === "left" ? "‹" : "›"}
+    </button>
+  );
+}
+
 // ── RemindersContainer ─────────────────────────────────────────────────────────
 export default function RemindersContainer({ reminders, completions, onToggle, onManage }) {
   const [overdueOpen, setOverdueOpen] = useState(true);
+  const [offset,      setOffset]      = useState(0); // days from today; 0 = today
 
-  const today        = new Date();
-  const todayISO     = toISODate(today);
-  const todayDay     = DAYS[today.getDay()];
-  const todayItems   = reminders.filter(r => r.days.includes(todayDay));
-  const overdueItems = getOverdueItems(reminders, completions);
+  // Derive the currently-viewed date from today + offset
+  const today    = new Date();
+  const viewDate = new Date(today);
+  viewDate.setDate(today.getDate() + offset);
+
+  const viewISO  = toISODate(viewDate);
+  const viewDay  = DAYS[viewDate.getDay()];
+  const isToday  = offset === 0;
+
+  const viewItems    = reminders.filter(r => r.days.includes(viewDay));
+  const overdueItems = getOverdueItems(reminders, completions); // always based on real today
+
+  // Date label: "Today  ·  Friday, Mar 27"  or just  "Thursday, Mar 26"
+  const dateLabel = isToday
+    ? `Today  ·  ${formatDisplayDate(viewDate)}`
+    : formatDisplayDate(viewDate);
 
   return (
     <div style={{
@@ -186,13 +217,35 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
         padding: "14px 20px", borderBottom: "1px solid #333338",
       }}>
         <div>
-          <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#55555e" }}>
+          <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#55555e", marginBottom: "4px" }}>
             Reminders
           </div>
-          <div style={{ fontSize: "12px", color: "#888890", marginTop: "2px" }}>
-            {formatDisplayDate(today)}
+          {/* Date navigator */}
+          <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
+            <NavArrow dir="left"  onClick={() => setOffset(o => o - 1)} />
+            <span style={{ fontSize: "12px", color: "#c8c8d0", fontWeight: 600, userSelect: "none" }}>
+              {dateLabel}
+            </span>
+            <NavArrow dir="right" onClick={() => setOffset(o => o + 1)} />
+            {!isToday && (
+              <button
+                onClick={() => setOffset(0)}
+                style={{
+                  marginLeft: "6px", background: "none",
+                  border: "1px solid #3a3a3a", borderRadius: "5px",
+                  cursor: "pointer", color: "#555560", fontSize: "10px", fontWeight: 600,
+                  padding: "2px 8px", fontFamily: "inherit",
+                  transition: "border-color 0.15s, color 0.15s",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#4ADE80"; e.currentTarget.style.color = "#4ADE80"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "#3a3a3a"; e.currentTarget.style.color = "#555560"; }}
+              >
+                Today
+              </button>
+            )}
           </div>
         </div>
+
         <button
           onClick={onManage}
           style={{
@@ -208,24 +261,24 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
         </button>
       </div>
 
-      {/* ── Today's reminders ───────────────────────────────────────────────── */}
+      {/* ── Viewed date's reminders ──────────────────────────────────────────── */}
       <div style={{ padding: "4px 20px 12px" }}>
-        {todayItems.length === 0 ? (
+        {viewItems.length === 0 ? (
           <div style={{ fontSize: "13px", color: "#55555e", padding: "14px 0" }}>
-            No reminders scheduled for today.
+            No reminders scheduled for {isToday ? "today" : formatDisplayDate(viewDate)}.
           </div>
-        ) : todayItems.map(r => (
+        ) : viewItems.map(r => (
           <ReminderRow
             key={r.id}
             reminder={r}
-            complete={isComplete(completions, r.id, todayISO)}
-            onToggle={() => onToggle(r.id, todayISO)}
+            complete={isComplete(completions, r.id, viewISO)}
+            onToggle={() => onToggle(r.id, viewISO)}
           />
         ))}
       </div>
 
-      {/* ── Overdue ─────────────────────────────────────────────────────────── */}
-      {overdueItems.length > 0 && (
+      {/* ── Overdue — only shown when viewing today ──────────────────────────── */}
+      {isToday && overdueItems.length > 0 && (
         <div style={{ borderTop: "1px solid #333338" }}>
           <button
             onClick={() => setOverdueOpen(v => !v)}
