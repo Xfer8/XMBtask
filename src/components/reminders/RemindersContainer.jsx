@@ -83,8 +83,8 @@ const getUrgencyStatus = (reminder) => {
 const STATUS_COLOR = {
   "ok":           "#4ADE80",
   "soon":         "#F97316",
-  "overdue-today":"#EF4444",
-  "overdue-past": "#7f2020",
+  "overdue-today":"#FF6B6B",
+  "overdue-past": "#FF6B6B",
   "neutral":      "#333340",
 };
 
@@ -455,7 +455,7 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
             <div style={{
               width:          "18px",
               height:         "18px",
-              background:     "#EF4444",
+              background:     "#FF6B6B",
               borderRadius:   "3px",
               display:        "flex",
               alignItems:     "center",
@@ -470,7 +470,7 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
             <span style={{
               fontSize:      "9px",
               fontWeight:    900,
-              color:         "#EF4444",
+              color:         "#FF6B6B",
               letterSpacing: "1.5px",
               textTransform: "uppercase",
               flex:          1,
@@ -481,7 +481,7 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
 
             {incompleteOverdueCount > 0 && (
               <span style={{
-                background:    "#EF4444",
+                background:    "#FF6B6B",
                 color:         "#fff",
                 fontSize:      "9px",
                 fontWeight:    900,
