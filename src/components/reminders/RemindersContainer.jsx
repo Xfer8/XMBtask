@@ -271,7 +271,7 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
         <span style={{ color: "#3a3a3a", fontSize: "14px", fontWeight: 300, userSelect: "none" }}>|</span>
 
         {/* Date */}
-        <span style={{ fontSize: "12px", color: "#888890", whiteSpace: "nowrap", userSelect: "none" }}>
+        <span style={{ fontSize: "13px", color: "#c8c8d0", whiteSpace: "nowrap", userSelect: "none" }}>
           {formatShortDate(today)}
         </span>
 
