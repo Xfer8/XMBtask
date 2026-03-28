@@ -8,7 +8,10 @@ import MutedBadge from "./ui/MutedBadge";
 
 const formatShortDate = (iso) => {
   if (!iso) return null;
-  const d = new Date(iso + "T00:00:00");
+  // Append T00:00:00 only for date-only strings to avoid timezone shifts.
+  // Full ISO timestamps (already contain "T") must be used as-is.
+  const d = new Date(iso.includes("T") ? iso : iso + "T00:00:00");
+  if (isNaN(d)) return null;
   return `${d.getMonth() + 1}/${d.getDate()}/${String(d.getFullYear()).slice(2)}`;
 };
 
@@ -582,7 +585,10 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
               <span style={{
                 flex: 1, fontSize: "12px", lineHeight: 1.4, minWidth: 0,
                 color: "#666", fontStyle: "italic",
-                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                overflow: "hidden",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
               }}>
                 {lastUpdate ? lastUpdate.text : "No updates yet — click to add one"}
               </span>
