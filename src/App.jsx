@@ -136,8 +136,11 @@ function ImportConfirmModal({ preview, fileType, onConfirm, onCancel }) {
   );
 }
 
+const PAGE_ORDER = ["Dashboard", "Tasks", "Projects"];
+
 export default function App() {
   const [currentPage,   setCurrentPage]   = useState("Dashboard");
+  const [slideDir,      setSlideDir]      = useState("right");
   const [projects,      setProjects]      = useState([]);
   const [tasks,         setTasks]         = useState([]);
   const [storageReady,  setStorageReady]  = useState(false);
@@ -276,7 +279,13 @@ export default function App() {
 
         {/* Nav — center */}
         <div style={{ display:"flex", alignItems:"center" }}>
-          <NavBar onNavigate={setCurrentPage} currentPage={currentPage} />
+          <NavBar
+            onNavigate={(page) => {
+              setSlideDir(PAGE_ORDER.indexOf(page) >= PAGE_ORDER.indexOf(currentPage) ? "right" : "left");
+              setCurrentPage(page);
+            }}
+            currentPage={currentPage}
+          />
         </div>
 
         {/* Cog — right */}
@@ -288,25 +297,27 @@ export default function App() {
 
       {/* Page content */}
       <div style={{ flex: 1, width: "100%" }}>
-        {currentPage === "Dashboard" && <Dashboard />}
-        {currentPage === "Tasks" && (
-          <Tasks
-            tasks={tasks}
-            projects={projects}
-            onAdd={addTask}
-            onUpdate={updateTask}
-            onDelete={deleteTask}
-          />
-        )}
-        {currentPage === "Projects" && (
-          <Projects
-            projects={projects}
-            tasks={tasks}
-            onAdd={addProject}
-            onUpdate={updateProject}
-            onDelete={deleteProject}
-          />
-        )}
+        <div key={currentPage} className={slideDir === "right" ? "slide-from-right" : "slide-from-left"}>
+          {currentPage === "Dashboard" && <Dashboard />}
+          {currentPage === "Tasks" && (
+            <Tasks
+              tasks={tasks}
+              projects={projects}
+              onAdd={addTask}
+              onUpdate={updateTask}
+              onDelete={deleteTask}
+            />
+          )}
+          {currentPage === "Projects" && (
+            <Projects
+              projects={projects}
+              tasks={tasks}
+              onAdd={addProject}
+              onUpdate={updateProject}
+              onDelete={deleteProject}
+            />
+          )}
+        </div>
       </div>
 
       {/* Hidden file input for import */}
