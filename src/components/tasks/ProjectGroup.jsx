@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { getPalette } from "../../colors";
 import { STATUS_COLORS } from "../../theme";
 import TaskCard from "../TaskCard";
@@ -20,22 +20,19 @@ const sortTasks = tasks => [...tasks].sort((a, b) => {
 const STATUS_OPTIONS = ["Not Started", "In Progress", "Needs Review", "Done"];
 
 // ── StatusFilterPill ───────────────────────────────────────────────────────────
-// Unselected (default): very muted — dark bg, low-opacity border and text.
-// Selected (clicked):   bright — glow palette bg, border, and text.
-// Hover on unselected:  slightly brightens toward selected style.
 
 function StatusFilterPill({ status, count, selected, onToggle }) {
   const [hov, setHov] = useState(false);
-  const p   = getPalette(STATUS_COLORS[status] ?? "gray"); // glow palette
+  const p   = getPalette(STATUS_COLORS[status] ?? "gray");
   const rgb = (() => {
     const h = p.text;
     if (!h || !h.startsWith("#") || h.length < 7) return "136,136,144";
     return [1,3,5].map(i => parseInt(h.slice(i,i+2),16)).join(",");
   })();
 
-  const bg     = selected ? p.bg                  : hov ? `rgba(${rgb},0.15)` : `rgba(${rgb},0.08)`;
-  const border = selected ? p.border              : hov ? p.border            : `rgba(${rgb},0.3)`;
-  const color  = selected ? p.text               : hov ? p.text               : `rgba(${rgb},0.65)`;
+  const bg     = selected ? p.bg     : hov ? `rgba(${rgb},0.15)` : `rgba(${rgb},0.08)`;
+  const border = selected ? p.border : hov ? p.border            : `rgba(${rgb},0.3)`;
+  const color  = selected ? p.text   : hov ? p.text              : `rgba(${rgb},0.65)`;
 
   return (
     <button
@@ -60,11 +57,7 @@ function StatusFilterPill({ status, count, selected, onToggle }) {
       }}
     >
       {status}
-      <span style={{
-        fontSize:   "9px",
-        fontWeight: 800,
-        opacity:    selected ? 0.7 : 0.6,
-      }}>
+      <span style={{ fontSize: "9px", fontWeight: 800, opacity: selected ? 0.7 : 0.6 }}>
         · {count}
       </span>
     </button>
@@ -78,36 +71,104 @@ const Sep = () => (
 );
 
 // ── ProjectGroup ───────────────────────────────────────────────────────────────
-// Header: ● Project Name  |  N tasks  |  [Status · count] ...
-// Status pills only render if that status has at least one task.
-// Selecting a pill (click = bright) filters the list to that status.
-// Multiple pills can be selected; no selection = show all tasks.
-// Done tasks are always in a separate collapsible section at the bottom.
+// Status pill clicks crossfade the task list; FLIP is reserved for task reorders
+// within a stable filter view.
 
 export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProjects, filterKey }) {
   const pal = project ? getPalette(project.color) : getPalette("gray");
 
-  // null = no filter (show all); a status string = filter to that status
-  const [selected, setSelected] = useState(null);
-  const [showDone, setShowDone] = useState(false);
+  const [selected,       setSelected]       = useState(null);
+  const [showDone,       setShowDone]       = useState(false);
+  const [outgoingFilter, setOutgoingFilter] = useState(null); // { selected } | null
+  const fadeTimerRef = useRef(null);
 
-  // Clicking the active filter deselects (back to all); clicking another selects it
-  const toggle = (status) => setSelected(prev => prev === status ? null : status);
+  // Crossfade on status pill click — same pattern as project-level crossfade
+  const toggle = (status) => {
+    const next = selected === status ? null : status;
+    if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+    setOutgoingFilter({ selected });  // freeze current filter as the outgoing layer
+    setSelected(next);                // incoming layer renders with new filter
+    fadeTimerRef.current = setTimeout(() => {
+      setOutgoingFilter(null);
+      fadeTimerRef.current = null;
+    }, 160);
+  };
 
-  const noFilter = selected === null;
-
-  // Active (non-done) tasks, filtered
-  const activeTasks = sortTasks(
-    tasks.filter(t => t.status !== "Done" && (noFilter || t.status === selected))
-  );
-
-  // Done tasks — in collapsible; shown when no filter or "Done" is selected
-  const doneTasks = sortTasks(
-    tasks.filter(t => t.status === "Done" && (noFilter || selected === "Done"))
-  );
-
-  // Only render pills for statuses that have at least one task
   const presentStatuses = STATUS_OPTIONS.filter(s => tasks.some(t => t.status === s));
+
+  // ── Task content renderer ──────────────────────────────────────────────────
+  // filterSelected — the status filter driving this render (null = show all)
+  // interactive    — whether the done toggle / edit handlers are live
+  const renderTaskContent = (filterSelected, interactive = true) => {
+    const noFilter    = filterSelected === null;
+    const activeTasks = sortTasks(
+      tasks.filter(t => t.status !== "Done" && (noFilter || t.status === filterSelected))
+    );
+    const doneTasks   = sortTasks(
+      tasks.filter(t => t.status === "Done" && (noFilter || filterSelected === "Done"))
+    );
+
+    if (activeTasks.length === 0 && doneTasks.length === 0) {
+      return (
+        <div style={{ fontSize: "13px", color: "#55555e", padding: "10px 0 14px" }}>
+          No tasks match the active filters.
+        </div>
+      );
+    }
+
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        {/* Active tasks — key resets FLIP whenever the status filter changes,
+            but preserves it across renders where only task values change.      */}
+        <AnimatedTaskList
+          key={`${filterKey}|${filterSelected ?? "__all__"}`}
+          tasks={activeTasks}
+          projects={allProjects}
+          onEdit={interactive ? onEdit : undefined}
+          onUpdate={interactive ? onUpdate : undefined}
+        />
+
+        {/* Done tasks collapsible */}
+        {doneTasks.length > 0 && (
+          <div style={{ marginTop: "4px" }}>
+            <button
+              onClick={interactive ? () => setShowDone(v => !v) : undefined}
+              style={{
+                background: "none", border: "none",
+                cursor:     interactive ? "pointer" : "default",
+                color:      "#555560", fontSize: "11px", fontWeight: 600,
+                padding:    "4px 0", fontFamily: "inherit",
+                display:    "flex", alignItems: "center", gap: "6px",
+                userSelect: "none",
+              }}
+            >
+              <span style={{
+                display:    "inline-block",
+                transform:  showDone ? "rotate(90deg)" : "rotate(0deg)",
+                transition: "transform 0.15s",
+                fontSize:   "9px",
+              }}>▶</span>
+              {showDone ? "Hide" : "Show"} completed ({doneTasks.length})
+            </button>
+
+            {showDone && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px" }}>
+                {doneTasks.map(task => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    projects={allProjects}
+                    onEdit={interactive ? onEdit : undefined}
+                    onUpdate={interactive ? onUpdate : undefined}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div>
@@ -120,7 +181,6 @@ export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProj
         paddingBottom: "6px",
         flexWrap:      "wrap",
       }}>
-        {/* Color dot */}
         <div style={{
           width:        "9px",
           height:       "9px",
@@ -129,7 +189,6 @@ export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProj
           flexShrink:   0,
         }} />
 
-        {/* Project name */}
         <span style={{
           fontSize:      "13px",
           fontWeight:    700,
@@ -143,14 +202,12 @@ export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProj
 
         <Sep />
 
-        {/* Task count */}
         <span style={{ fontSize: "12px", color: "#555560", whiteSpace: "nowrap" }}>
           {tasks.length} task{tasks.length !== 1 ? "s" : ""}
         </span>
 
         <Sep />
 
-        {/* Status filter pills — only shown statuses */}
         <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
           {presentStatuses.map(status => (
             <StatusFilterPill
@@ -163,73 +220,43 @@ export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProj
           ))}
         </div>
 
-        {/* Right accent line — fills remaining space, stops 8px short of edge */}
         <div style={{
-          flex:        1,
-          minWidth:    "8px",
-          marginRight: "8px",
-          height:      "2px",
-          background:  pal.text,
-          borderRadius:"1px",
+          flex:         1,
+          minWidth:     "8px",
+          marginRight:  "8px",
+          height:       "2px",
+          background:   pal.text,
+          borderRadius: "1px",
         }} />
       </div>
 
-      {/* ── Task list ─────────────────────────────────────────────────────── */}
-      {activeTasks.length === 0 && doneTasks.length === 0 ? (
-        <div style={{ fontSize: "13px", color: "#55555e", padding: "10px 0 14px" }}>
-          No tasks match the active filters.
-        </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          <AnimatedTaskList
-            key={filterKey}
-            tasks={activeTasks}
-            projects={allProjects}
-            onEdit={onEdit}
-            onUpdate={onUpdate}
-          />
+      {/* ── Task list — crossfade on filter change, FLIP on task reorder ──── */}
+      <div style={{ position: "relative" }}>
 
-          {/* ── Done tasks collapsible ──────────────────────────────────── */}
-          {doneTasks.length > 0 && (
-            <div style={{ marginTop: "4px" }}>
-              <button
-                onClick={() => setShowDone(v => !v)}
-                style={{
-                  background: "none", border: "none", cursor: "pointer",
-                  color: "#555560", fontSize: "11px", fontWeight: 600,
-                  padding: "4px 0", fontFamily: "inherit",
-                  display: "flex", alignItems: "center", gap: "6px",
-                  userSelect: "none",
-                }}
-              >
-                <span style={{
-                  display: "inline-block",
-                  transform: showDone ? "rotate(90deg)" : "rotate(0deg)",
-                  transition: "transform 0.15s",
-                  fontSize: "9px",
-                }}>
-                  ▶
-                </span>
-                {showDone ? "Hide" : "Show"} completed ({doneTasks.length})
-              </button>
-
-              {showDone && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px" }}>
-                  {doneTasks.map(task => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      projects={allProjects}
-                      onEdit={onEdit}
-                      onUpdate={onUpdate}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+        {/* Incoming (live) layer */}
+        <div
+          key={selected ?? "__all__"}
+          className={outgoingFilter ? "xfade-in" : undefined}
+        >
+          {renderTaskContent(selected, true)}
         </div>
-      )}
+
+        {/* Outgoing layer — absolute overlay, fades out */}
+        {outgoingFilter && (
+          <div
+            className="xfade-out"
+            style={{
+              position:      "absolute",
+              top:           0,
+              left:          0,
+              right:         0,
+              pointerEvents: "none",
+            }}
+          >
+            {renderTaskContent(outgoingFilter.selected, false)}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
