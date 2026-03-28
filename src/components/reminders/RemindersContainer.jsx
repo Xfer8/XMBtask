@@ -91,19 +91,21 @@ const STATUS_COLOR = {
 // ── StatusBar ─────────────────────────────────────────────────────────────────
 function StatusBar({ status }) {
   const color     = STATUS_COLOR[status] ?? STATUS_COLOR.neutral;
-  const animation =
-    status === "overdue-today" ? "pulseRed 1.4s ease-in-out infinite" :
-    status === "soon"          ? "pulseOrangeBar 1.2s ease-in-out infinite" :
-    undefined;
+  const animation = status === "overdue-today"
+    ? "pulseRed 1.4s ease-in-out infinite"
+    : undefined; // "soon" pulse is driven by parent .reminder-soon via CSS
   return (
-    <div style={{
-      width:        "5px",
-      alignSelf:    "stretch",
-      borderRadius: "3px",
-      flexShrink:   0,
-      background:   color,
-      animation,
-    }} />
+    <div
+      className="reminder-bar"
+      style={{
+        width:        "5px",
+        alignSelf:    "stretch",
+        borderRadius: "3px",
+        flexShrink:   0,
+        background:   color,
+        animation,
+      }}
+    />
   );
 }
 

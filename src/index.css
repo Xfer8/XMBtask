@@ -51,19 +51,18 @@ body {
   50%       { opacity: 0.3; }
 }
 
-@keyframes pulseOrangeBar {
-  0%, 100% { opacity: 1;    box-shadow: 0 0 0px  0px rgba(249,115,22,0);    }
-  50%       { opacity: 0.8; box-shadow: 0 0 10px 2px rgba(249,115,22,0.65); }
-}
-
 @keyframes pulseOrangeBg {
   0%, 100% { background-color: transparent; }
   50%       { background-color: rgba(249,115,22,0.05); }
 }
 
-.reminder-soon {
-  animation: pulseOrangeBg 1.2s ease-in-out infinite;
+@keyframes pulseOrangeBar {
+  0%, 100% { opacity: 1;    box-shadow: 0 0 0px  0px rgba(249,115,22,0);    }
+  50%       { opacity: 0.8; box-shadow: 0 0 10px 2px rgba(249,115,22,0.65); }
 }
-.reminder-soon:hover {
-  animation: none;
-}
+
+/* Both animations share the same duration so they pulse in perfect sync */
+.reminder-soon               { animation: pulseOrangeBg  2.5s ease-in-out infinite; }
+.reminder-soon .reminder-bar { animation: pulseOrangeBar 2.5s ease-in-out infinite; }
+.reminder-soon:hover               { animation: none; }
+.reminder-soon:hover .reminder-bar { animation: none; }
