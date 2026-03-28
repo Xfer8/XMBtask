@@ -227,7 +227,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
   };
 
   return (
-    <div style={{ width:"100%", padding:"24px 20px", boxSizing:"border-box", maxWidth:"720px", margin:"0 auto" }}>
+    <div style={{ width:"100%", padding:"24px 20px", boxSizing:"border-box", maxWidth:"680px", margin:"0 auto" }}>
 
       {/* ── Project bar ─────────────────────────────────────────────────────── */}
       <ProjectBar

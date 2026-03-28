@@ -132,7 +132,7 @@ export default function Projects({ projects = [], tasks = [], onAdd, onUpdate, o
   });
 
   return (
-    <div style={{ width:"100%", padding:"24px 20px", boxSizing:"border-box", maxWidth:"720px", margin:"0 auto" }}>
+    <div style={{ width:"100%", padding:"24px 20px", boxSizing:"border-box", maxWidth:"680px", margin:"0 auto" }}>
 
       {/* ── Page header ── */}
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"24px" }}>

@@ -242,10 +242,10 @@ export default function App() {
         zIndex:     99,
       }} />
 
-      {/* Floating header — outer wrapper matches page content column (720px, 20px padding) */}
+      {/* Floating header — outer wrapper matches page content column (680px, 20px padding) */}
       <div style={{
         width:      "100%",
-        maxWidth:   "720px",
+        maxWidth:   "680px",
         margin:     "20px auto 0",
         padding:    "0 20px",
         boxSizing:  "border-box",
