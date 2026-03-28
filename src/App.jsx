@@ -6,6 +6,7 @@ import Tasks from "./pages/Tasks";
 import Projects from "./pages/Projects";
 import { loadProjects, saveProjects, loadTasks, saveTasks } from "./services/dataService";
 import { exportToXlsx, importFromXlsx } from "./services/xlsxService";
+import { exportBackup, importBackup } from "./services/backupService";
 
 const generateTaskId = (tasks) => {
   const max = tasks.reduce((m, t) => Math.max(m, parseInt(t.id.replace("XMB-T", "")) || 0), 0);
@@ -17,8 +18,62 @@ const generateProjectId = (projects) => {
   return `XMB-P${String(max + 1).padStart(3, "0")}`;
 };
 
+// ── Export choice modal ────────────────────────────────────────────────────────
+function ExportChoiceModal({ onExcel, onBackup, onCancel }) {
+  return (
+    <div style={{
+      position:"fixed", inset:0, zIndex:600,
+      background:"rgba(0,0,0,0.75)",
+      display:"flex", alignItems:"center", justifyContent:"center",
+    }}>
+      <div style={{
+        background:"#2c2c2c", border:"1px solid #3a3a3a", borderRadius:"14px",
+        padding:"28px 32px", width:"360px",
+        boxShadow:"0 16px 48px rgba(0,0,0,0.6)",
+      }}>
+        <div style={{ fontSize:"15px", fontWeight:700, color:"#f0f0f0", marginBottom:"8px" }}>
+          Export data
+        </div>
+        <div style={{ fontSize:"13px", color:"#888890", lineHeight:1.5, marginBottom:"20px" }}>
+          Choose an export format.
+        </div>
+
+        <div style={{ display:"flex", flexDirection:"column", gap:"10px", marginBottom:"22px" }}>
+          <button onClick={onExcel} style={{
+            background:"#1e1e1e", border:"1px solid #3a3a3a", borderRadius:"8px",
+            cursor:"pointer", color:"#f0f0f0", fontSize:"13px",
+            padding:"14px 16px", fontFamily:"inherit", textAlign:"left",
+          }}>
+            <div style={{ fontWeight:600, marginBottom:"3px" }}>Excel spreadsheet (.xlsx)</div>
+            <div style={{ fontSize:"12px", color:"#888890" }}>Human-readable. Images are not included.</div>
+          </button>
+          <button onClick={onBackup} style={{
+            background:"#1e1e1e", border:"1px solid #3a3a3a", borderRadius:"8px",
+            cursor:"pointer", color:"#f0f0f0", fontSize:"13px",
+            padding:"14px 16px", fontFamily:"inherit", textAlign:"left",
+          }}>
+            <div style={{ fontWeight:600, marginBottom:"3px" }}>Full backup (.xmbtask)</div>
+            <div style={{ fontSize:"12px", color:"#888890" }}>Complete restore file. Includes all images.</div>
+          </button>
+        </div>
+
+        <div style={{ display:"flex", justifyContent:"flex-end" }}>
+          <button onClick={onCancel} style={{
+            background:"none", border:"1px solid #3a3a3a", borderRadius:"7px",
+            cursor:"pointer", color:"#888890", fontSize:"13px",
+            padding:"7px 18px", fontFamily:"inherit",
+          }}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Import confirmation modal ──────────────────────────────────────────────────
-function ImportConfirmModal({ preview, onConfirm, onCancel }) {
+function ImportConfirmModal({ preview, fileType, onConfirm, onCancel }) {
+  const isBackup = fileType === "xmbtask";
   return (
     <div style={{
       position:"fixed", inset:0, zIndex:600,
@@ -31,14 +86,18 @@ function ImportConfirmModal({ preview, onConfirm, onCancel }) {
         boxShadow:"0 16px 48px rgba(0,0,0,0.6)",
       }}>
         <div style={{ fontSize:"15px", fontWeight:700, color:"#f0f0f0", marginBottom:"10px" }}>
-          Import backup?
+          {isBackup ? "Restore from backup?" : "Import from Excel?"}
         </div>
-        <div style={{
-          fontSize:"13px", color:"#888890", lineHeight:1.6, marginBottom:"16px",
-        }}>
+        <div style={{ fontSize:"13px", color:"#888890", lineHeight:1.6, marginBottom:"4px" }}>
           This will <span style={{ color:"#FF6B6B", fontWeight:600 }}>replace all existing data</span> with
           the contents of the selected file. This action cannot be undone.
         </div>
+        {!isBackup && (
+          <div style={{ fontSize:"12px", color:"#666670", marginBottom:"12px" }}>
+            Note: images are not stored in Excel exports and will not be restored.
+          </div>
+        )}
+        {isBackup && <div style={{ marginBottom:"12px" }} />}
 
         {/* Preview counts */}
         <div style={{
@@ -82,8 +141,9 @@ export default function App() {
   const [projects,      setProjects]      = useState([]);
   const [tasks,         setTasks]         = useState([]);
   const [storageReady,  setStorageReady]  = useState(false);
-  const [pendingImport, setPendingImport] = useState(null); // { projects, tasks }
-  const [importError,   setImportError]   = useState(null);
+  const [showExportChoice, setShowExportChoice] = useState(false);
+  const [pendingImport,    setPendingImport]    = useState(null); // { projects, tasks, fileType }
+  const [importError,      setImportError]      = useState(null);
   const fileInputRef = useRef(null);
 
   // ── Load from storage on mount ──────────────────────────────────────────────
@@ -119,7 +179,17 @@ export default function App() {
 
   // ── Export ──────────────────────────────────────────────────────────────────
   const handleExport = () => {
+    setShowExportChoice(true);
+  };
+
+  const handleExportExcel = () => {
+    setShowExportChoice(false);
     exportToXlsx(projects, tasks);
+  };
+
+  const handleExportBackup = () => {
+    setShowExportChoice(false);
+    exportBackup(projects, tasks);
   };
 
   // ── Import — step 1: open file picker ─────────────────────────────────────
@@ -134,11 +204,19 @@ export default function App() {
     e.target.value = ""; // reset so same file can be re-selected
     if (!file) return;
 
+    const isBackup = file.name.endsWith(".xmbtask");
+
     try {
-      const data = await importFromXlsx(file);
-      setPendingImport(data);
+      const data = isBackup
+        ? await importBackup(file)
+        : await importFromXlsx(file);
+      setPendingImport({ ...data, fileType: isBackup ? "xmbtask" : "xlsx" });
     } catch {
-      setImportError("Could not read the file. Make sure it's a valid XMBtask backup (.xlsx).");
+      setImportError(
+        isBackup
+          ? "Could not read the file. Make sure it's a valid XMBtask backup (.xmbtask)."
+          : "Could not read the file. Make sure it's a valid XMBtask export (.xlsx)."
+      );
     }
   };
 
@@ -235,7 +313,7 @@ export default function App() {
       <input
         ref={fileInputRef}
         type="file"
-        accept=".xlsx,.xls"
+        accept=".xlsx,.xls,.xmbtask"
         style={{ display: "none" }}
         onChange={handleFileChange}
       />
@@ -252,10 +330,20 @@ export default function App() {
         </div>
       )}
 
+      {/* Export choice modal */}
+      {showExportChoice && (
+        <ExportChoiceModal
+          onExcel={handleExportExcel}
+          onBackup={handleExportBackup}
+          onCancel={() => setShowExportChoice(false)}
+        />
+      )}
+
       {/* Import confirmation modal */}
       {pendingImport && (
         <ImportConfirmModal
           preview={{ projects: pendingImport.projects.length, tasks: pendingImport.tasks.length }}
+          fileType={pendingImport.fileType}
           onConfirm={handleImportConfirm}
           onCancel={() => setPendingImport(null)}
         />

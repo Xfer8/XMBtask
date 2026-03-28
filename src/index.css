@@ -38,3 +38,15 @@ body {
 }
 .slide-from-right { animation: slideInFromRight 0.22s ease; }
 .slide-from-left  { animation: slideInFromLeft  0.22s ease; }
+
+/* ─── Project filter crossfade ───────────────────────────────────────────── */
+@keyframes xfadeIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes xfadeOut { from { opacity: 1; } to { opacity: 0; } }
+.xfade-in  { animation: xfadeIn  0.12s ease forwards; }
+.xfade-out { animation: xfadeOut 0.12s ease forwards; }
+
+/* ─── Reminder status bar pulse ──────────────────────────────────────────── */
+@keyframes pulseRed {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
