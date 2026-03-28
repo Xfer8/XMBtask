@@ -165,7 +165,7 @@ function ReminderRow({ reminder, complete, onToggle, overdueDate }) {
 }
 
 // ── NavArrow ───────────────────────────────────────────────────────────────────
-function NavArrow({ dir, onClick }) {
+function NavArrow({ dir, onClick, dim }) {
   const [hov, setHov] = useState(false);
   return (
     <button
@@ -173,8 +173,11 @@ function NavArrow({ dir, onClick }) {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        background: "none", border: "none", cursor: "pointer", padding: "2px 5px",
-        color: hov ? "#f0f0f0" : "#555560", fontSize: "14px", lineHeight: 1,
+        background: "none", border: "none",
+        cursor: dim ? "default" : "pointer",
+        padding: "2px 5px",
+        color: dim ? "#333338" : hov ? "#f0f0f0" : "#555560",
+        fontSize: "14px", lineHeight: 1,
         transition: "color 0.15s", fontFamily: "inherit",
       }}
     >
@@ -185,8 +188,21 @@ function NavArrow({ dir, onClick }) {
 
 // ── RemindersContainer ─────────────────────────────────────────────────────────
 export default function RemindersContainer({ reminders, completions, onToggle, onManage }) {
-  const [overdueOpen, setOverdueOpen] = useState(true);
-  const [offset,      setOffset]      = useState(0); // days from today; 0 = today
+  const [overdueOpen,   setOverdueOpen]   = useState(true);
+  const [offset,        setOffset]        = useState(0); // days from today; 0 = today
+  const [showLimitMsg,  setShowLimitMsg]  = useState(false);
+
+  const HISTORY_LIMIT = -30; // completions are pruned after 30 days
+
+  const goBack = () => {
+    if (offset <= HISTORY_LIMIT) {
+      setShowLimitMsg(true);
+      setTimeout(() => setShowLimitMsg(false), 3000);
+    } else {
+      setOffset(o => o - 1);
+      setShowLimitMsg(false);
+    }
+  };
 
   // Derive the currently-viewed date from today + offset
   const today    = new Date();
@@ -222,14 +238,14 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
           </div>
           {/* Date navigator */}
           <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
-            <NavArrow dir="left"  onClick={() => setOffset(o => o - 1)} />
+            <NavArrow dir="left"  onClick={goBack} dim={offset <= HISTORY_LIMIT} />
             <span style={{ fontSize: "12px", color: "#c8c8d0", fontWeight: 600, userSelect: "none" }}>
               {dateLabel}
             </span>
-            <NavArrow dir="right" onClick={() => setOffset(o => o + 1)} />
+            <NavArrow dir="right" onClick={() => { setOffset(o => o + 1); setShowLimitMsg(false); }} />
             {!isToday && (
               <button
-                onClick={() => setOffset(0)}
+                onClick={() => { setOffset(0); setShowLimitMsg(false); }}
                 style={{
                   marginLeft: "6px", background: "none",
                   border: "1px solid #3a3a3a", borderRadius: "5px",
@@ -244,6 +260,12 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
               </button>
             )}
           </div>
+          {/* 30-day limit message */}
+          {showLimitMsg && (
+            <div style={{ fontSize: "11px", color: "#888890", marginTop: "5px", fontStyle: "italic" }}>
+              Reminder completions are only kept for 30 days.
+            </div>
+          )}
         </div>
 
         <button
