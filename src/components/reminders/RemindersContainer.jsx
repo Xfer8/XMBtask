@@ -253,37 +253,47 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <div style={{
-        display:        "flex",
-        alignItems:     "center",
-        justifyContent: "space-between",
-        padding:        "10px 18px",
-        background:     "rgba(0,0,0,0.18)",
-        borderBottom:   "1px solid #333338",
+        display:      "flex",
+        alignItems:   "center",
+        gap:          "10px",
+        padding:      "12px 18px 10px",
+        borderBottom: "1px solid #333338",
       }}>
-        {/* Left: day label + date */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{
-            fontSize:      "9px",
-            fontWeight:    900,
-            color:         "#444450",
-            letterSpacing: "1.5px",
-            textTransform: "uppercase",
-            userSelect:    "none",
-          }}>
-            {todayDay.toUpperCase()} REMINDERS
-          </span>
-          <span style={{
-            fontSize:      "9px",
-            fontWeight:    700,
-            color:         "#333340",
-            letterSpacing: "0.06em",
-            userSelect:    "none",
-          }}>
-            {formatShortDate(today)}
-          </span>
-        </div>
+        {/* Title */}
+        <span style={{
+          fontSize:      "13px",
+          fontWeight:    700,
+          color:         "#f0f0f0",
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+          whiteSpace:    "nowrap",
+          userSelect:    "none",
+        }}>
+          {todayDay} Reminders
+        </span>
 
-        {/* Right: Manage button */}
+        {/* Separator */}
+        <span style={{ color: "#3a3a3a", fontSize: "14px", fontWeight: 300, userSelect: "none" }}>|</span>
+
+        {/* Date */}
+        <span style={{
+          fontSize:   "12px",
+          color:      "#555560",
+          whiteSpace: "nowrap",
+          userSelect: "none",
+        }}>
+          {formatShortDate(today)}
+        </span>
+
+        {/* Right accent line */}
+        <div style={{
+          flex:         1,
+          height:       "2px",
+          background:   "#4ADE80",
+          borderRadius: "1px",
+        }} />
+
+        {/* Manage button */}
         <button
           onClick={onManage}
           style={{
@@ -299,6 +309,7 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
             fontFamily:    "inherit",
             textTransform: "uppercase",
             transition:    "border-color 0.15s, color 0.15s",
+            flexShrink:    0,
           }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = "#4ADE80"; e.currentTarget.style.color = "#4ADE80"; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = "#444450"; e.currentTarget.style.color = "#888890"; }}
