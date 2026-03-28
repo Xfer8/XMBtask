@@ -1,10 +1,11 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import MutedBadge from "../../ui/MutedBadge";
+import ImagePasteZone from "./ImagePasteZone";
 
 const LINK_TYPES       = ["Source", "Sherlock", "Jira", "Email", "Link"];
 const LINK_TYPE_COLORS = { Source:"yellow", Sherlock:"orange", Jira:"blue", Email:"purple", Link:"gray", Other:"gray" };
 const generateLinkId   = () => `LK${Date.now()}`;
-const EMPTY_LINK       = { url:"", displayName:"", type:"" };
+const EMPTY_LINK       = { url:"", displayName:"", type:"", images:[] };
 
 const inputStyle = {
   width:"100%", boxSizing:"border-box", background:"#1e1e1e",
@@ -43,44 +44,10 @@ const autoName = (type, url) => {
   return null;
 };
 
-// ── Read a .msg file into base64 ────────────────────────────────────────────────
-// Processes in 8 KB chunks to avoid call-stack overflow on large files.
-const readMsgFile = (file, cb) => {
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const bytes  = new Uint8Array(ev.target.result);
-    const CHUNK  = 8192;
-    let   binary = "";
-    for (let i = 0; i < bytes.length; i += CHUNK) {
-      binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
-    }
-    cb(btoa(binary), file.name);
-  };
-  reader.readAsArrayBuffer(file);
-};
-
-// ── Inline file row: shows filename + optional Change button ─────────────────
-function MsgFileRow({ fileName, onChangeClick }) {
-  return (
-    <div style={{
-      display:"flex", alignItems:"center", gap:"8px",
-      background:"#1e1e1e", border:"1px solid #3a3a3a",
-      borderRadius:"8px", padding:"8px 12px",
-    }}>
-      <span style={{ fontSize:"12px", color:"#555560", userSelect:"none", flexShrink:0 }}>
-        📎
-      </span>
-      <span style={{ fontSize:"13px", color:"#c8c8d0", flex:1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-        {fileName}
-      </span>
-      {onChangeClick && (
-        <button onClick={onChangeClick} style={{ ...cancelBtnStyle, padding:"3px 10px", fontSize:"11px", flexShrink:0 }}>
-          Change
-        </button>
-      )}
-    </div>
-  );
-}
+// Badge display value for an Email link
+const emailBadgeValue = l =>
+  l.displayName ||
+  (l.images?.length ? `${l.images.length} image${l.images.length !== 1 ? "s" : ""}` : "(none)");
 
 export default function LinksSection({ links, onChange }) {
   const [adding,     setAdding]     = useState(false);
@@ -89,18 +56,11 @@ export default function LinksSection({ links, onChange }) {
   const [editForm,   setEditForm]   = useState(null);
   const [confirmDel, setConfirmDel] = useState(null);
 
-  const addFileRef  = useRef(null);
-  const editFileRef = useRef(null);
-
   // ── Add-form field updater ──────────────────────────────────────────────────
   const set = (k, v) => setForm(f => {
     const next = { ...f, [k]: v };
-    // Clear stored file when switching away from Email
-    if (k === "type" && v !== "Email") {
-      delete next.fileData;
-      delete next.fileName;
-      if (next.url && next.url === f.fileName) next.url = "";
-    }
+    // Reset images when switching type away from / back to Email
+    if (k === "type") next.images = [];
     if (k === "url") {
       const detected = detectType(next.url);
       if (detected && !next.type) next.type = detected;
@@ -112,43 +72,22 @@ export default function LinksSection({ links, onChange }) {
     return next;
   });
 
-  // ── .msg file handlers ──────────────────────────────────────────────────────
-  const handleAddFileSelect = e => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    readMsgFile(file, (base64, name) => {
-      setForm(f => ({ ...f, fileData: base64, fileName: name, url: name }));
-    });
-  };
-
-  const handleEditFileSelect = e => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    readMsgFile(file, (base64, name) => {
-      setEditForm(f => ({ ...f, fileData: base64, fileName: name, url: name }));
-    });
-  };
-
   // ── Add / save ──────────────────────────────────────────────────────────────
   const handleAdd = () => {
     if (!form.type) return;
-    if (form.type === "Email"  && !form.fileData)   return;
-    if (form.type !== "Email"  && !form.url.trim()) return;
+    if (form.type !== "Email" && !form.url.trim()) return;
     onChange([...links, { ...form, id: generateLinkId() }]);
     setForm(EMPTY_LINK);
     setAdding(false);
   };
 
-  const startEdit = l => { setEditingId(l.id); setEditForm({ ...l }); setConfirmDel(null); };
+  const startEdit = l => { setEditingId(l.id); setEditForm({ ...l, images: l.images ?? [] }); setConfirmDel(null); };
   const saveEdit  = () => {
     onChange(links.map(l => l.id === editingId ? { ...l, ...editForm } : l));
     setEditingId(null); setEditForm(null);
   };
 
-  const addDisabled = !form.type ||
-    (form.type === "Email" ? !form.fileData : !form.url.trim());
+  const addDisabled = !form.type || (form.type !== "Email" && !form.url.trim());
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
@@ -159,44 +98,20 @@ export default function LinksSection({ links, onChange }) {
         if (editingId === l.id) return (
           <div key={l.id} style={{ display:"flex", flexDirection:"column", gap:"8px", background:"#1E1E1E", borderRadius:"8px", padding:"12px" }}>
 
-            {/* Type selector */}
             <select
               value={editForm.type}
-              onChange={e => setEditForm(f => {
-                const next = { ...f, type: e.target.value };
-                if (e.target.value !== "Email") { delete next.fileData; delete next.fileName; }
-                return next;
-              })}
+              onChange={e => setEditForm(f => ({ ...f, type: e.target.value, images: [] }))}
               style={{ ...inputStyle, cursor:"pointer" }}
             >
               <option value="">Select type…</option>
               {LINK_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
 
-            {/* URL field or .msg file picker */}
             {editForm.type === "Email" ? (
-              <>
-                {editForm.fileData ? (
-                  <MsgFileRow
-                    fileName={editForm.fileName || editForm.url}
-                    onChangeClick={() => editFileRef.current?.click()}
-                  />
-                ) : (
-                  <button
-                    onClick={() => editFileRef.current?.click()}
-                    style={{ ...inputStyle, cursor:"pointer", textAlign:"left", color:"#888890" }}
-                  >
-                    📎 Add .msg file…
-                  </button>
-                )}
-                <input
-                  ref={editFileRef}
-                  type="file"
-                  accept=".msg"
-                  style={{ display:"none" }}
-                  onChange={handleEditFileSelect}
-                />
-              </>
+              <ImagePasteZone
+                images={editForm.images ?? []}
+                onChange={imgs => setEditForm(f => ({ ...f, images: imgs }))}
+              />
             ) : (
               <input
                 type="text"
@@ -207,7 +122,6 @@ export default function LinksSection({ links, onChange }) {
               />
             )}
 
-            {/* Display name */}
             <input
               type="text"
               value={editForm.displayName}
@@ -225,11 +139,12 @@ export default function LinksSection({ links, onChange }) {
 
         // ── Display row ─────────────────────────────────────────────────────
         const colorKey = LINK_TYPE_COLORS[l.type] ?? "gray";
+        const badgeVal = l.type === "Email" ? emailBadgeValue(l) : (l.displayName || l.url || "(none)");
         return (
           <div key={l.id} style={{ display:"flex", alignItems:"center", gap:"10px", background:"#1E1E1E", borderRadius:"8px", padding:"8px 12px" }}>
             <MutedBadge
               label={l.type}
-              value={l.displayName || l.fileName || l.url || "(none)"}
+              value={badgeVal}
               colorKey={colorKey}
               onClick={() => startEdit(l)}
             />
@@ -255,36 +170,16 @@ export default function LinksSection({ links, onChange }) {
       {adding ? (
         <div style={{ display:"flex", flexDirection:"column", gap:"8px", background:"#1E1E1E", borderRadius:"8px", padding:"12px" }}>
 
-          {/* Type selector */}
           <select value={form.type} onChange={e => set("type", e.target.value)} style={{ ...inputStyle, cursor:"pointer" }}>
             <option value="">Select type…</option>
             {LINK_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
 
-          {/* URL field or .msg file picker */}
           {form.type === "Email" ? (
-            <>
-              {form.fileData ? (
-                <MsgFileRow
-                  fileName={form.fileName || form.url}
-                  onChangeClick={() => addFileRef.current?.click()}
-                />
-              ) : (
-                <button
-                  onClick={() => addFileRef.current?.click()}
-                  style={{ ...inputStyle, cursor:"pointer", textAlign:"left", color:"#888890" }}
-                >
-                  📎 Add .msg file…
-                </button>
-              )}
-              <input
-                ref={addFileRef}
-                type="file"
-                accept=".msg"
-                style={{ display:"none" }}
-                onChange={handleAddFileSelect}
-              />
-            </>
+            <ImagePasteZone
+              images={form.images ?? []}
+              onChange={imgs => setForm(f => ({ ...f, images: imgs }))}
+            />
           ) : (
             form.type && (
               <input
@@ -297,7 +192,6 @@ export default function LinksSection({ links, onChange }) {
             )
           )}
 
-          {/* Display name */}
           {form.type && (
             <input
               type="text"

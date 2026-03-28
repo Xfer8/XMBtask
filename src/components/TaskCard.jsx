@@ -366,33 +366,12 @@ function UpdatePopover({ updates = [], onAdd, onClose }) {
   );
 }
 
-// ── openMsgFile ────────────────────────────────────────────────────────────────
-// Decodes a base64-stored .msg file into a Blob and triggers a browser download.
-// If Outlook is registered as the default handler for .msg files on Windows,
-// the browser will open it directly in Outlook from the downloads bar.
-
-const openMsgFile = (link) => {
-  if (!link.fileData) return;
-  const binary = atob(link.fileData);
-  const bytes  = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  const blob    = new Blob([bytes], { type: "application/vnd.ms-outlook" });
-  const blobUrl = URL.createObjectURL(blob);
-  const a = Object.assign(document.createElement("a"), {
-    href:     blobUrl,
-    download: link.fileName || link.url || "email.msg",
-  });
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-};
-
 // ── TaskCard ───────────────────────────────────────────────────────────────────
 
 export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
-  const [showPopover, setShowPopover] = useState(false);
-  const [viewerIndex, setViewerIndex] = useState(null);
+  const [showPopover,    setShowPopover]    = useState(false);
+  const [viewerIndex,    setViewerIndex]    = useState(null);
+  const [emailViewer,    setEmailViewer]    = useState(null); // { link } when open
 
   const project    = projects.find(p => p.id === task.projectId);
   const projectPal = project ? getPalette(project.color) : null;
@@ -648,17 +627,20 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
           {links.length > 0 && (
             <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
               {links.map(link => {
-                const colorMap = { Source: "yellow", Sherlock: "orange", Jira: "blue", Email: "purple", Link: "gray", Other: "gray" };
-                const isMsgFile = link.type === "Email" && !!link.fileData;
+                const colorMap   = { Source: "yellow", Sherlock: "orange", Jira: "blue", Email: "purple", Link: "gray", Other: "gray" };
+                const isEmailImg = link.type === "Email" && link.images?.length > 0;
+                const badgeVal   = link.type === "Email"
+                  ? (link.displayName || (link.images?.length ? `${link.images.length} image${link.images.length !== 1 ? "s" : ""}` : "(none)"))
+                  : (link.displayName || link.url || "(none)");
                 return (
                   <MutedBadge
                     key={link.id}
                     label={link.type}
-                    value={link.displayName || link.fileName || link.url || "(none)"}
+                    value={badgeVal}
                     colorKey={colorMap[link.type] ?? "gray"}
-                    href={isMsgFile ? undefined : (link.url || undefined)}
-                    onClick={isMsgFile
-                      ? e => { e.stopPropagation(); openMsgFile(link); }
+                    href={isEmailImg ? undefined : (link.url || undefined)}
+                    onClick={isEmailImg
+                      ? e => { e.stopPropagation(); setEmailViewer({ link }); }
                       : e => e.stopPropagation()
                     }
                   />
@@ -670,13 +652,33 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
         </div>
       </div>
 
-      {/* Image viewer modal */}
+      {/* Task image viewer modal */}
       {viewerIndex !== null && (
         <ImageViewer
           images={images}
           startIndex={viewerIndex}
           onClose={() => setViewerIndex(null)}
           onDelete={newImages => onUpdate?.({ ...task, images: newImages })}
+        />
+      )}
+
+      {/* Email link image viewer modal */}
+      {emailViewer && (
+        <ImageViewer
+          images={emailViewer.link.images}
+          startIndex={0}
+          onClose={() => setEmailViewer(null)}
+          onDelete={newImages => {
+            const updatedLinks = links.map(l =>
+              l.id === emailViewer.link.id ? { ...l, images: newImages } : l
+            );
+            onUpdate?.({ ...task, links: updatedLinks });
+            if (newImages.length === 0) {
+              setEmailViewer(null);
+            } else {
+              setEmailViewer(prev => ({ link: { ...prev.link, images: newImages } }));
+            }
+          }}
         />
       )}
     </>
