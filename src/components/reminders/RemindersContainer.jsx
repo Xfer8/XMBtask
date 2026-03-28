@@ -1,22 +1,11 @@
 import { useState, useEffect } from "react";
 
 const DAYS        = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-const MONTH_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const MON_UP      = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
-const DAY_UP      = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
-const DAY_SHORT   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
 // ── Date helpers ───────────────────────────────────────────────────────────────
 const toISODate = (d) =>
   `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 
-// "SAT, MAR 28" — used in the nav pill
-const formatNavDate = (d) =>
-  `${DAY_UP[d.getDay()]}, ${MON_UP[d.getMonth()]} ${d.getDate()}`;
-
-// "Fri Mar 26" — used in overdue due-date label
-const formatDueDate = (d) =>
-  `${DAY_SHORT[d.getDay()]} ${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
 
 // "09:00" → "9:00AM", "14:30" → "2:30PM"
 const formatTime12h = (time) => {
@@ -46,27 +35,6 @@ const formatTimeRemaining = (hhmm) => {
   return `${Math.floor(diffMs / 3_600_000)}H`;
 };
 
-// Returns ALL overdue items (including completed) from past 7 days
-const getOverdueItems = (reminders, completions) => {
-  const items = [];
-  const today = new Date();
-  for (let i = 1; i <= 7; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    const dateStr = toISODate(d);
-    const dayName = DAYS[d.getDay()];
-    reminders.forEach(r => {
-      if (!r.days.includes(dayName)) return;
-      items.push({
-        reminder: r,
-        date:     dateStr,
-        dueDate:  formatDueDate(d),
-      });
-    });
-  }
-  return items;
-};
-
 // Returns urgency status for a reminder scheduled today
 const getUrgencyStatus = (reminder) => {
   if (!reminder.time) return "ok";  // no time set → green, same as plenty of time
@@ -84,7 +52,6 @@ const STATUS_COLOR = {
   "ok":           "#4ADE80",
   "soon":         "#F97316",
   "overdue-today":"#FF6B6B",
-  "overdue-past": "#FF6B6B",
   "neutral":      "#333340",
 };
 
@@ -252,11 +219,16 @@ function ReminderRow({ reminder, complete, onToggle, status = "neutral", overdue
   );
 }
 
+// "3/28/26" format
+const formatShortDate = (d) => {
+  const mm = d.getMonth() + 1;
+  const dd = d.getDate();
+  const yy = String(d.getFullYear()).slice(2);
+  return `${mm}/${dd}/${yy}`;
+};
+
 // ── RemindersContainer ────────────────────────────────────────────────────────
 export default function RemindersContainer({ reminders, completions, onToggle, onManage }) {
-  const [overdueOpen,  setOverdueOpen]  = useState(false); // collapsed by default
-  const [offset,       setOffset]       = useState(0);
-  const [showLimitMsg, setShowLimitMsg] = useState(false);
   const [, setTick] = useState(0); // re-evaluate urgency every minute
 
   useEffect(() => {
@@ -264,45 +236,11 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
     return () => clearInterval(t);
   }, []);
 
-  const HISTORY_LIMIT = -30;
+  const today   = new Date();
+  const todayISO = toISODate(today);
+  const todayDay = DAYS[today.getDay()];
 
-  const goBack = () => {
-    if (offset <= HISTORY_LIMIT) {
-      setShowLimitMsg(true);
-      setTimeout(() => setShowLimitMsg(false), 3000);
-    } else {
-      setOffset(o => o - 1);
-      setShowLimitMsg(false);
-    }
-  };
-  const goForward = () => { setOffset(o => o + 1); setShowLimitMsg(false); };
-
-  const today    = new Date();
-  const viewDate = new Date(today);
-  viewDate.setDate(today.getDate() + offset);
-
-  const viewISO  = toISODate(viewDate);
-  const viewDay  = DAYS[viewDate.getDay()];
-  const isToday  = offset === 0;
-
-  const viewItems    = reminders.filter(r => r.days.includes(viewDay));
-  const overdueItems = getOverdueItems(reminders, completions);
-  const incompleteOverdueCount = overdueItems.filter(
-    ({ reminder, date }) => !isComplete(completions, reminder.id, date)
-  ).length;
-
-  // ── Shared button hover helper ─────────────────────────────────────────────
-  const navBtnStyle = (dim) => ({
-    background:  "none",
-    border:      "none",
-    cursor:      dim ? "default" : "pointer",
-    padding:     "0 9px",
-    color:       dim ? "#2e2e38" : "#555560",
-    fontSize:    "14px",
-    lineHeight:  "28px",
-    fontFamily:  "inherit",
-    transition:  "color 0.15s",
-  });
+  const viewItems = reminders.filter(r => r.days.includes(todayDay));
 
   return (
     <div style={{
@@ -322,8 +260,8 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
         background:     "rgba(0,0,0,0.18)",
         borderBottom:   "1px solid #333338",
       }}>
-        {/* Left: label + date nav */}
-        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+        {/* Left: day label + date */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <span style={{
             fontSize:      "9px",
             fontWeight:    900,
@@ -332,72 +270,17 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
             textTransform: "uppercase",
             userSelect:    "none",
           }}>
-            DAILY_REMINDERS
+            {todayDay.toUpperCase()} REMINDERS
           </span>
-
-          {/* Date nav pill */}
-          <div style={{
-            display:      "flex",
-            alignItems:   "center",
-            background:   "#1c1c22",
-            border:       "1px solid #2e2e38",
-            borderRadius: "3px",
-            height:       "28px",
+          <span style={{
+            fontSize:      "9px",
+            fontWeight:    700,
+            color:         "#333340",
+            letterSpacing: "0.06em",
+            userSelect:    "none",
           }}>
-            <button
-              onClick={goBack}
-              disabled={offset <= HISTORY_LIMIT}
-              style={navBtnStyle(offset <= HISTORY_LIMIT)}
-              onMouseEnter={e => { if (offset > HISTORY_LIMIT) e.currentTarget.style.color = "#c8c8d0"; }}
-              onMouseLeave={e => { e.currentTarget.style.color = offset <= HISTORY_LIMIT ? "#2e2e38" : "#555560"; }}
-            >‹</button>
-
-            <span style={{
-              fontSize:      "9px",
-              fontWeight:    800,
-              color:         isToday ? "#888890" : "#c8c8d0",
-              padding:       "0 12px",
-              borderLeft:    "1px solid #2e2e38",
-              borderRight:   "1px solid #2e2e38",
-              lineHeight:    "28px",
-              userSelect:    "none",
-              letterSpacing: "0.06em",
-              whiteSpace:    "nowrap",
-            }}>
-              {formatNavDate(viewDate)}
-            </span>
-
-            <button
-              onClick={goForward}
-              style={navBtnStyle(false)}
-              onMouseEnter={e => { e.currentTarget.style.color = "#c8c8d0"; }}
-              onMouseLeave={e => { e.currentTarget.style.color = "#555560"; }}
-            >›</button>
-          </div>
-
-          {/* "TODAY" jump button when not on today */}
-          {!isToday && (
-            <button
-              onClick={() => { setOffset(0); setShowLimitMsg(false); }}
-              style={{
-                background:    "none",
-                border:        "1px solid #333340",
-                borderRadius:  "3px",
-                cursor:        "pointer",
-                color:         "#555560",
-                fontSize:      "9px",
-                fontWeight:    800,
-                padding:       "3px 10px",
-                fontFamily:    "inherit",
-                letterSpacing: "0.08em",
-                transition:    "border-color 0.15s, color 0.15s",
-              }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = "#4ADE80"; e.currentTarget.style.color = "#4ADE80"; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = "#333340"; e.currentTarget.style.color = "#555560"; }}
-            >
-              TODAY
-            </button>
-          )}
+            {formatShortDate(today)}
+          </span>
         </div>
 
         {/* Right: Manage button */}
@@ -424,21 +307,7 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
         </button>
       </div>
 
-      {/* 30-day limit notice */}
-      {showLimitMsg && (
-        <div style={{
-          fontSize:   "11px",
-          color:      "#888890",
-          fontStyle:  "italic",
-          padding:    "8px 18px",
-          background: "rgba(0,0,0,0.1)",
-          borderBottom: "1px solid #333338",
-        }}>
-          Reminder history is only kept for 30 days.
-        </div>
-      )}
-
-      {/* ── Today's / viewed-date reminders ──────────────────────────────────── */}
+      {/* ── Today's reminders ─────────────────────────────────────────────────── */}
       <div>
         {viewItems.length === 0 ? (
           <div style={{
@@ -447,115 +316,24 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
             padding:   "18px",
             textAlign: "center",
           }}>
-            No reminders scheduled for {isToday ? "today" : formatNavDate(viewDate)}.
+            No reminders scheduled for today.
           </div>
         ) : (
           viewItems.map(r => {
-            const complete = isComplete(completions, r.id, viewISO);
-            const status   = isToday && !complete ? getUrgencyStatus(r) : "neutral";
+            const complete = isComplete(completions, r.id, todayISO);
+            const status   = complete ? "neutral" : getUrgencyStatus(r);
             return (
               <ReminderRow
                 key={r.id}
                 reminder={r}
                 complete={complete}
-                onToggle={() => onToggle(r.id, viewISO)}
+                onToggle={() => onToggle(r.id, todayISO)}
                 status={status}
               />
             );
           })
         )}
       </div>
-
-      {/* ── Overdue drawer — only on today's view ─────────────────────────────── */}
-      {isToday && overdueItems.length > 0 && (
-        <div style={{ borderTop: "1px solid #333338" }}>
-
-          {/* Trigger row */}
-          <button
-            onClick={() => setOverdueOpen(v => !v)}
-            style={{
-              width:       "100%",
-              background:  "rgba(239,68,68,0.04)",
-              border:      "none",
-              cursor:      "pointer",
-              display:     "flex",
-              alignItems:  "center",
-              padding:     "10px 18px",
-              gap:         "10px",
-              fontFamily:  "inherit",
-            }}
-          >
-            {/* Red "!" badge */}
-            <div style={{
-              width:          "18px",
-              height:         "18px",
-              background:     "#FF6B6B",
-              borderRadius:   "3px",
-              display:        "flex",
-              alignItems:     "center",
-              justifyContent: "center",
-              color:          "#fff",
-              fontSize:       "12px",
-              fontWeight:     900,
-              flexShrink:     0,
-              lineHeight:     1,
-            }}>!</div>
-
-            <span style={{
-              fontSize:      "9px",
-              fontWeight:    900,
-              color:         "#FF6B6B",
-              letterSpacing: "1.5px",
-              textTransform: "uppercase",
-              flex:          1,
-              textAlign:     "left",
-            }}>
-              OVERDUE
-            </span>
-
-            {incompleteOverdueCount > 0 && (
-              <span style={{
-                background:    "#FF6B6B",
-                color:         "#fff",
-                fontSize:      "9px",
-                fontWeight:    900,
-                padding:       "2px 9px",
-                borderRadius:  "2px",
-                letterSpacing: "0.5px",
-              }}>
-                {incompleteOverdueCount} REMINDER{incompleteOverdueCount !== 1 ? "S" : ""}
-              </span>
-            )}
-
-            <span style={{
-              color:      "#444450",
-              fontSize:   "9px",
-              transform:  overdueOpen ? "rotate(180deg)" : "none",
-              transition: "transform 0.2s",
-              lineHeight: 1,
-            }}>▼</span>
-          </button>
-
-          {/* Drawer content */}
-          {overdueOpen && (
-            <div style={{ background: "#252528" }}>
-              {overdueItems.map(({ reminder, date, dueDate }) => {
-                const complete = isComplete(completions, reminder.id, date);
-                return (
-                  <ReminderRow
-                    key={`${reminder.id}-${date}`}
-                    reminder={reminder}
-                    complete={complete}
-                    onToggle={() => onToggle(reminder.id, date)}
-                    status={complete ? "neutral" : "overdue-past"}
-                    overdueDate={dueDate}
-                  />
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
 
       {/* ── Empty state ───────────────────────────────────────────────────────── */}
       {reminders.length === 0 && (
