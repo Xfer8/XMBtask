@@ -441,21 +441,50 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
               }}>
                 {task.title}
               </span>
-              {projectLabel && (
-                <span style={{
-                  fontSize:      "10px",
-                  fontWeight:    800,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  color:         projectPal.text,
-                  marginTop:     "3px",
-                  whiteSpace:    "nowrap",
-                  overflow:      "hidden",
-                  textOverflow:  "ellipsis",
-                  lineHeight:    1.2,
+              {(projectLabel || task.owner) && (
+                <div style={{
+                  display:    "flex",
+                  alignItems: "center",
+                  gap:        "6px",
+                  marginTop:  "3px",
+                  minWidth:   0,
+                  overflow:   "hidden",
                 }}>
-                  {projectLabel}
-                </span>
+                  {projectLabel && (
+                    <span style={{
+                      fontSize:      "10px",
+                      fontWeight:    800,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                      color:         projectPal.text,
+                      whiteSpace:    "nowrap",
+                      overflow:      "hidden",
+                      textOverflow:  "ellipsis",
+                      lineHeight:    1.2,
+                      flexShrink:    0,
+                    }}>
+                      {projectLabel}
+                    </span>
+                  )}
+                  {projectLabel && task.owner && (
+                    <span style={{ color:"#444450", fontSize:"10px", fontWeight:800, flexShrink:0, lineHeight:1.2 }}>|</span>
+                  )}
+                  {task.owner && (
+                    <span style={{
+                      fontSize:      "10px",
+                      fontWeight:    800,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                      color:         "#666670",
+                      whiteSpace:    "nowrap",
+                      overflow:      "hidden",
+                      textOverflow:  "ellipsis",
+                      lineHeight:    1.2,
+                    }}>
+                      Owner: {task.owner}
+                    </span>
+                  )}
+                </div>
               )}
             </div>
           </div>
