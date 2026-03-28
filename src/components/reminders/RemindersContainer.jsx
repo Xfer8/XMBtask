@@ -32,6 +32,20 @@ const formatTime12h = (time) => {
 const isComplete = (completions, reminderId, date) =>
   completions.some(c => c.reminderId === reminderId && c.date === date);
 
+// "4H" if due in > 1 hour, "42M" if due in < 1 hour, null if past or no time
+const formatTimeRemaining = (hhmm) => {
+  if (!hhmm) return null;
+  const now  = new Date();
+  const [h, m] = hhmm.split(":").map(Number);
+  const due  = new Date(now);
+  due.setHours(h, m, 0, 0);
+  const diffMs   = due - now;
+  if (diffMs <= 0) return null;
+  const diffMins = Math.round(diffMs / 60_000);
+  if (diffMins < 60) return `${diffMins}M`;
+  return `${Math.floor(diffMs / 3_600_000)}H`;
+};
+
 // Returns ALL overdue items (including completed) from past 7 days
 const getOverdueItems = (reminders, completions) => {
   const items = [];
@@ -80,9 +94,9 @@ function StatusBar({ status }) {
   const pulsing = status === "overdue-today";
   return (
     <div style={{
-      width:        "3px",
+      width:        "6px",
       alignSelf:    "stretch",
-      borderRadius: "2px",
+      borderRadius: "3px",
       flexShrink:   0,
       background:   color,
       animation:    pulsing ? "pulseRed 1.4s ease-in-out infinite" : undefined,
@@ -131,13 +145,19 @@ function LinkBadge({ url, displayName }) {
 
 // ── ReminderRow ───────────────────────────────────────────────────────────────
 function ReminderRow({ reminder, complete, onToggle, status = "neutral", overdueDate }) {
-  const [hov, setHov] = useState(false);
-  const time12 = formatTime12h(reminder.time);
+  const [hov, setHov]   = useState(false);
+  const time12          = formatTime12h(reminder.time);
+  const effectiveSt     = complete ? "neutral" : status;
+  const barColor        = STATUS_COLOR[effectiveSt] ?? STATUS_COLOR.neutral;
+  const timeRemaining   = formatTimeRemaining(reminder.time);
 
-  // Meta line under the title — always reserve space so rows stay the same height
-  const metaLine = overdueDate
-    ? `DUE: ${overdueDate}${time12 ? ` · ${time12}` : ""}`
-    : time12 ? `DUE: ${time12}` : null;
+  // Meta line — always rendered at fixed height so all rows stay the same size
+  const metaContent = (() => {
+    if (overdueDate) return `DUE: ${overdueDate}${time12 ? ` · ${time12}` : ""}`;
+    if (timeRemaining !== null)         return `DUE IN: ${timeRemaining}`;
+    if (status === "overdue-today")     return time12 ? `DUE: ${time12}` : "OVERDUE";
+    return "";  // no time set → space reserved but blank
+  })();
 
   return (
     <div
@@ -156,7 +176,7 @@ function ReminderRow({ reminder, complete, onToggle, status = "neutral", overdue
         opacity:       complete ? 0.42 : 1,
       }}
     >
-      <StatusBar status={complete ? "neutral" : status} />
+      <StatusBar status={effectiveSt} />
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
@@ -172,17 +192,18 @@ function ReminderRow({ reminder, complete, onToggle, status = "neutral", overdue
           {reminder.text}
         </div>
 
-        {/* Always render — fixed height keeps rows uniform whether or not a time is set */}
+        {/* Always rendered — fixed height keeps all rows the same height */}
         <div style={{
-          fontSize:      "10px",
-          fontWeight:    600,
-          color:         "#666670",
+          fontSize:      "11px",
+          fontWeight:    700,
+          color:         metaContent ? barColor : "transparent",
           marginTop:     "3px",
           letterSpacing: "0.06em",
           height:        "14px",
           lineHeight:    "14px",
+          textTransform: "uppercase",
         }}>
-          {metaLine ?? ""}
+          {metaContent || "\u00A0"}
         </div>
       </div>
 
@@ -428,6 +449,22 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
               fontFamily:  "inherit",
             }}
           >
+            {/* Red "!" badge */}
+            <div style={{
+              width:          "18px",
+              height:         "18px",
+              background:     "#EF4444",
+              borderRadius:   "3px",
+              display:        "flex",
+              alignItems:     "center",
+              justifyContent: "center",
+              color:          "#fff",
+              fontSize:       "12px",
+              fontWeight:     900,
+              flexShrink:     0,
+              lineHeight:     1,
+            }}>!</div>
+
             <span style={{
               fontSize:      "9px",
               fontWeight:    900,
@@ -450,7 +487,7 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
                 borderRadius:  "2px",
                 letterSpacing: "0.5px",
               }}>
-                {incompleteOverdueCount} ALERT{incompleteOverdueCount !== 1 ? "S" : ""}
+                {incompleteOverdueCount} REMINDER{incompleteOverdueCount !== 1 ? "S" : ""}
               </span>
             )}
 
