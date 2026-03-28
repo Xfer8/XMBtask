@@ -91,9 +91,9 @@ const STATUS_COLOR = {
 // ── StatusBar ─────────────────────────────────────────────────────────────────
 function StatusBar({ status }) {
   const color     = STATUS_COLOR[status] ?? STATUS_COLOR.neutral;
-  const animation = status === "overdue-today"
-    ? "pulseRed 1.4s ease-in-out infinite"
-    : undefined; // "soon" pulse is driven by parent .reminder-soon via CSS
+  const boxShadow = status === "overdue-today"
+    ? "0 0 10px 2px rgba(255,107,107,0.65)"
+    : undefined;
   return (
     <div
       className="reminder-bar"
@@ -103,7 +103,7 @@ function StatusBar({ status }) {
         borderRadius: "3px",
         flexShrink:   0,
         background:   color,
-        animation,
+        boxShadow,
       }}
     />
   );
@@ -161,7 +161,7 @@ function ReminderRow({ reminder, complete, onToggle, status = "neutral", overdue
     if (complete)                       return "DONE";
     if (overdueDate) return `DUE: ${overdueDate}${time12 ? ` · ${time12}` : ""}`;
     if (timeRemaining !== null)         return `DUE IN: ${timeRemaining}`;
-    if (status === "overdue-today")     return time12 ? `DUE: ${time12}` : "OVERDUE";
+    if (status === "overdue-today")     return time12 ? `OVERDUE: ${time12}` : "OVERDUE";
     return "";  // no time set → space reserved but blank
   })();
 
@@ -179,7 +179,9 @@ function ReminderRow({ reminder, complete, onToggle, status = "neutral", overdue
         padding:       "11px 18px",
         borderBottom:  "1px solid rgba(255,255,255,0.03)",
         cursor:        "pointer",
-        background:    hov ? "rgba(255,255,255,0.025)" : "transparent",
+        background:    hov
+          ? "rgba(255,255,255,0.025)"
+          : effectiveSt === "overdue-today" ? "rgba(255,107,107,0.06)" : "transparent",
         transition:    "background 0.12s",
         opacity:       complete ? 0.6 : 1,
       }}
