@@ -260,7 +260,7 @@ export default function App() {
       {/* Inner floating pill fills the padded column, matching task card width */}
       <div style={{
         width:       "100%",
-        background:  "#222228",
+        background:  "#2a2a2a",
         height:      "48px",
         display:     "grid",
         gridTemplateColumns: "1fr auto 1fr",
