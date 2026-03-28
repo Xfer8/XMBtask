@@ -94,7 +94,7 @@ function StatusBar({ status }) {
   const pulsing = status === "overdue-today";
   return (
     <div style={{
-      width:        "6px",
+      width:        "5px",
       alignSelf:    "stretch",
       borderRadius: "3px",
       flexShrink:   0,
