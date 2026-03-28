@@ -179,9 +179,9 @@ function ReminderRow({ reminder, complete, onToggle, status = "neutral", overdue
         padding:       "11px 18px",
         borderBottom:  "1px solid rgba(255,255,255,0.03)",
         cursor:        "pointer",
-        background:    hov
-          ? "rgba(255,255,255,0.025)"
-          : effectiveSt === "overdue-today" ? "rgba(255,107,107,0.06)" : "transparent",
+        background:    effectiveSt === "overdue-today"
+          ? hov ? "rgba(255,107,107,0.12)" : "rgba(255,107,107,0.06)"
+          : hov ? "rgba(255,255,255,0.025)" : "transparent",
         transition:    "background 0.12s",
         opacity:       complete ? 0.6 : 1,
       }}
