@@ -16,6 +16,15 @@ const formatDisplayDate = (d) =>
 const formatDueDate = (d) =>
   `${DAY_SHORT[d.getDay()]} ${MONTH_SHORT[d.getMonth()]} ${d.getDate()}`;
 
+// "09:00" → "9am", "14:30" → "2:30pm", "12:00" → "12pm"
+const formatTime12h = (time) => {
+  if (!time) return null;
+  const [h, m] = time.split(":").map(Number);
+  const period = h >= 12 ? "pm" : "am";
+  const hour   = h % 12 || 12;
+  return m === 0 ? `${hour}${period}` : `${hour}:${String(m).padStart(2,"0")}${period}`;
+};
+
 const isComplete = (completions, reminderId, date) =>
   completions.some(c => c.reminderId === reminderId && c.date === date);
 
@@ -102,14 +111,16 @@ function LinkBadge({ url, displayName }) {
 }
 
 // ── ReminderRow ────────────────────────────────────────────────────────────────
-// overdueDate — short date string ("Fri Mar 26") shown in the Due label for overdue rows
+// overdueDate — short date string ("Fri Mar 26") included in the Due label
 function ReminderRow({ reminder, complete, onToggle, overdueDate }) {
-  // Build the "Due …" string:
-  // Today:   "09:00"            (time only, if set)
-  // Overdue: "Due Fri Mar 26"   or   "Due Fri Mar 26 · 09:00"
+  const time12 = formatTime12h(reminder.time);
+
+  // "Due: 9am"  /  "Due: Fri Mar 26"  /  "Due: Fri Mar 26 · 9am"
   const dueLabel = overdueDate
-    ? `Due ${overdueDate}${reminder.time ? ` · ${reminder.time}` : ""}`
-    : reminder.time || null;
+    ? `Due: ${overdueDate}${time12 ? ` · ${time12}` : ""}`
+    : time12 ? `Due: ${time12}` : null;
+
+  const dueColor = overdueDate ? "#FF6B6B" : "#555560";
 
   return (
     <div style={{
@@ -121,28 +132,30 @@ function ReminderRow({ reminder, complete, onToggle, overdueDate }) {
     }}>
       <CheckCircle checked={complete} onClick={onToggle} />
 
-      {/* Reminder text — larger and bolder */}
-      <span style={{
-        flex: 1, minWidth: 0,
-        fontSize: "14px", fontWeight: 700,
-        color: complete ? "#55555e" : "#f0f0f0",
-        textDecoration: complete ? "line-through" : "none",
-        transition: "color 0.15s",
-        whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-      }}>
-        {reminder.text}
-      </span>
-
-      {/* Due time / overdue date — right-aligned, smaller */}
-      {dueLabel && (
+      {/* Title + due label — grouped, fill available space */}
+      <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "baseline", gap: "10px" }}>
         <span style={{
-          fontSize: "11px", fontWeight: 600, flexShrink: 0,
-          color: overdueDate ? "#FF6B6B" : "#555560",
-          whiteSpace: "nowrap",
+          flexShrink: 1, minWidth: 0,
+          fontSize: "14px", fontWeight: 700,
+          color: complete ? "#55555e" : "#f0f0f0",
+          textDecoration: complete ? "line-through" : "none",
+          transition: "color 0.15s",
+          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
         }}>
-          {dueLabel}
+          {reminder.text}
         </span>
-      )}
+
+        {dueLabel && (
+          <span style={{
+            flexShrink: 0,
+            fontSize: "11px", fontWeight: 600,
+            color: dueColor,
+            whiteSpace: "nowrap",
+          }}>
+            {dueLabel}
+          </span>
+        )}
+      </div>
 
       {/* Link badge — far right */}
       {reminder.url && (
