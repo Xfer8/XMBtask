@@ -147,12 +147,13 @@ function LinkBadge({ url, displayName }) {
 function ReminderRow({ reminder, complete, onToggle, status = "neutral", overdueDate }) {
   const [hov, setHov]   = useState(false);
   const time12          = formatTime12h(reminder.time);
-  const effectiveSt     = complete ? "neutral" : status;
+  const effectiveSt     = complete ? "ok" : status;
   const barColor        = STATUS_COLOR[effectiveSt] ?? STATUS_COLOR.neutral;
   const timeRemaining   = formatTimeRemaining(reminder.time);
 
   // Meta line — always rendered at fixed height so all rows stay the same size
   const metaContent = (() => {
+    if (complete)                       return "DONE";
     if (overdueDate) return `DUE: ${overdueDate}${time12 ? ` · ${time12}` : ""}`;
     if (timeRemaining !== null)         return `DUE IN: ${timeRemaining}`;
     if (status === "overdue-today")     return time12 ? `DUE: ${time12}` : "OVERDUE";
@@ -173,7 +174,7 @@ function ReminderRow({ reminder, complete, onToggle, status = "neutral", overdue
         cursor:        "pointer",
         background:    hov ? "rgba(255,255,255,0.025)" : "transparent",
         transition:    "background 0.12s",
-        opacity:       complete ? 0.42 : 1,
+        opacity:       complete ? 0.6 : 1,
       }}
     >
       <StatusBar status={effectiveSt} />
