@@ -478,13 +478,13 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
                       fontWeight:    800,
                       textTransform: "uppercase",
                       letterSpacing: "0.05em",
-                      color:         "#666670",
+                      color:         "#888890",
                       whiteSpace:    "nowrap",
                       overflow:      "hidden",
                       textOverflow:  "ellipsis",
                       lineHeight:    1.2,
                     }}>
-                      Owner: {task.owner}
+                      Alt Owner: {task.owner}
                     </span>
                   )}
                 </div>
