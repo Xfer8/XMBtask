@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { generateReminderId } from "../../services/dataService";
 
 const DAYS      = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -28,6 +28,108 @@ const labelStyle = {
   letterSpacing: "0.06em", textTransform: "uppercase",
   display: "block", marginBottom: "5px",
 };
+
+// ── Shorthand time parser ──────────────────────────────────────────────────────
+// Accepts: "1pm", "8:30am", "13:00", "9", "930am", "0800" → "HH:MM" or ""
+const parseTimeShorthand = (str) => {
+  if (!str) return "";
+  str = str.trim().toLowerCase().replace(/\s+/g, "");
+
+  // Already HH:MM or H:MM
+  const colon = str.match(/^(\d{1,2}):(\d{2})$/);
+  if (colon) {
+    const h = parseInt(colon[1]), m = parseInt(colon[2]);
+    if (h >= 0 && h <= 23 && m >= 0 && m <= 59)
+      return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+  }
+
+  // "8:30am" / "12:30pm"
+  const colonAmpm = str.match(/^(\d{1,2}):(\d{2})(am|pm)$/);
+  if (colonAmpm) {
+    let h = parseInt(colonAmpm[1]); const m = parseInt(colonAmpm[2]);
+    if (colonAmpm[3] === "am") { if (h === 12) h = 0; }
+    else                       { if (h !== 12) h += 12; }
+    if (h >= 0 && h <= 23 && m >= 0 && m <= 59)
+      return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+  }
+
+  // "1pm" / "12am"
+  const simple = str.match(/^(\d{1,2})(am|pm)$/);
+  if (simple) {
+    let h = parseInt(simple[1]);
+    if (simple[2] === "am") { if (h === 12) h = 0; }
+    else                    { if (h !== 12) h += 12; }
+    if (h >= 0 && h <= 23) return `${String(h).padStart(2,"0")}:00`;
+  }
+
+  // "930am" / "1230pm" (no colon)
+  const compact = str.match(/^(\d{1,2})(\d{2})(am|pm)$/);
+  if (compact) {
+    let h = parseInt(compact[1]); const m = parseInt(compact[2]);
+    if (compact[3] === "am") { if (h === 12) h = 0; }
+    else                     { if (h !== 12) h += 12; }
+    if (h >= 0 && h <= 23 && m >= 0 && m <= 59)
+      return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+  }
+
+  // "0800" / "1430" — 4-digit 24h
+  const fourDigit = str.match(/^(\d{2})(\d{2})$/);
+  if (fourDigit) {
+    const h = parseInt(fourDigit[1]), m = parseInt(fourDigit[2]);
+    if (h >= 0 && h <= 23 && m >= 0 && m <= 59)
+      return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+  }
+
+  // Bare hour "9" or "14"
+  const bare = str.match(/^(\d{1,2})$/);
+  if (bare) {
+    const h = parseInt(bare[1]);
+    if (h >= 0 && h <= 23) return `${String(h).padStart(2,"0")}:00`;
+  }
+
+  return ""; // unrecognised
+};
+
+// "09:00" → "9:00AM", "14:30" → "2:30PM" — for display inside the input
+const toDisplay12h = (hhmm) => {
+  if (!hhmm) return "";
+  const [h, m] = hhmm.split(":").map(Number);
+  const period = h >= 12 ? "PM" : "AM";
+  const hour   = h % 12 || 12;
+  return m === 0 ? `${hour}${period}` : `${hour}:${String(m).padStart(2,"0")}${period}`;
+};
+
+// ── TimeInput ──────────────────────────────────────────────────────────────────
+// Text input that accepts shorthand like "1pm", "8:30am", normalises on blur.
+function TimeInput({ value, onChange }) {
+  const [raw,     setRaw]     = useState(toDisplay12h(value));
+  const focusedRef            = useRef(false);
+
+  // When the parent form value changes externally (edit form opens with existing data),
+  // sync the display — but only when the field isn't currently being typed into.
+  useEffect(() => {
+    if (!focusedRef.current) setRaw(toDisplay12h(value));
+  }, [value]);
+
+  const handleBlur = () => {
+    focusedRef.current = false;
+    const parsed = parseTimeShorthand(raw);
+    onChange(parsed);
+    setRaw(toDisplay12h(parsed));
+  };
+
+  return (
+    <input
+      type="text"
+      placeholder="e.g. 9am, 1:30pm, 14:00"
+      value={raw}
+      onChange={e => setRaw(e.target.value)}
+      onFocus={() => { focusedRef.current = true; }}
+      onBlur={handleBlur}
+      style={{ ...inputStyle, width: "180px" }}
+    />
+  );
+}
 
 // ── Day toggle pills ───────────────────────────────────────────────────────────
 function DayPills({ selected, onChange }) {
@@ -92,11 +194,8 @@ function ReminderForm({ value, onChange, onSave, onCancel, saveLabel = "Save" })
 
       {/* Time */}
       <div>
-        <label style={labelStyle}>Time <span style={{ color: "#444450" }}>(optional — for future alerts)</span></label>
-        <input
-          type="time" value={value.time} onChange={e => set("time", e.target.value)}
-          style={{ ...inputStyle, width: "150px", colorScheme: "dark" }}
-        />
+        <label style={{ ...labelStyle, color: "#888890" }}>Due <span style={{ color: "#444450", textTransform: "none", letterSpacing: 0, fontWeight: 400, fontSize: "10px" }}>(optional)</span></label>
+        <TimeInput value={value.time} onChange={v => set("time", v)} />
       </div>
 
       {/* Link */}

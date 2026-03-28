@@ -55,7 +55,7 @@ const getOverdueItems = (reminders, completions) => {
 
 // Returns urgency status for a reminder scheduled today
 const getUrgencyStatus = (reminder) => {
-  if (!reminder.time) return "neutral";
+  if (!reminder.time) return "ok";  // no time set → green, same as plenty of time
   const now = new Date();
   const [h, m] = reminder.time.split(":").map(Number);
   const due = new Date(now);
@@ -134,10 +134,10 @@ function ReminderRow({ reminder, complete, onToggle, status = "neutral", overdue
   const [hov, setHov] = useState(false);
   const time12 = formatTime12h(reminder.time);
 
-  // Meta line under the title
+  // Meta line under the title — always reserve space so rows stay the same height
   const metaLine = overdueDate
     ? `DUE: ${overdueDate}${time12 ? ` · ${time12}` : ""}`
-    : time12 ? `AT: ${time12}` : null;
+    : time12 ? `DUE: ${time12}` : null;
 
   return (
     <div
@@ -172,17 +172,18 @@ function ReminderRow({ reminder, complete, onToggle, status = "neutral", overdue
           {reminder.text}
         </div>
 
-        {metaLine && (
-          <div style={{
-            fontSize:      "10px",
-            fontWeight:    600,
-            color:         "#444450",
-            marginTop:     "3px",
-            letterSpacing: "0.06em",
-          }}>
-            {metaLine}
-          </div>
-        )}
+        {/* Always render — fixed height keeps rows uniform whether or not a time is set */}
+        <div style={{
+          fontSize:      "10px",
+          fontWeight:    600,
+          color:         "#666670",
+          marginTop:     "3px",
+          letterSpacing: "0.06em",
+          height:        "14px",
+          lineHeight:    "14px",
+        }}>
+          {metaLine ?? ""}
+        </div>
       </div>
 
       {reminder.url && (
