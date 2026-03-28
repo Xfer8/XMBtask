@@ -251,6 +251,8 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
         gap:           "10px",
         marginBottom:  "8px",
         paddingBottom: "6px",
+        paddingLeft:   "6px",
+        paddingRight:  "6px",
       }}>
         {/* Title */}
         <span style={{
