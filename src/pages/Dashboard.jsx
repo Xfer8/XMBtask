@@ -37,7 +37,7 @@ export default function Dashboard() {
 
   return (
     <div style={{
-      maxWidth:   "720px",
+      maxWidth:   "680px",
       margin:     "0 auto",
       padding:    "24px 20px",
       boxSizing:  "border-box",
