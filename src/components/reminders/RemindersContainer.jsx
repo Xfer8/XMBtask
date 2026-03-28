@@ -243,21 +243,14 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
   const viewItems = reminders.filter(r => r.days.includes(todayDay));
 
   return (
-    <div style={{
-      background:   "#2a2a2a",
-      border:       "1px solid #444450",
-      borderRadius: "8px",
-      overflow:     "hidden",
-      boxShadow:    "0 6px 24px rgba(0,0,0,0.35)",
-    }}>
-
-      {/* ── Header ──────────────────────────────────────────────────────────── */}
+    <>
+      {/* ── Header — sits above the card, matches ProjectGroup heading ───────── */}
       <div style={{
-        display:      "flex",
-        alignItems:   "center",
-        gap:          "10px",
-        padding:      "12px 18px 10px",
-        borderBottom: "1px solid #333338",
+        display:       "flex",
+        alignItems:    "center",
+        gap:           "10px",
+        marginBottom:  "8px",
+        paddingBottom: "6px",
       }}>
         {/* Title */}
         <span style={{
@@ -276,22 +269,12 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
         <span style={{ color: "#3a3a3a", fontSize: "14px", fontWeight: 300, userSelect: "none" }}>|</span>
 
         {/* Date */}
-        <span style={{
-          fontSize:   "12px",
-          color:      "#555560",
-          whiteSpace: "nowrap",
-          userSelect: "none",
-        }}>
+        <span style={{ fontSize: "12px", color: "#555560", whiteSpace: "nowrap", userSelect: "none" }}>
           {formatShortDate(today)}
         </span>
 
         {/* Right accent line */}
-        <div style={{
-          flex:         1,
-          height:       "2px",
-          background:   "#4ADE80",
-          borderRadius: "1px",
-        }} />
+        <div style={{ flex: 1, height: "2px", background: "#4ADE80", borderRadius: "1px" }} />
 
         {/* Manage button */}
         <button
@@ -318,15 +301,20 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
         </button>
       </div>
 
-      {/* ── Today's reminders ─────────────────────────────────────────────────── */}
-      <div>
-        {viewItems.length === 0 ? (
-          <div style={{
-            fontSize:  "12px",
-            color:     "#444450",
-            padding:   "18px",
-            textAlign: "center",
-          }}>
+      {/* ── Card — reminder rows grouped together ────────────────────────────── */}
+      <div style={{
+        background:   "#2a2a2a",
+        border:       "1px solid #444450",
+        borderRadius: "8px",
+        overflow:     "hidden",
+        boxShadow:    "0 6px 24px rgba(0,0,0,0.35)",
+      }}>
+        {reminders.length === 0 ? (
+          <div style={{ padding: "20px", fontSize: "12px", color: "#444450", textAlign: "center" }}>
+            Click <strong style={{ color: "#888890" }}>MANAGE</strong> to add your first reminder.
+          </div>
+        ) : viewItems.length === 0 ? (
+          <div style={{ fontSize: "12px", color: "#444450", padding: "18px", textAlign: "center" }}>
             No reminders scheduled for today.
           </div>
         ) : (
@@ -345,18 +333,6 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
           })
         )}
       </div>
-
-      {/* ── Empty state ───────────────────────────────────────────────────────── */}
-      {reminders.length === 0 && (
-        <div style={{
-          padding:   "20px",
-          fontSize:  "12px",
-          color:     "#444450",
-          textAlign: "center",
-        }}>
-          Click <strong style={{ color: "#888890" }}>MANAGE</strong> to add your first reminder.
-        </div>
-      )}
-    </div>
+    </>
   );
 }
