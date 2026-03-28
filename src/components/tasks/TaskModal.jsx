@@ -178,9 +178,9 @@ export default function TaskModal({ title, task, tasks = [], projects = [], onUp
               />
             </div>
             <div>
-              <label style={labelStyle}>Owner</label>
+              <label style={labelStyle}>Alt Owner</label>
               <input
-                type="text" value={task.owner} placeholder="Owner name"
+                type="text" value={task.owner} placeholder="Alt owner name"
                 onChange={e => set("owner", e.target.value)}
                 style={inputStyle}
               />

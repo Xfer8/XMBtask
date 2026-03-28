@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import TaskCard          from "../components/TaskCard";
 import TaskModal         from "../components/tasks/TaskModal";
 import ProjectGroup      from "../components/tasks/ProjectGroup";
@@ -60,6 +60,71 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
   const [viewMode,        setViewMode]        = useState("by-project"); // "by-project" | "all-tasks"
   const [slideDir,        setSlideDir]        = useState("right");
   const [activeProjectId, setActiveProjectId] = useState(null);
+  // outgoing: null = no crossfade active
+  //           { projectId } = crossfade active; this filter drives the fading-out layer
+  const [outgoing, setOutgoing] = useState(null);
+
+  // ── Project filter — crossfade transition ──────────────────────────────────
+  // Old content becomes an absolute overlay playing xfadeOut.
+  // New content renders in normal flow playing xfadeIn.
+  // Both happen simultaneously for a true crossfade.
+  const fadeTimerRef = useRef(null);
+
+  const handleProjectFilter = (id) => {
+    if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+    prevGroupY.current = {};
+    setOutgoing({ projectId: activeProjectId }); // freeze old content as outgoing layer
+    setActiveProjectId(id);                       // new content renders immediately
+    fadeTimerRef.current = setTimeout(() => {
+      setOutgoing(null);
+      fadeTimerRef.current = null;
+    }, 160); // slightly longer than the 120ms CSS animation to ensure it finishes
+  };
+
+  // ── Group-level FLIP animation ─────────────────────────────────────────────
+  // Animates groups sliding when tasks reorder within a stable filter view.
+  // Skipped entirely when activeProjectId changes (fade handles that instead).
+  const groupWrappers        = useRef({}); // group key → wrapper DOM element
+  const prevGroupY           = useRef({}); // group key → natural top from last render
+  const prevActiveProjectId  = useRef(activeProjectId);
+
+  useLayoutEffect(() => {
+    // If the filter changed, skip FLIP — just record fresh positions for next time
+    if (prevActiveProjectId.current !== activeProjectId) {
+      prevActiveProjectId.current = activeProjectId;
+      const nextY = {};
+      Object.entries(groupWrappers.current).forEach(([id, el]) => {
+        if (el) nextY[id] = el.getBoundingClientRect().top;
+      });
+      prevGroupY.current = nextY;
+      return;
+    }
+
+    const W = groupWrappers.current;
+    const P = prevGroupY.current;
+
+    const nextY = {};
+    Object.entries(W).forEach(([id, el]) => {
+      if (el) nextY[id] = el.getBoundingClientRect().top;
+    });
+
+    Object.entries(W).forEach(([id, el]) => {
+      if (!el || P[id] === undefined) return;
+      const dy = P[id] - nextY[id];
+      if (Math.abs(dy) < 1) return;
+
+      el.style.transition = "none";
+      el.style.transform  = `translateY(${dy}px)`;
+      el.getBoundingClientRect(); // force layout flush
+
+      requestAnimationFrame(() => {
+        el.style.transition = "transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)";
+        el.style.transform  = "";
+      });
+    });
+
+    prevGroupY.current = nextY;
+  });
 
   // ── Open handlers ──────────────────────────────────────────────────────────
   const openNew = () => {
@@ -99,12 +164,67 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
     : tasks;
 
   // ── By-project grouping ────────────────────────────────────────────────────
-  const activeProjects = projects.filter(p =>
-    p.status === "Active" && (!activeProjectId || p.id === activeProjectId)
-  );
-  const uncategorized = activeProjectId
-    ? [] // hide uncategorized when a specific project filter is active
-    : filteredTasks.filter(t => !t.projectId || !projects.find(p => p.id === t.projectId));
+  // Renders the groups list for a given filter ID.
+  // withFlipRefs=true attaches the FLIP ref callbacks (only for the live layer).
+  const renderGroupsContent = (filterId, withFlipRefs) => {
+    const projs = projects.filter(p =>
+      p.status === "Active" && (!filterId || p.id === filterId)
+    );
+    const uncatTasks = filterId
+      ? []
+      : filteredTasks.filter(t => !t.projectId || !projects.find(p => p.id === t.projectId));
+
+    return (
+      <div style={{ display:"flex", flexDirection:"column", gap:"40px" }}>
+        {projs.map(project => {
+          const projectTasks = filteredTasks.filter(t => t.projectId === project.id);
+          if (projectTasks.length === 0) return null;
+          return (
+            <div
+              key={project.id}
+              ref={withFlipRefs ? (el => {
+                if (el) groupWrappers.current[project.id] = el;
+                else    delete groupWrappers.current[project.id];
+              }) : undefined}
+            >
+              <ProjectGroup
+                project={project}
+                tasks={projectTasks}
+                onEdit={openEdit}
+                onUpdate={onUpdate}
+                allProjects={projects}
+                filterKey={filterId ?? "__all__"}
+              />
+            </div>
+          );
+        })}
+
+        {uncatTasks.length > 0 && (
+          <div
+            ref={withFlipRefs ? (el => {
+              if (el) groupWrappers.current["__uncategorized__"] = el;
+              else    delete groupWrappers.current["__uncategorized__"];
+            }) : undefined}
+          >
+            <ProjectGroup
+              project={null}
+              tasks={uncatTasks}
+              onEdit={openEdit}
+              onUpdate={onUpdate}
+              allProjects={projects}
+              filterKey={filterId ?? "__all__"}
+            />
+          </div>
+        )}
+
+        {filteredTasks.length === 0 && (
+          <div style={{ fontSize:"13px", color:"#55555e", textAlign:"center", padding:"40px 0" }}>
+            {q ? "No tasks match your search." : "No tasks yet — click \"New Task\" to get started."}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div style={{ width:"100%", padding:"24px 20px", boxSizing:"border-box", maxWidth:"720px", margin:"0 auto" }}>
@@ -114,7 +234,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
         tasks={tasks}
         projects={projects}
         activeProjectId={activeProjectId}
-        onSelect={setActiveProjectId}
+        onSelect={handleProjectFilter}
       />
 
       {/* ── Toolbar ─────────────────────────────────────────────────────────── */}
@@ -202,38 +322,22 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
         {viewMode === "by-project" ? (
 
           // ── By Project view ────────────────────────────────────────────────
-          <div style={{ display:"flex", flexDirection:"column", gap:"40px" }}>
-            {activeProjects.map(project => {
-              const projectTasks = filteredTasks.filter(t => t.projectId === project.id);
-              if (projectTasks.length === 0) return null;
-              return (
-                <ProjectGroup
-                  key={project.id}
-                  project={project}
-                  tasks={projectTasks}
-                  onEdit={openEdit}
-                  onUpdate={onUpdate}
-                  allProjects={projects}
-                />
-              );
-            })}
+          // Crossfade: incoming content is in normal flow (xfade-in).
+          // Outgoing content is an absolute overlay (xfade-out), removed after animation.
+          <div style={{ position: "relative" }}>
 
-            {/* Uncategorized tasks */}
-            {uncategorized.length > 0 && (
-              <ProjectGroup
-                key="uncategorized"
-                project={null}
-                tasks={uncategorized}
-                onEdit={openEdit}
-                onUpdate={onUpdate}
-                allProjects={projects}
-              />
-            )}
+            {/* Incoming (live) layer */}
+            <div key={activeProjectId ?? "__all__"} className={outgoing ? "xfade-in" : undefined}>
+              {renderGroupsContent(activeProjectId, true)}
+            </div>
 
-            {/* Empty state */}
-            {filteredTasks.length === 0 && (
-              <div style={{ fontSize:"13px", color:"#55555e", textAlign:"center", padding:"40px 0" }}>
-                {q ? "No tasks match your search." : "No tasks yet — click \"New Task\" to get started."}
+            {/* Outgoing layer — absolute overlay, fades out */}
+            {outgoing && (
+              <div
+                className="xfade-out"
+                style={{ position:"absolute", top:0, left:0, right:0, pointerEvents:"none" }}
+              >
+                {renderGroupsContent(outgoing.projectId, false)}
               </div>
             )}
           </div>

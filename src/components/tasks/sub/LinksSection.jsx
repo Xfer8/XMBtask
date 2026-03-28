@@ -7,6 +7,10 @@ const LINK_TYPE_COLORS = { Source:"yellow", Sherlock:"orange", Jira:"blue", Emai
 const generateLinkId   = () => `LK${Date.now()}`;
 const EMPTY_LINK       = { url:"", displayName:"", type:"", images:[] };
 
+// Types that auto-save on paste without opening the full form.
+// Email is excluded — user may want to add more images or a display name.
+const AUTO_SAVE_TYPES  = new Set(["Sherlock", "Jira"]);
+
 const inputStyle = {
   width:"100%", boxSizing:"border-box", background:"#1e1e1e",
   border:"1px solid #3a3a3a", borderRadius:"8px", color:"#f0f0f0",
@@ -143,10 +147,17 @@ export default function LinksSection({ links, onChange }) {
   const startAdding  = () => { setAdding(true); setQuickMode(true); setForm(EMPTY_LINK); };
   const cancelAdding = () => { setAdding(false); setQuickMode(false); setForm(EMPTY_LINK); };
 
-  // Called by QuickPasteZone with detected payload; exits quick mode into full form
+  // Called by QuickPasteZone with detected payload.
+  // Known types (Sherlock, Jira, …) save immediately — no form needed.
+  // Everything else (Email, Link, unknown) opens the full form pre-filled.
   const handleQuickDetected = detected => {
-    setForm(f => ({ ...f, ...detected }));
-    setQuickMode(false);
+    if (AUTO_SAVE_TYPES.has(detected.type)) {
+      onChange([...links, { ...EMPTY_LINK, ...detected, id: generateLinkId() }]);
+      cancelAdding();
+    } else {
+      setForm(f => ({ ...f, ...detected }));
+      setQuickMode(false);
+    }
   };
 
   // Manual "skip quick paste" path

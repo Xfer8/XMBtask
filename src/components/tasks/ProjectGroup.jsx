@@ -84,7 +84,7 @@ const Sep = () => (
 // Multiple pills can be selected; no selection = show all tasks.
 // Done tasks are always in a separate collapsible section at the bottom.
 
-export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProjects }) {
+export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProjects, filterKey }) {
   const pal = project ? getPalette(project.color) : getPalette("gray");
 
   // null = no filter (show all); a status string = filter to that status
@@ -182,6 +182,7 @@ export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProj
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           <AnimatedTaskList
+            key={filterKey}
             tasks={activeTasks}
             projects={allProjects}
             onEdit={onEdit}
