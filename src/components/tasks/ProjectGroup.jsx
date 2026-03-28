@@ -120,12 +120,12 @@ export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProj
         paddingBottom: "6px",
         flexWrap:      "wrap",
       }}>
-        {/* Left accent line — fixed 8px, project color */}
+        {/* Color dot */}
         <div style={{
-          width:        "8px",
-          height:       "2px",
+          width:        "9px",
+          height:       "9px",
+          borderRadius: "50%",
           background:   pal.text,
-          borderRadius: "1px",
           flexShrink:   0,
         }} />
 
@@ -163,13 +163,14 @@ export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProj
           ))}
         </div>
 
-        {/* Right accent line — fills remaining space, matches left */}
+        {/* Right accent line — fills remaining space, stops 8px short of edge */}
         <div style={{
-          flex:         1,
-          minWidth:     "8px",
-          height:       "2px",
-          background:   pal.text,
-          borderRadius: "1px",
+          flex:        1,
+          minWidth:    "8px",
+          marginRight: "8px",
+          height:      "2px",
+          background:  pal.text,
+          borderRadius:"1px",
         }} />
       </div>
 
