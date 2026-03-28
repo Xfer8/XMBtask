@@ -90,8 +90,11 @@ const STATUS_COLOR = {
 
 // ── StatusBar ─────────────────────────────────────────────────────────────────
 function StatusBar({ status }) {
-  const color   = STATUS_COLOR[status] ?? STATUS_COLOR.neutral;
-  const pulsing = status === "overdue-today";
+  const color     = STATUS_COLOR[status] ?? STATUS_COLOR.neutral;
+  const animation =
+    status === "overdue-today" ? "pulseRed 1.4s ease-in-out infinite" :
+    status === "soon"          ? "pulseOrangeBar 1.2s ease-in-out infinite" :
+    undefined;
   return (
     <div style={{
       width:        "5px",
@@ -99,7 +102,7 @@ function StatusBar({ status }) {
       borderRadius: "3px",
       flexShrink:   0,
       background:   color,
-      animation:    pulsing ? "pulseRed 1.4s ease-in-out infinite" : undefined,
+      animation,
     }} />
   );
 }
@@ -165,6 +168,7 @@ function ReminderRow({ reminder, complete, onToggle, status = "neutral", overdue
       onClick={onToggle}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
+      className={effectiveSt === "soon" ? "reminder-soon" : undefined}
       style={{
         display:       "flex",
         alignItems:    "stretch",

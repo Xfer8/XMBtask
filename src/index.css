@@ -45,8 +45,25 @@ body {
 .xfade-in  { animation: xfadeIn  0.12s ease forwards; }
 .xfade-out { animation: xfadeOut 0.12s ease forwards; }
 
-/* ─── Reminder status bar pulse ──────────────────────────────────────────── */
+/* ─── Reminder status bar pulses ─────────────────────────────────────────── */
 @keyframes pulseRed {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.3; }
+}
+
+@keyframes pulseOrangeBar {
+  0%, 100% { opacity: 1;    box-shadow: 0 0 0px  0px rgba(249,115,22,0);    }
+  50%       { opacity: 0.8; box-shadow: 0 0 10px 2px rgba(249,115,22,0.65); }
+}
+
+@keyframes pulseOrangeBg {
+  0%, 100% { background-color: transparent; }
+  50%       { background-color: rgba(249,115,22,0.05); }
+}
+
+.reminder-soon {
+  animation: pulseOrangeBg 1.2s ease-in-out infinite;
+}
+.reminder-soon:hover {
+  animation: none;
 }
