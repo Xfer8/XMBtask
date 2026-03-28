@@ -258,6 +258,7 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
         <span style={{
           fontSize:      "13px",
           fontWeight:    700,
+          lineHeight:    1,
           color:         "#f0f0f0",
           textTransform: "uppercase",
           letterSpacing: "0.06em",
@@ -268,15 +269,15 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
         </span>
 
         {/* Separator */}
-        <span style={{ color: "#555560", fontSize: "14px", fontWeight: 500, userSelect: "none" }}>|</span>
+        <span style={{ color: "#555560", fontSize: "14px", fontWeight: 700, lineHeight: 1, userSelect: "none" }}>|</span>
 
         {/* Date */}
-        <span style={{ fontSize: "13px", color: "#c8c8d0", whiteSpace: "nowrap", userSelect: "none" }}>
+        <span style={{ fontSize: "13px", lineHeight: 1, color: "#c8c8d0", whiteSpace: "nowrap", userSelect: "none" }}>
           {formatShortDate(today)}
         </span>
 
         {/* Separator */}
-        <span style={{ color: "#555560", fontSize: "14px", fontWeight: 500, userSelect: "none" }}>|</span>
+        <span style={{ color: "#555560", fontSize: "14px", fontWeight: 700, lineHeight: 1, userSelect: "none" }}>|</span>
 
         {/* Right accent line */}
         <div style={{ flex: 1, height: "2px", background: "#f0f0f0", borderRadius: "1px" }} />
