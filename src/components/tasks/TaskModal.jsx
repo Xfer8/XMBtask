@@ -44,7 +44,9 @@ export default function TaskModal({ title, task, tasks = [], projects = [], onUp
   // Snapshot taken on mount for cancel/restore
   const [snapshot]    = useState(() => JSON.parse(JSON.stringify(task)));
   const [showConfirm, setShowConfirm] = useState(false);
-  const descRef = useRef(null);
+  const [flashFooter, setFlashFooter] = useState(false);
+  const descRef    = useRef(null);
+  const footerRef  = useRef(null);
 
   // Auto-resize description textarea up to 450px
   useEffect(() => {
@@ -66,6 +68,17 @@ export default function TaskModal({ title, task, tasks = [], projects = [], onUp
     else onCancel(snapshot);
   };
 
+  // Backdrop click while dirty → pulse the footer to guide user to Save/Cancel
+  const handleBackdropClick = () => {
+    if (isDirty) {
+      setFlashFooter(true);
+      footerRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      setTimeout(() => setFlashFooter(false), 600);
+    } else {
+      onClose();
+    }
+  };
+
   // Escape → close (save)
   useEffect(() => {
     const h = e => { if (e.key === "Escape") onClose(); };
@@ -76,7 +89,7 @@ export default function TaskModal({ title, task, tasks = [], projects = [], onUp
   return (
     // ── Backdrop ──────────────────────────────────────────────────────────────
     <div
-      onClick={onClose}
+      onClick={handleBackdropClick}
       style={{
         position:"fixed", inset:0, zIndex:500,
         background:"rgba(0,0,0,0.75)",
@@ -196,9 +209,18 @@ export default function TaskModal({ title, task, tasks = [], projects = [], onUp
         </FormSection>
 
         {/* ── Footer ───────────────────────────────────────────────────────── */}
-        <div style={{
+        <div ref={footerRef} style={{
           display:"flex", alignItems:"center", justifyContent:"space-between",
           paddingTop:"16px", borderTop:"1px solid #2e2e33",
+          borderRadius:"0 0 8px 8px",
+          transition: "box-shadow 0.15s, background 0.15s",
+          ...(flashFooter ? {
+            background:  "rgba(74,222,128,0.06)",
+            boxShadow:   "0 0 0 2px rgba(74,222,128,0.35)",
+            borderRadius:"8px",
+            padding:     "16px 10px 4px",
+            margin:      "0 -10px -4px",
+          } : {}),
         }}>
           <div>
             {onDelete && (
