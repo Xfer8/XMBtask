@@ -17,18 +17,21 @@ const isComplete = (completions, reminderId, date) =>
 
 // Returns overdue items: reminders scheduled on a past day (up to 7 days back)
 // that have no completion record for that date.
+// Skips any date that is before the reminder's createdAt — prevents false
+// positives when a new reminder is added mid-week.
 const getOverdueItems = (reminders, completions) => {
   const items = [];
   const today = new Date();
   for (let i = 1; i <= 7; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() - i);
-    const dateStr  = toISODate(d);
-    const dayName  = DAYS[d.getDay()];
+    const dateStr = toISODate(d);
+    const dayName = DAYS[d.getDay()];
     reminders.forEach(r => {
-      if (r.days.includes(dayName) && !isComplete(completions, r.id, dateStr)) {
+      if (!r.days.includes(dayName)) return;
+      if (r.createdAt && dateStr < r.createdAt) return;   // before reminder existed
+      if (!isComplete(completions, r.id, dateStr))
         items.push({ reminder: r, date: dateStr, dayName, display: formatDisplayDate(d) });
-      }
     });
   }
   return items;
