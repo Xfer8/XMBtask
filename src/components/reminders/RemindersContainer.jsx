@@ -180,7 +180,7 @@ function ReminderRow({ reminder, complete, onToggle, status = "neutral", overdue
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
-          fontSize:       "13px",
+          fontSize:       "15px",
           fontWeight:     700,
           color:          complete ? "#55555e" : "#f0f0f0",
           textDecoration: complete ? "line-through" : "none",
@@ -194,11 +194,11 @@ function ReminderRow({ reminder, complete, onToggle, status = "neutral", overdue
 
         {/* Always rendered — fixed height keeps all rows the same height */}
         <div style={{
-          fontSize:      "11px",
-          fontWeight:    700,
+          fontSize:      "10px",
+          fontWeight:    800,
           color:         metaContent ? barColor : "transparent",
           marginTop:     "3px",
-          letterSpacing: "0.06em",
+          letterSpacing: "0.05em",
           height:        "14px",
           lineHeight:    "14px",
           textTransform: "uppercase",
