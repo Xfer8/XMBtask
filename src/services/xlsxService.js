@@ -70,13 +70,17 @@ export function exportToXlsx(projects, tasks) {
   );
 
   // ── Sheet 5: TaskLinks (flattened) ────────────────────────────────────────
+  // fileData (base64 .msg content) is intentionally excluded — it would
+  // bloat the spreadsheet enormously. fileName is exported as the url column
+  // for Email/.msg links so the filename is preserved in the backup.
   const linkRows = tasks.flatMap(t =>
     (t.links ?? []).map(l => ({
-      taskId:  t.id,
-      id:      l.id ?? "",
-      url:     l.url ?? "",
-      display: l.displayName ?? "",
-      type:    l.type ?? "",
+      taskId:   t.id,
+      id:       l.id ?? "",
+      url:      l.url ?? "",           // for .msg links this is the filename
+      display:  l.displayName ?? "",
+      type:     l.type ?? "",
+      fileName: l.fileName ?? "",      // original .msg filename
     }))
   );
   XLSX.utils.book_append_sheet(
@@ -141,7 +145,8 @@ export function importFromXlsx(file) {
             images:   [],
             updates:  updateRows .filter(u => String(u.taskId) === id).map(u => ({ text: u.text ?? "", createdAt: u.createdAt ?? "" })),
             subtasks: subtaskRows.filter(s => String(s.taskId) === id).map(s => ({ id: String(s.id ?? ""), title: s.title ?? "", status: s.status ?? "open", url: s.url ?? "", urlDisplay: s.urlDisplay ?? "" })),
-            links:    linkRows   .filter(l => String(l.taskId) === id).map(l => ({ id: String(l.id ?? ""), url: l.url ?? "", displayName: l.display ?? "", type: l.type ?? "" })),
+            links:    linkRows   .filter(l => String(l.taskId) === id).map(l => ({ id: String(l.id ?? ""), url: l.url ?? "", displayName: l.display ?? "", type: l.type ?? "", fileName: l.fileName ?? "" })),
+            // Note: fileData (the .msg binary) is not restored from xlsx — the file must be re-attached.
           };
         });
 

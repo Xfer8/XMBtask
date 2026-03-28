@@ -366,6 +366,28 @@ function UpdatePopover({ updates = [], onAdd, onClose }) {
   );
 }
 
+// ── openMsgFile ────────────────────────────────────────────────────────────────
+// Decodes a base64-stored .msg file into a Blob and triggers a browser download.
+// If Outlook is registered as the default handler for .msg files on Windows,
+// the browser will open it directly in Outlook from the downloads bar.
+
+const openMsgFile = (link) => {
+  if (!link.fileData) return;
+  const binary = atob(link.fileData);
+  const bytes  = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  const blob    = new Blob([bytes], { type: "application/vnd.ms-outlook" });
+  const blobUrl = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement("a"), {
+    href:     blobUrl,
+    download: link.fileName || link.url || "email.msg",
+  });
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+};
+
 // ── TaskCard ───────────────────────────────────────────────────────────────────
 
 export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
@@ -627,14 +649,18 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
             <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
               {links.map(link => {
                 const colorMap = { Source: "yellow", Sherlock: "orange", Jira: "blue", Email: "purple", Link: "gray", Other: "gray" };
+                const isMsgFile = link.type === "Email" && !!link.fileData;
                 return (
                   <MutedBadge
                     key={link.id}
                     label={link.type}
-                    value={link.displayName || link.url || "(none)"}
+                    value={link.displayName || link.fileName || link.url || "(none)"}
                     colorKey={colorMap[link.type] ?? "gray"}
-                    href={link.url || undefined}
-                    onClick={e => e.stopPropagation()}
+                    href={isMsgFile ? undefined : (link.url || undefined)}
+                    onClick={isMsgFile
+                      ? e => { e.stopPropagation(); openMsgFile(link); }
+                      : e => e.stopPropagation()
+                    }
                   />
                 );
               })}

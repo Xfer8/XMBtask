@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { getPalette } from "../../../colors";
+import { useState, useRef } from "react";
 import MutedBadge from "../../ui/MutedBadge";
 
 const LINK_TYPES       = ["Source", "Sherlock", "Jira", "Email", "Link"];
@@ -44,15 +43,64 @@ const autoName = (type, url) => {
   return null;
 };
 
+// ── Read a .msg file into base64 ────────────────────────────────────────────────
+// Processes in 8 KB chunks to avoid call-stack overflow on large files.
+const readMsgFile = (file, cb) => {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const bytes  = new Uint8Array(ev.target.result);
+    const CHUNK  = 8192;
+    let   binary = "";
+    for (let i = 0; i < bytes.length; i += CHUNK) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+    }
+    cb(btoa(binary), file.name);
+  };
+  reader.readAsArrayBuffer(file);
+};
+
+// ── Inline file row: shows filename + optional Change button ─────────────────
+function MsgFileRow({ fileName, onChangeClick }) {
+  return (
+    <div style={{
+      display:"flex", alignItems:"center", gap:"8px",
+      background:"#1e1e1e", border:"1px solid #3a3a3a",
+      borderRadius:"8px", padding:"8px 12px",
+    }}>
+      <span style={{ fontSize:"12px", color:"#555560", userSelect:"none", flexShrink:0 }}>
+        📎
+      </span>
+      <span style={{ fontSize:"13px", color:"#c8c8d0", flex:1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+        {fileName}
+      </span>
+      {onChangeClick && (
+        <button onClick={onChangeClick} style={{ ...cancelBtnStyle, padding:"3px 10px", fontSize:"11px", flexShrink:0 }}>
+          Change
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function LinksSection({ links, onChange }) {
-  const [adding,    setAdding]    = useState(false);
-  const [form,      setForm]      = useState(EMPTY_LINK);
-  const [editingId, setEditingId] = useState(null);
-  const [editForm,  setEditForm]  = useState(null);
+  const [adding,     setAdding]     = useState(false);
+  const [form,       setForm]       = useState(EMPTY_LINK);
+  const [editingId,  setEditingId]  = useState(null);
+  const [editForm,   setEditForm]   = useState(null);
   const [confirmDel, setConfirmDel] = useState(null);
 
+  const addFileRef  = useRef(null);
+  const editFileRef = useRef(null);
+
+  // ── Add-form field updater ──────────────────────────────────────────────────
   const set = (k, v) => setForm(f => {
     const next = { ...f, [k]: v };
+    // Clear stored file when switching away from Email
+    if (k === "type" && v !== "Email") {
+      delete next.fileData;
+      delete next.fileName;
+      if (next.url && next.url === f.fileName) next.url = "";
+    }
     if (k === "url") {
       const detected = detectType(next.url);
       if (detected && !next.type) next.type = detected;
@@ -64,8 +112,30 @@ export default function LinksSection({ links, onChange }) {
     return next;
   });
 
+  // ── .msg file handlers ──────────────────────────────────────────────────────
+  const handleAddFileSelect = e => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    readMsgFile(file, (base64, name) => {
+      setForm(f => ({ ...f, fileData: base64, fileName: name, url: name }));
+    });
+  };
+
+  const handleEditFileSelect = e => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    readMsgFile(file, (base64, name) => {
+      setEditForm(f => ({ ...f, fileData: base64, fileName: name, url: name }));
+    });
+  };
+
+  // ── Add / save ──────────────────────────────────────────────────────────────
   const handleAdd = () => {
-    if ((!form.url.trim() && form.type !== "Email") || !form.type) return;
+    if (!form.type) return;
+    if (form.type === "Email"  && !form.fileData)   return;
+    if (form.type !== "Email"  && !form.url.trim()) return;
     onChange([...links, { ...form, id: generateLinkId() }]);
     setForm(EMPTY_LINK);
     setAdding(false);
@@ -77,19 +147,75 @@ export default function LinksSection({ links, onChange }) {
     setEditingId(null); setEditForm(null);
   };
 
+  const addDisabled = !form.type ||
+    (form.type === "Email" ? !form.fileData : !form.url.trim());
+
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
+
+      {/* ── Existing link rows ─────────────────────────────────────────────── */}
       {links.map(l => {
+        // ── Inline edit form ────────────────────────────────────────────────
         if (editingId === l.id) return (
           <div key={l.id} style={{ display:"flex", flexDirection:"column", gap:"8px", background:"#1E1E1E", borderRadius:"8px", padding:"12px" }}>
-            <select value={editForm.type} onChange={e => setEditForm(f => ({ ...f, type: e.target.value }))} style={{ ...inputStyle, cursor:"pointer" }}>
+
+            {/* Type selector */}
+            <select
+              value={editForm.type}
+              onChange={e => setEditForm(f => {
+                const next = { ...f, type: e.target.value };
+                if (e.target.value !== "Email") { delete next.fileData; delete next.fileName; }
+                return next;
+              })}
+              style={{ ...inputStyle, cursor:"pointer" }}
+            >
               <option value="">Select type…</option>
               {LINK_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
-            {editForm.type !== "Email" && (
-              <input type="text" value={editForm.url} placeholder="URL" onChange={e => setEditForm(f => ({ ...f, url: e.target.value }))} style={inputStyle}/>
+
+            {/* URL field or .msg file picker */}
+            {editForm.type === "Email" ? (
+              <>
+                {editForm.fileData ? (
+                  <MsgFileRow
+                    fileName={editForm.fileName || editForm.url}
+                    onChangeClick={() => editFileRef.current?.click()}
+                  />
+                ) : (
+                  <button
+                    onClick={() => editFileRef.current?.click()}
+                    style={{ ...inputStyle, cursor:"pointer", textAlign:"left", color:"#888890" }}
+                  >
+                    📎 Add .msg file…
+                  </button>
+                )}
+                <input
+                  ref={editFileRef}
+                  type="file"
+                  accept=".msg"
+                  style={{ display:"none" }}
+                  onChange={handleEditFileSelect}
+                />
+              </>
+            ) : (
+              <input
+                type="text"
+                value={editForm.url}
+                placeholder="URL"
+                onChange={e => setEditForm(f => ({ ...f, url: e.target.value }))}
+                style={inputStyle}
+              />
             )}
-            <input type="text" value={editForm.displayName} placeholder="Display name (optional)" onChange={e => setEditForm(f => ({ ...f, displayName: e.target.value }))} style={inputStyle}/>
+
+            {/* Display name */}
+            <input
+              type="text"
+              value={editForm.displayName}
+              placeholder="Display name (optional)"
+              onChange={e => setEditForm(f => ({ ...f, displayName: e.target.value }))}
+              style={inputStyle}
+            />
+
             <div style={{ display:"flex", gap:"8px", justifyContent:"flex-end" }}>
               <button onClick={() => { setEditingId(null); setEditForm(null); }} style={cancelBtnStyle}>Cancel</button>
               <button onClick={saveEdit} style={saveBtnStyle}>Save</button>
@@ -97,18 +223,18 @@ export default function LinksSection({ links, onChange }) {
           </div>
         );
 
+        // ── Display row ─────────────────────────────────────────────────────
         const colorKey = LINK_TYPE_COLORS[l.type] ?? "gray";
         return (
           <div key={l.id} style={{ display:"flex", alignItems:"center", gap:"10px", background:"#1E1E1E", borderRadius:"8px", padding:"8px 12px" }}>
-            <>
-              <MutedBadge
-                label={l.type}
-                value={l.displayName || l.url || "(none)"}
-                colorKey={colorKey}
-                onClick={() => startEdit(l)}
-              />
-              <div style={{ flex:1 }} />
-            </>
+            <MutedBadge
+              label={l.type}
+              value={l.displayName || l.fileName || l.url || "(none)"}
+              colorKey={colorKey}
+              onClick={() => startEdit(l)}
+            />
+            <div style={{ flex:1 }} />
+
             {confirmDel === l.id ? (
               <div style={{ display:"flex", alignItems:"center", gap:"6px", flexShrink:0 }}>
                 <span style={{ fontSize:"11px", color:"#888890" }}>Delete?</span>
@@ -125,23 +251,75 @@ export default function LinksSection({ links, onChange }) {
         );
       })}
 
+      {/* ── Add form ───────────────────────────────────────────────────────── */}
       {adding ? (
         <div style={{ display:"flex", flexDirection:"column", gap:"8px", background:"#1E1E1E", borderRadius:"8px", padding:"12px" }}>
+
+          {/* Type selector */}
           <select value={form.type} onChange={e => set("type", e.target.value)} style={{ ...inputStyle, cursor:"pointer" }}>
             <option value="">Select type…</option>
             {LINK_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
-          {form.type !== "Email" && (
-            <input type="text" value={form.url} placeholder="URL (required)" onChange={e => set("url", e.target.value)} style={inputStyle}/>
+
+          {/* URL field or .msg file picker */}
+          {form.type === "Email" ? (
+            <>
+              {form.fileData ? (
+                <MsgFileRow
+                  fileName={form.fileName || form.url}
+                  onChangeClick={() => addFileRef.current?.click()}
+                />
+              ) : (
+                <button
+                  onClick={() => addFileRef.current?.click()}
+                  style={{ ...inputStyle, cursor:"pointer", textAlign:"left", color:"#888890" }}
+                >
+                  📎 Add .msg file…
+                </button>
+              )}
+              <input
+                ref={addFileRef}
+                type="file"
+                accept=".msg"
+                style={{ display:"none" }}
+                onChange={handleAddFileSelect}
+              />
+            </>
+          ) : (
+            form.type && (
+              <input
+                type="text"
+                value={form.url}
+                placeholder="URL (required)"
+                onChange={e => set("url", e.target.value)}
+                style={inputStyle}
+              />
+            )
           )}
-          <input type="text" value={form.displayName} placeholder="Display name (optional)" onChange={e => set("displayName", e.target.value)} style={inputStyle}/>
+
+          {/* Display name */}
+          {form.type && (
+            <input
+              type="text"
+              value={form.displayName}
+              placeholder="Display name (optional)"
+              onChange={e => set("displayName", e.target.value)}
+              style={inputStyle}
+            />
+          )}
+
           <div style={{ display:"flex", gap:"8px", justifyContent:"flex-end" }}>
             <button onClick={() => { setAdding(false); setForm(EMPTY_LINK); }} style={cancelBtnStyle}>Cancel</button>
-            <button onClick={handleAdd} disabled={!form.type || (!form.url.trim() && form.type !== "Email")} style={saveBtnStyle}>Add Link</button>
+            <button onClick={handleAdd} disabled={addDisabled} style={{ ...saveBtnStyle, opacity: addDisabled ? 0.45 : 1 }}>
+              Add Link
+            </button>
           </div>
         </div>
       ) : (
-        <button onClick={() => setAdding(true)} style={{ background:"none", border:"1px dashed #3a3a3a", borderRadius:"8px", padding:"7px 12px", cursor:"pointer", fontSize:"12px", color:"#888890", textAlign:"left", fontFamily:"inherit" }}>
+        <button
+          onClick={() => setAdding(true)}
+          style={{ background:"none", border:"1px dashed #3a3a3a", borderRadius:"8px", padding:"7px 12px", cursor:"pointer", fontSize:"12px", color:"#888890", textAlign:"left", fontFamily:"inherit" }}
+        >
           + Add Link
         </button>
       )}
