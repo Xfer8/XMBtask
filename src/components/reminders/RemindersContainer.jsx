@@ -172,6 +172,7 @@ function ReminderRow({ reminder, complete, onToggle, status = "neutral", overdue
       onMouseLeave={() => setHov(false)}
       className={effectiveSt === "soon" ? "reminder-soon" : undefined}
       style={{
+
         display:       "flex",
         alignItems:    "stretch",
         gap:           "14px",
