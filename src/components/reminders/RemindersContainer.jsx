@@ -38,7 +38,6 @@ const getOverdueItems = (reminders, completions) => {
     const dayName = DAYS[d.getDay()];
     reminders.forEach(r => {
       if (!r.days.includes(dayName)) return;
-      if (r.createdAt && dateStr < r.createdAt) return;
       if (!isComplete(completions, r.id, dateStr))
         items.push({ reminder: r, date: dateStr, dueDate: formatDueDate(d), display: formatDisplayDate(d) });
     });
