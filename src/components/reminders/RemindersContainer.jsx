@@ -109,41 +109,68 @@ function StatusBar({ status }) {
   );
 }
 
+// hex → "r,g,b" for rgba() usage
+const hexToRgb = (hex) => {
+  if (!hex || !hex.startsWith("#") || hex.length < 7) return "136,136,144";
+  return [1,3,5].map(i => parseInt(hex.slice(i,i+2),16)).join(",");
+};
+
 // ── LinkBadge ─────────────────────────────────────────────────────────────────
-function LinkBadge({ url, displayName }) {
+function LinkBadge({ url, displayName, color }) {
   const [hov, setHov] = useState(false);
+  const rgb = hexToRgb(color);
   return (
     <a
       href={url} target="_blank" rel="noopener noreferrer"
+      onClick={e => e.stopPropagation()}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
-      onClick={e => e.stopPropagation()}
       style={{
-        display:        "inline-flex",
-        alignItems:     "center",
-        gap:            "5px",
+        alignSelf:      "stretch",
+        display:        "flex",
+        flexDirection:  "column",
+        justifyContent: "center",
+        gap:            "3px",
         flexShrink:     0,
-        padding:        "3px 10px",
-        borderRadius:   "3px",
-        border:         `1px solid ${hov ? "rgba(74,222,128,0.4)" : "rgba(74,222,128,0.15)"}`,
-        background:     hov ? "rgba(74,222,128,0.08)" : "transparent",
-        color:          hov ? "#4ADE80" : "rgba(74,222,128,0.6)",
-        fontSize:       "10px",
-        fontWeight:     700,
+        borderLeft:     `1px solid rgba(${rgb},${hov ? 0.35 : 0.18})`,
+        paddingLeft:    "16px",
         textDecoration: "none",
-        letterSpacing:  "0.03em",
-        transition:     "background 0.15s, border-color 0.15s, color 0.15s",
-        maxWidth:       "130px",
-        overflow:       "hidden",
-        textOverflow:   "ellipsis",
-        whiteSpace:     "nowrap",
+        transition:     "border-color 0.15s",
       }}
     >
-      <svg width="9" height="9" viewBox="0 0 14 14" fill="none" style={{ flexShrink:0 }}>
-        <path d="M5.5 8.5l3-3M8 3h3v3M11 3L6.5 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M7 4H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      </svg>
-      {displayName || "Link"}
+      {/* Label row */}
+      <span style={{
+        display:       "flex",
+        alignItems:    "center",
+        gap:           "4px",
+        fontSize:      "9px",
+        fontWeight:    800,
+        letterSpacing: "0.08em",
+        textTransform: "uppercase",
+        color:         `rgba(${rgb},0.6)`,
+        lineHeight:    1,
+      }}>
+        <svg width="8" height="8" viewBox="0 0 14 14" fill="none" style={{ flexShrink:0 }}>
+          <path d="M5.5 8.5l3-3M8 3h3v3M11 3L6.5 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M7 4H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+        LINK
+      </span>
+      {/* Display name */}
+      <span style={{
+        fontSize:     "11px",
+        fontWeight:   700,
+        letterSpacing:"0.02em",
+        color:        `rgba(${rgb},${hov ? 1 : 0.85})`,
+        whiteSpace:   "nowrap",
+        overflow:     "hidden",
+        textOverflow: "ellipsis",
+        maxWidth:     "120px",
+        lineHeight:   1.2,
+        transition:   "color 0.15s",
+      }}>
+        {displayName || "Open Link"}
+      </span>
     </a>
   );
 }
@@ -219,9 +246,7 @@ function ReminderRow({ reminder, complete, onToggle, status = "neutral", overdue
       </div>
 
       {reminder.url && (
-        <div style={{ alignSelf: "center" }}>
-          <LinkBadge url={reminder.url} displayName={reminder.displayName} />
-        </div>
+        <LinkBadge url={reminder.url} displayName={reminder.displayName} color={barColor} />
       )}
     </div>
   );
