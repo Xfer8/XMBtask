@@ -182,6 +182,7 @@ function ReminderRow({ reminder, complete, onToggle, status = "neutral", overdue
         <div style={{
           fontSize:       "15px",
           fontWeight:     700,
+          lineHeight:     1.2,
           color:          complete ? "#55555e" : "#f0f0f0",
           textDecoration: complete ? "line-through" : "none",
           whiteSpace:     "nowrap",
