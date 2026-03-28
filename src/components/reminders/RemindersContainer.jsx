@@ -268,7 +268,7 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
         </span>
 
         {/* Separator */}
-        <span style={{ color: "#3a3a3a", fontSize: "14px", fontWeight: 300, userSelect: "none" }}>|</span>
+        <span style={{ color: "#555560", fontSize: "14px", fontWeight: 300, userSelect: "none" }}>|</span>
 
         {/* Date */}
         <span style={{ fontSize: "13px", color: "#c8c8d0", whiteSpace: "nowrap", userSelect: "none" }}>
@@ -276,7 +276,7 @@ export default function RemindersContainer({ reminders, completions, onToggle, o
         </span>
 
         {/* Separator */}
-        <span style={{ color: "#3a3a3a", fontSize: "14px", fontWeight: 300, userSelect: "none" }}>|</span>
+        <span style={{ color: "#555560", fontSize: "14px", fontWeight: 300, userSelect: "none" }}>|</span>
 
         {/* Right accent line */}
         <div style={{ flex: 1, height: "2px", background: "#f0f0f0", borderRadius: "1px" }} />
