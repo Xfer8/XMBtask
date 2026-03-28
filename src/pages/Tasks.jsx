@@ -59,6 +59,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
   const [search,          setSearch]          = useState("");
   const [viewMode,        setViewMode]        = useState("by-project"); // "by-project" | "all-tasks"
   const [slideDir,        setSlideDir]        = useState("right");
+  const viewModeMounted = useRef(false); // suppress slide on initial mount
   const [activeProjectId, setActiveProjectId] = useState(null);
   // outgoing: null = no crossfade active
   //           { projectId } = crossfade active; this filter drives the fading-out layer
@@ -296,7 +297,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
           <ToggleSegment
             label="By Project"
             active={viewMode === "by-project"}
-            onClick={() => { setSlideDir("left"); setViewMode("by-project"); }}
+            onClick={() => { viewModeMounted.current = true; setSlideDir("left"); setViewMode("by-project"); }}
           />
           {/* Vertical divider */}
           <div style={{
@@ -309,7 +310,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
           <ToggleSegment
             label="All Tasks"
             active={viewMode === "all-tasks"}
-            onClick={() => { setSlideDir("right"); setViewMode("all-tasks"); setActiveProjectId(null); }}
+            onClick={() => { viewModeMounted.current = true; setSlideDir("right"); setViewMode("all-tasks"); setActiveProjectId(null); }}
           />
         </div>
       </div>
@@ -317,7 +318,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
       {/* ── Content ─────────────────────────────────────────────────────────── */}
       <div
         key={viewMode}
-        className={slideDir === "right" ? "slide-from-right" : "slide-from-left"}
+        className={viewModeMounted.current ? (slideDir === "right" ? "slide-from-right" : "slide-from-left") : undefined}
       >
         {viewMode === "by-project" ? (
 
