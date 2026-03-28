@@ -120,12 +120,12 @@ export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProj
         paddingBottom: "6px",
         flexWrap:      "wrap",
       }}>
-        {/* Color dot */}
+        {/* Left accent line — fixed 8px, project color */}
         <div style={{
-          width:        "9px",
-          height:       "9px",
-          borderRadius: "50%",
+          width:        "8px",
+          height:       "2px",
           background:   pal.text,
+          borderRadius: "1px",
           flexShrink:   0,
         }} />
 
@@ -162,6 +162,15 @@ export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProj
             />
           ))}
         </div>
+
+        {/* Right accent line — fills remaining space, matches left */}
+        <div style={{
+          flex:         1,
+          minWidth:     "8px",
+          height:       "2px",
+          background:   pal.text,
+          borderRadius: "1px",
+        }} />
       </div>
 
       {/* ── Task list ─────────────────────────────────────────────────────── */}
