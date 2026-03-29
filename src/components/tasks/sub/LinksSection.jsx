@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import MutedBadge    from "../../ui/MutedBadge";
 import ImagePasteZone from "./ImagePasteZone";
 
@@ -70,6 +70,9 @@ const emailBadgeValue = l =>
 function QuickPasteZone({ onDetected }) {
   const ref = useRef(null);
   const [focused, setFocused] = useState(false);
+
+  // Auto-focus the textarea on mount so the user can Ctrl+V immediately
+  useEffect(() => { ref.current?.focus(); }, []);
 
   const handlePaste = e => {
     e.preventDefault();

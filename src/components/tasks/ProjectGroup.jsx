@@ -82,12 +82,15 @@ export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProj
   const [outgoingFilter, setOutgoingFilter] = useState(null); // { selected } | null
   const fadeTimerRef = useRef(null);
 
-  // Crossfade on status pill click — same pattern as project-level crossfade
+  // Crossfade on status pill click — same pattern as project-level crossfade.
+  // Also syncs the Done section: auto-expand when Done filter is active,
+  // auto-collapse for any other filter (overrides any manual toggle).
   const toggle = (status) => {
     const next = selected === status ? null : status;
     if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
     setOutgoingFilter({ selected });  // freeze current filter as the outgoing layer
     setSelected(next);                // incoming layer renders with new filter
+    setShowDone(next === "Done");     // expand iff Done filter is now active
     fadeTimerRef.current = setTimeout(() => {
       setOutgoingFilter(null);
       fadeTimerRef.current = null;
