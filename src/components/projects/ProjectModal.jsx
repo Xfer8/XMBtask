@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getPalette } from "../../colors";
 
 const PROJECT_COLORS = [
@@ -23,24 +23,53 @@ const labelStyle = {
 // title    = modal heading ("New Project" | "Edit Project")
 // initial  = existing project data for editing, or null/undefined for new
 // onSave   = called with form data when Save is clicked
-// onCancel = called when Cancel or Escape is pressed
+// onCancel = called when user discards changes (or closes a clean form)
 // onDelete = called when Delete is clicked (only shown when editing)
 export default function ProjectModal({ title, initial, onSave, onCancel, onDelete }) {
   const [form, setForm] = useState({ ...EMPTY_PROJECT, ...(initial ?? {}) });
   const set   = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const valid = form.title.trim().length > 0;
 
-  // Escape → cancel
+  // Snapshot of the initial value for dirty detection
+  const snapshotStr = useRef(JSON.stringify({ ...EMPTY_PROJECT, ...(initial ?? {}) }));
+  const isDirty = JSON.stringify(form) !== snapshotStr.current;
+
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  // Cancel flow: show discard confirm if dirty, else close cleanly
+  const handleCancelClick = () => {
+    if (isDirty) setShowConfirm(true);
+    else onCancel();
+  };
+
+  // Ref so Escape handler always sees fresh values without re-registering
+  const cancelRef = useRef(null);
+  cancelRef.current = { isDirty, onCancel };
+
+  // Escape → cancel flow. Registered once.
   useEffect(() => {
-    const h = e => { if (e.key === "Escape") onCancel(); };
+    const h = e => {
+      if (e.key !== "Escape") return;
+      const { isDirty, onCancel } = cancelRef.current;
+      if (isDirty) setShowConfirm(true);
+      else onCancel();
+    };
     document.addEventListener("keydown", h);
     return () => document.removeEventListener("keydown", h);
-  }, [onCancel]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Primary button:
+  //  • Dirty + valid   → "Save Project" → onSave(form)
+  //  • Dirty + invalid → "Save Project" → disabled
+  //  • Not dirty       → "Close"        → onCancel()
+  const primaryLabel  = isDirty ? "Save Project" : "Close";
+  const primaryAction = isDirty ? () => valid && onSave(form) : onCancel;
+  const primaryValid  = !isDirty || valid;
 
   return (
     // ── Backdrop ──────────────────────────────────────────────────────────────
+    // No onClick — data-entry modals must be closed via Save or Cancel.
     <div
-      onClick={onCancel}
       style={{
         position:"fixed", inset:0, zIndex:500,
         background:"rgba(0,0,0,0.75)",
@@ -55,6 +84,7 @@ export default function ProjectModal({ title, initial, onSave, onCancel, onDelet
           background:"#2c2c2c", border:"1px solid #3a3a3a", borderRadius:"14px",
           padding:"24px 28px", width:"100%", maxWidth:"480px",
           boxShadow:"0 16px 48px rgba(0,0,0,0.6)",
+          position:"relative",
         }}
       >
         <div style={{ fontSize:"14px", fontWeight:700, color:"#f0f0f0", marginBottom:"22px" }}>
@@ -149,7 +179,7 @@ export default function ProjectModal({ title, initial, onSave, onCancel, onDelet
             )}
           </div>
           <div style={{ display:"flex", gap:"8px" }}>
-            <button onClick={onCancel} style={{
+            <button onClick={handleCancelClick} style={{
               background:"none", border:"1px solid #3a3a3a", borderRadius:"7px",
               cursor:"pointer", color:"#888890", fontSize:"13px",
               padding:"7px 18px", fontFamily:"inherit",
@@ -157,19 +187,64 @@ export default function ProjectModal({ title, initial, onSave, onCancel, onDelet
               Cancel
             </button>
             <button
-              onClick={() => valid && onSave(form)}
-              disabled={!valid}
+              onClick={primaryAction}
+              disabled={!primaryValid}
               style={{
-                background: valid ? "#4ADE80" : "#1a3d2a", border:"none", borderRadius:"7px",
-                cursor: valid ? "pointer" : "default",
-                color: valid ? "#0E3F24" : "#2e6644",
+                background: primaryValid ? "#4ADE80" : "#1a3d2a", border:"none", borderRadius:"7px",
+                cursor: primaryValid ? "pointer" : "default",
+                color: primaryValid ? "#0E3F24" : "#2e6644",
                 fontSize:"13px", fontWeight:600, padding:"7px 18px", fontFamily:"inherit",
               }}
             >
-              Save Project
+              {primaryLabel}
             </button>
           </div>
         </div>
+
+        {/* ── Discard confirmation overlay ──────────────────────────────────── */}
+        {showConfirm && (
+          <div style={{
+            position:"absolute", inset:0, zIndex:10,
+            background:"rgba(0,0,0,0.6)", borderRadius:"14px",
+            display:"flex", alignItems:"center", justifyContent:"center",
+          }}>
+            <div style={{
+              background:"#2c2c2c", border:"1px solid #3a3a3a",
+              borderRadius:"12px", padding:"24px 28px",
+              width:"280px", textAlign:"center",
+              boxShadow:"0 8px 32px rgba(0,0,0,0.5)",
+            }}>
+              <div style={{ fontSize:"14px", fontWeight:700, color:"#f0f0f0", marginBottom:"8px" }}>
+                Discard changes?
+              </div>
+              <div style={{ fontSize:"13px", color:"#888890", marginBottom:"20px", lineHeight:1.5 }}>
+                Your unsaved changes will be lost.
+              </div>
+              <div style={{ display:"flex", gap:"8px", justifyContent:"center" }}>
+                <button
+                  onClick={() => setShowConfirm(false)}
+                  style={{
+                    background:"none", border:"1px solid #3a3a3a", borderRadius:"7px",
+                    cursor:"pointer", color:"#888890", fontSize:"13px",
+                    padding:"7px 18px", fontFamily:"inherit",
+                  }}
+                >
+                  Keep Editing
+                </button>
+                <button
+                  onClick={onCancel}
+                  style={{
+                    background:"#4A1B1B", border:"1px solid #943636", borderRadius:"7px",
+                    cursor:"pointer", color:"#FF6B6B", fontSize:"13px",
+                    fontWeight:600, padding:"7px 18px", fontFamily:"inherit",
+                  }}
+                >
+                  Discard
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

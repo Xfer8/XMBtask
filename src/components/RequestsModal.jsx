@@ -137,12 +137,13 @@ function RequestCard({ req }) {
 // ── RequestsModal ─────────────────────────────────────────────────────────────
 export default function RequestsModal({ requests, onClose }) {
   return (
+    // No onClick on backdrop — closing requires the ✕ button
     <div style={{
       position: "fixed", inset: 0, zIndex: 700,
       background: "rgba(0,0,0,0.75)",
       display: "flex", alignItems: "flex-start", justifyContent: "center",
       padding: "40px 20px", overflowY: "auto",
-    }} onClick={onClose}>
+    }}>
       <div style={{
         background: "#2c2c2c", border: "1px solid #3a3a3a",
         borderRadius: "14px", padding: "28px 32px",

@@ -37,8 +37,8 @@ function FormSection({ title, children }) {
 
 // ── TaskModal ─────────────────────────────────────────────────────────────────
 // Overlays the app. task is fully controlled — every field change fires onUpdate.
-// onClose   = user clicked Save (changes already applied live)
-// onCancel  = user clicked Cancel — receives snapshot to restore
+// onClose   = user clicked Save or Close (changes already applied live)
+// onCancel  = user confirmed Discard (new task → deleted; existing → snapshot restored)
 // onDelete  = user clicked Delete
 export default function TaskModal({ title, task, tasks = [], projects = [], onUpdate, onClose, onCancel, onDelete }) {
   // Snapshot taken on mount for cancel/restore
@@ -63,36 +63,43 @@ export default function TaskModal({ title, task, tasks = [], projects = [], onUp
 
   const activeProjects = projects.filter(p => p.status === "Active");
 
-  const handleCancel = () => {
+  // Cancel flow: show discard confirm if dirty, otherwise close cleanly.
+  // Used by both the Cancel button and the Escape key.
+  const handleCancelClick = () => {
     if (isDirty) setShowConfirm(true);
     else onCancel(snapshot);
   };
 
-  // Backdrop click:
-  //  • Valid (or clean) → save and close (changes are already live in state)
-  //  • Dirty but invalid (missing title / project) → pulse footer so the user
-  //    knows what still needs filling in before they can leave
-  const handleBackdropClick = () => {
-    if (isDirty && !valid) {
-      setFlashFooter(true);
-      footerRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-      setTimeout(() => setFlashFooter(false), 600);
-    } else {
-      onClose();
-    }
-  };
+  // Use a ref so the Escape handler always sees the latest isDirty / snapshot
+  // without needing to re-register the listener on every render.
+  const cancelRef = useRef(null);
+  cancelRef.current = { isDirty, snapshot, onCancel };
 
-  // Escape → close (save)
+  // Escape → cancel flow (not save). Registered once.
   useEffect(() => {
-    const h = e => { if (e.key === "Escape") onClose(); };
+    const h = e => {
+      if (e.key !== "Escape") return;
+      const { isDirty, snapshot, onCancel } = cancelRef.current;
+      if (isDirty) setShowConfirm(true);
+      else onCancel(snapshot);
+    };
     document.addEventListener("keydown", h);
     return () => document.removeEventListener("keydown", h);
-  }, [onClose]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Primary button behaviour:
+  //  • Dirty + valid   → "Save"  → onClose (changes already in state)
+  //  • Dirty + invalid → "Save"  → disabled (required fields missing)
+  //  • Not dirty       → "Close" → onCancel(snapshot) (cleans up blank new tasks too)
+  const primaryLabel  = isDirty ? "Save" : "Close";
+  const primaryAction = isDirty ? onClose : () => onCancel(snapshot);
+  const primaryValid  = !isDirty || valid; // Close is always enabled; Save requires valid
 
   return (
     // ── Backdrop ──────────────────────────────────────────────────────────────
+    // Intentionally no onClick — data-entry modals require an explicit Save or
+    // Cancel action; clicking outside does nothing.
     <div
-      onClick={handleBackdropClick}
       style={{
         position:"fixed", inset:0, zIndex:500,
         background:"rgba(0,0,0,0.75)",
@@ -237,23 +244,28 @@ export default function TaskModal({ title, task, tasks = [], projects = [], onUp
             )}
           </div>
           <div style={{ display:"flex", gap:"8px" }}>
-            <button onClick={handleCancel} style={{
+            <button onClick={handleCancelClick} style={{
               background:"none", border:"1px solid #3a3a3a", borderRadius:"7px",
               cursor:"pointer", color:"#888890", fontSize:"13px",
               padding:"7px 18px", fontFamily:"inherit",
             }}>
               Cancel
             </button>
-            <button onClick={onClose} disabled={!valid} style={{
-              background: valid ? "#4ADE80" : "#1a3d2a", border:"none", borderRadius:"7px",
-              cursor: valid ? "pointer" : "default",
-              color: valid ? "#0E3F24" : "#2e6644",
-              fontSize:"13px", fontWeight:600, padding:"7px 18px", fontFamily:"inherit",
-            }}>
-              Save
+            <button
+              onClick={primaryAction}
+              disabled={!primaryValid}
+              style={{
+                background: primaryValid ? "#4ADE80" : "#1a3d2a", border:"none", borderRadius:"7px",
+                cursor: primaryValid ? "pointer" : "default",
+                color: primaryValid ? "#0E3F24" : "#2e6644",
+                fontSize:"13px", fontWeight:600, padding:"7px 18px", fontFamily:"inherit",
+              }}
+            >
+              {primaryLabel}
             </button>
           </div>
         </div>
+
         {/* ── Discard confirmation overlay ─────────────────────────────────── */}
         {showConfirm && (
           <div style={{

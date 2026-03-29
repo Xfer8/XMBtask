@@ -251,11 +251,21 @@ const PencilIcon = () => (
 
 // ── ManageRemindersModal ───────────────────────────────────────────────────────
 export default function ManageRemindersModal({ reminders, onSave, onClose }) {
-  const [adding,     setAdding]     = useState(false);
-  const [form,       setForm]       = useState(EMPTY);
-  const [editingId,  setEditingId]  = useState(null);
-  const [editForm,   setEditForm]   = useState(null);
-  const [confirmDel, setConfirmDel] = useState(null);
+  const [adding,       setAdding]       = useState(false);
+  const [form,         setForm]         = useState(EMPTY);
+  const [editingId,    setEditingId]    = useState(null);
+  const [editForm,     setEditForm]     = useState(null);
+  const [confirmDel,   setConfirmDel]   = useState(null);
+  const [confirmClose, setConfirmClose] = useState(false);
+
+  // True when the user has an unsaved add or edit sub-form open
+  const hasUnsavedForm = adding || editingId !== null;
+
+  // Clicking the ✕ or attempting to close: warn if a sub-form is open
+  const handleCloseClick = () => {
+    if (hasUnsavedForm) setConfirmClose(true);
+    else onClose();
+  };
 
   const handleAdd = () => {
     onSave([...reminders, {
@@ -277,8 +287,8 @@ export default function ManageRemindersModal({ reminders, onSave, onClose }) {
   };
 
   return (
+    // No onClick on backdrop — closing requires the ✕ button
     <div
-      onClick={onClose}
       style={{
         position: "fixed", inset: 0, zIndex: 600,
         background: "rgba(0,0,0,0.75)",
@@ -292,12 +302,13 @@ export default function ManageRemindersModal({ reminders, onSave, onClose }) {
           background: "#2c2c2c", border: "1px solid #3a3a3a", borderRadius: "14px",
           padding: "24px 28px", width: "100%", maxWidth: "480px",
           boxShadow: "0 16px 48px rgba(0,0,0,0.6)", margin: "auto",
+          position: "relative",
         }}
       >
         {/* Heading */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
           <div style={{ fontSize: "15px", fontWeight: 700, color: "#f0f0f0" }}>Manage Reminders</div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "#555560", fontSize: "20px", cursor: "pointer", lineHeight: 1, padding: "2px 4px" }}>✕</button>
+          <button onClick={handleCloseClick} style={{ background: "none", border: "none", color: "#555560", fontSize: "20px", cursor: "pointer", lineHeight: 1, padding: "2px 4px" }}>✕</button>
         </div>
 
         {/* Existing reminders */}
@@ -400,6 +411,51 @@ export default function ManageRemindersModal({ reminders, onSave, onClose }) {
           >
             + Add Reminder
           </button>
+        )}
+
+        {/* ── Discard + close confirmation overlay ─────────────────────────── */}
+        {confirmClose && (
+          <div style={{
+            position: "absolute", inset: 0, zIndex: 10,
+            background: "rgba(0,0,0,0.6)", borderRadius: "14px",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <div style={{
+              background: "#2c2c2c", border: "1px solid #3a3a3a",
+              borderRadius: "12px", padding: "24px 28px",
+              width: "280px", textAlign: "center",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+            }}>
+              <div style={{ fontSize: "14px", fontWeight: 700, color: "#f0f0f0", marginBottom: "8px" }}>
+                Unsaved reminder
+              </div>
+              <div style={{ fontSize: "13px", color: "#888890", marginBottom: "20px", lineHeight: 1.5 }}>
+                You have an unsaved form open. Discard it and close?
+              </div>
+              <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
+                <button
+                  onClick={() => setConfirmClose(false)}
+                  style={{
+                    background: "none", border: "1px solid #3a3a3a", borderRadius: "7px",
+                    cursor: "pointer", color: "#888890", fontSize: "13px",
+                    padding: "7px 18px", fontFamily: "inherit",
+                  }}
+                >
+                  Keep Editing
+                </button>
+                <button
+                  onClick={onClose}
+                  style={{
+                    background: "#4A1B1B", border: "1px solid #943636", borderRadius: "7px",
+                    cursor: "pointer", color: "#FF6B6B", fontSize: "13px",
+                    fontWeight: 600, padding: "7px 18px", fontFamily: "inherit",
+                  }}
+                >
+                  Discard
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

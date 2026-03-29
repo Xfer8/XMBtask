@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { submitFeedback } from "../services/feedbackService";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -20,8 +20,11 @@ export default function FeedbackModal({ onClose }) {
   const [type,        setType]        = useState("");
   const [description, setDescription] = useState("");
   const [status,      setStatus]      = useState("idle"); // idle | submitting | done | error
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  const canSubmit = type && description.trim().length > 0;
+  const isDirty    = type !== "" || description.trim() !== "";
+  const canSubmit  = type && description.trim().length > 0;
+  const isFormDone = status === "done";
 
   const handleSubmit = async () => {
     if (!canSubmit || status === "submitting") return;
@@ -40,7 +43,30 @@ export default function FeedbackModal({ onClose }) {
     }
   };
 
+  // Cancel flow: show discard confirm if dirty, else close
+  const handleCancelClick = () => {
+    if (isDirty && !isFormDone) setShowConfirm(true);
+    else onClose();
+  };
+
+  // Ref so Escape always sees fresh isDirty without re-registering
+  const cancelRef = useRef(null);
+  cancelRef.current = { isDirty, isFormDone, onClose };
+
+  // Escape → cancel flow (or close cleanly when done/empty). Registered once.
+  useEffect(() => {
+    const h = e => {
+      if (e.key !== "Escape") return;
+      const { isDirty, isFormDone, onClose } = cancelRef.current;
+      if (isDirty && !isFormDone) setShowConfirm(true);
+      else onClose();
+    };
+    document.addEventListener("keydown", h);
+    return () => document.removeEventListener("keydown", h);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
+    // No onClick on backdrop — data-entry modals must be closed via a button
     <div style={{
       position: "fixed", inset: 0, zIndex: 600,
       background: "rgba(0,0,0,0.75)",
@@ -50,8 +76,9 @@ export default function FeedbackModal({ onClose }) {
         background: "#2c2c2c", border: "1px solid #3a3a3a", borderRadius: "14px",
         padding: "28px 32px", width: "420px",
         boxShadow: "0 16px 48px rgba(0,0,0,0.6)",
+        position: "relative",
       }}>
-        {status === "done" ? (
+        {isFormDone ? (
           /* ── Success state ─────────────────────────────────────────────────── */
           <>
             <div style={{ fontSize: "15px", fontWeight: 700, color: "#f0f0f0", marginBottom: "8px" }}>
@@ -130,12 +157,12 @@ export default function FeedbackModal({ onClose }) {
             )}
 
             <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-              <button onClick={onClose} style={{
+              <button onClick={handleCancelClick} style={{
                 background: "none", border: "1px solid #3a3a3a", borderRadius: "7px",
                 cursor: "pointer", color: "#888890", fontSize: "13px",
                 padding: "7px 18px", fontFamily: "inherit",
               }}>
-                Cancel
+                {isDirty ? "Cancel" : "Close"}
               </button>
               <button
                 onClick={handleSubmit}
@@ -153,6 +180,51 @@ export default function FeedbackModal({ onClose }) {
               </button>
             </div>
           </>
+        )}
+
+        {/* ── Discard confirmation overlay ──────────────────────────────────── */}
+        {showConfirm && (
+          <div style={{
+            position: "absolute", inset: 0, zIndex: 10,
+            background: "rgba(0,0,0,0.6)", borderRadius: "14px",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <div style={{
+              background: "#2c2c2c", border: "1px solid #3a3a3a",
+              borderRadius: "12px", padding: "24px 28px",
+              width: "280px", textAlign: "center",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+            }}>
+              <div style={{ fontSize: "14px", fontWeight: 700, color: "#f0f0f0", marginBottom: "8px" }}>
+                Discard feedback?
+              </div>
+              <div style={{ fontSize: "13px", color: "#888890", marginBottom: "20px", lineHeight: 1.5 }}>
+                Your draft will be lost.
+              </div>
+              <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
+                <button
+                  onClick={() => setShowConfirm(false)}
+                  style={{
+                    background: "none", border: "1px solid #3a3a3a", borderRadius: "7px",
+                    cursor: "pointer", color: "#888890", fontSize: "13px",
+                    padding: "7px 18px", fontFamily: "inherit",
+                  }}
+                >
+                  Keep Editing
+                </button>
+                <button
+                  onClick={onClose}
+                  style={{
+                    background: "#4A1B1B", border: "1px solid #943636", borderRadius: "7px",
+                    cursor: "pointer", color: "#FF6B6B", fontSize: "13px",
+                    fontWeight: 600, padding: "7px 18px", fontFamily: "inherit",
+                  }}
+                >
+                  Discard
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
