@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XMBtask — Task Management for Teams</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #212121;
+      color: #c8c8d0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .card {
+      background: #2a2a2a;
+      border: 1px solid #444450;
+      border-radius: 14px;
+      padding: 40px 44px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+    }
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 16px;
+    }
+    .logo span:first-child { color: #4ADE80; }
+    .logo span:last-child  { color: #f0f0f0; }
+    .tagline {
+      font-size: 14px;
+      color: #888890;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+    .description {
+      font-size: 13px;
+      color: #666670;
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+    .signin-btn {
+      display: inline-block;
+      background: #4ADE80;
+      color: #0a1a0f;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 11px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      margin-bottom: 20px;
+      transition: opacity 0.15s;
+    }
+    .signin-btn:hover { opacity: 0.88; }
+    .footer {
+      font-size: 12px;
+      color: #444450;
+      margin-top: 8px;
+    }
+    .footer a {
+      color: #555560;
+      text-decoration: none;
+    }
+    .footer a:hover { color: #888890; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo"><span>XMB</span><span>task</span></div>
+    <p class="tagline">Task management for trusted teams.</p>
+    <p class="description">
+      XMBtask is a private, invitation-only task management tool. Access is granted
+      by the app administrator. If you have been given access, sign in with your
+      Google account to get started.
+    </p>
+    <a href="/" class="signin-btn">Sign in</a>
+    <div class="footer">
+      <a href="/privacy.html">Privacy Policy</a>
+    </div>
+  </div>
+</body>
+</html>

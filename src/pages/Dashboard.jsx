@@ -5,8 +5,11 @@ import {
 } from "../services/dataService";
 import RemindersContainer  from "../components/reminders/RemindersContainer";
 import ManageRemindersModal from "../components/reminders/ManageRemindersModal";
+import ScratchPad           from "../components/ScratchPad";
+import { useAuth } from "../contexts/AuthContext";
 
-export default function Dashboard() {
+export default function Dashboard({ tasks = [], projects = [], onAddTask, onUpdateTask, scratchPadEnabled = false, onToggleScratchPad }) {
+  const { isAdmin } = useAuth();
   const [reminders,   setReminders]   = useState([]);
   const [completions, setCompletions] = useState([]);
   const [ready,       setReady]       = useState(false);
@@ -43,6 +46,18 @@ export default function Dashboard() {
       boxSizing:  "border-box",
       width:      "100%",
     }}>
+      {(isAdmin || scratchPadEnabled) && (
+        <ScratchPad
+          tasks={tasks}
+          projects={projects}
+          onAddTask={onAddTask}
+          onUpdateTask={onUpdateTask}
+          isAdmin={isAdmin}
+          enabled={scratchPadEnabled}
+          onToggle={onToggleScratchPad}
+        />
+      )}
+
       <RemindersContainer
         reminders={reminders}
         completions={completions}

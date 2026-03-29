@@ -71,7 +71,7 @@ export default function ProjectModal({ title, initial, onSave, onCancel, onDelet
         <div style={{ marginBottom:"20px" }}>
           <label style={labelStyle}>Description</label>
           <textarea
-            value={form.description} placeholder="Optional description" rows={3}
+            value={form.description} placeholder="Describe what this project is about. The more detail you provide, the better AI tools will be able to suggest and assign tasks to it automatically." rows={3}
             onChange={e => set("description", e.target.value)}
             style={{ ...inputStyle, resize:"vertical", lineHeight:"1.5" }}
           />

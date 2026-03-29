@@ -60,6 +60,17 @@
   background-color: #555;
 }
 
-.settings-dropdown-item:not(:last-child) {
-  border-bottom: 1px solid #444;
+
+.settings-dropdown-divider {
+  height: 1px;
+  background-color: #444;
+  margin: 4px 0;
+}
+
+.settings-dropdown-item--danger {
+  color: #FF6B6B;
+}
+
+.settings-dropdown-item--danger:hover {
+  background-color: #4A1B1B;
 }

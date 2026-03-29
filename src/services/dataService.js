@@ -1,29 +1,26 @@
 // ─── dataService.js ───────────────────────────────────────────────────────────
-// Abstracts all data persistence so the storage backend can be swapped
-// (e.g. localStorage → Firebase) without touching the rest of the app.
+// All data is stored in Firestore under users/{uid}/data/{type}.
+// Each type (tasks, projects, reminders, completions) is a single document
+// containing an { items: [...] } array.
 //
-// All functions are async even though localStorage is synchronous.
-// This keeps the calling code Firebase-ready from day one.
-//
-// TO MIGRATE TO FIREBASE:
-//   1. Import your Firebase db instance here
-//   2. Replace the localStorage calls below with Firestore/RTDB equivalents
-//   3. No changes needed anywhere else in the app
+// Data is scoped per user — each user only ever reads/writes their own data.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const KEYS = {
-  projects:    'xmbtask:projects',
-  tasks:       'xmbtask:tasks',
-  reminders:   'xmbtask:reminders',
-  completions: 'xmbtask:reminder-completions',
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db, auth } from "../firebase";
+
+const userDataDoc = (type) => {
+  const uid = auth.currentUser?.uid;
+  if (!uid) throw new Error("Not authenticated");
+  return doc(db, "users", uid, "data", type);
 };
 
 // ── Projects ──────────────────────────────────────────────────────────────────
 
 export const loadProjects = async () => {
   try {
-    const raw = localStorage.getItem(KEYS.projects);
-    return raw ? JSON.parse(raw) : [];
+    const snap = await getDoc(userDataDoc("projects"));
+    return snap.exists() ? snap.data().items : [];
   } catch {
     return [];
   }
@@ -31,16 +28,16 @@ export const loadProjects = async () => {
 
 export const saveProjects = async (projects) => {
   try {
-    localStorage.setItem(KEYS.projects, JSON.stringify(projects));
-  } catch { /* storage full or unavailable */ }
+    await setDoc(userDataDoc("projects"), { items: projects });
+  } catch { /* ignore */ }
 };
 
 // ── Tasks ─────────────────────────────────────────────────────────────────────
 
 export const loadTasks = async () => {
   try {
-    const raw = localStorage.getItem(KEYS.tasks);
-    return raw ? JSON.parse(raw) : [];
+    const snap = await getDoc(userDataDoc("tasks"));
+    return snap.exists() ? snap.data().items : [];
   } catch {
     return [];
   }
@@ -48,44 +45,42 @@ export const loadTasks = async () => {
 
 export const saveTasks = async (tasks) => {
   try {
-    localStorage.setItem(KEYS.tasks, JSON.stringify(tasks));
-  } catch { /* storage full or unavailable */ }
+    await setDoc(userDataDoc("tasks"), { items: tasks });
+  } catch { /* ignore */ }
 };
 
 // ── Reminders ─────────────────────────────────────────────────────────────────
 
 export const loadReminders = async () => {
   try {
-    const raw = localStorage.getItem(KEYS.reminders);
-    return raw ? JSON.parse(raw) : [];
+    const snap = await getDoc(userDataDoc("reminders"));
+    return snap.exists() ? snap.data().items : [];
   } catch { return []; }
 };
 
 export const saveReminders = async (reminders) => {
-  try { localStorage.setItem(KEYS.reminders, JSON.stringify(reminders)); }
-  catch { /* storage full or unavailable */ }
+  try {
+    await setDoc(userDataDoc("reminders"), { items: reminders });
+  } catch { /* ignore */ }
 };
 
 // ── Reminder Completions ───────────────────────────────────────────────────────
-// Each entry: { reminderId, date } where date is "YYYY-MM-DD".
-// Completions older than 30 days are pruned automatically on save.
 
 export const loadCompletions = async () => {
   try {
-    const raw = localStorage.getItem(KEYS.completions);
-    return raw ? JSON.parse(raw) : [];
+    const snap = await getDoc(userDataDoc("completions"));
+    return snap.exists() ? snap.data().items : [];
   } catch { return []; }
 };
 
 export const saveCompletions = async (completions) => {
   try {
-    // Prune entries older than 30 days to keep storage tidy
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - 30);
     const cutoffStr = cutoff.toISOString().slice(0, 10);
     const pruned = completions.filter(c => c.date >= cutoffStr);
-    localStorage.setItem(KEYS.completions, JSON.stringify(pruned));
-  } catch { /* storage full or unavailable */ }
+    await setDoc(userDataDoc("completions"), { items: pruned });
+  } catch { /* ignore */ }
 };
 
 // ── ID Generators ──────────────────────────────────────────────────────────────

@@ -4,7 +4,12 @@ import SettingsMenu from "./components/SettingsMenu";
 import Dashboard from "./pages/Dashboard";
 import Tasks from "./pages/Tasks";
 import Projects from "./pages/Projects";
+import Login from "./pages/Login";
+import { useAuth } from "./contexts/AuthContext";
 import { loadProjects, saveProjects, loadTasks, saveTasks } from "./services/dataService";
+import { subscribeToRequests } from "./services/requestsService";
+import { subscribeToFeatureFlags, setFeatureFlag } from "./services/featureFlagsService";
+import RequestsModal from "./components/RequestsModal";
 import { exportToXlsx, importFromXlsx } from "./services/xlsxService";
 import { exportBackup, importBackup } from "./services/backupService";
 
@@ -139,6 +144,19 @@ function ImportConfirmModal({ preview, fileType, onConfirm, onCancel }) {
 const PAGE_ORDER = ["Dashboard", "Tasks", "Projects"];
 
 export default function App() {
+  const { user } = useAuth();
+
+  // Still checking auth state — show nothing to avoid flash
+  if (user === undefined) return null;
+
+  // Not signed in — show login screen
+  if (user === null) return <Login />;
+
+  return <AuthenticatedApp />;
+}
+
+function AuthenticatedApp() {
+  const { isAdmin } = useAuth();
   const [currentPage,   setCurrentPage]   = useState("Dashboard");
   const [slideDir,      setSlideDir]      = useState("right");
   const [projects,      setProjects]      = useState([]);
@@ -147,6 +165,9 @@ export default function App() {
   const [showExportChoice, setShowExportChoice] = useState(false);
   const [pendingImport,    setPendingImport]    = useState(null); // { projects, tasks, fileType }
   const [importError,      setImportError]      = useState(null);
+  const [requests,         setRequests]         = useState([]);
+  const [showRequests,     setShowRequests]     = useState(false);
+  const [featureFlags,     setFeatureFlags]     = useState({ scratchPadEnabled: false });
   const fileInputRef = useRef(null);
 
   // ── Load from storage on mount ──────────────────────────────────────────────
@@ -157,6 +178,17 @@ export default function App() {
       setStorageReady(true);
     };
     load();
+  }, []);
+
+  // ── Subscribe to access requests (admin only) ───────────────────────────────
+  useEffect(() => {
+    if (!isAdmin) return;
+    return subscribeToRequests(setRequests);
+  }, [isAdmin]);
+
+  // ── Subscribe to feature flags ───────────────────────────────────────────────
+  useEffect(() => {
+    return subscribeToFeatureFlags(setFeatureFlags);
   }, []);
 
   // ── Persist on change ───────────────────────────────────────────────────────
@@ -290,7 +322,12 @@ export default function App() {
 
         {/* Cog — right */}
         <div style={{ display:"flex", alignItems:"center", justifyContent:"flex-end" }}>
-          <SettingsMenu onImport={handleImport} onExport={handleExport} />
+          <SettingsMenu
+            onImport={handleImport}
+            onExport={handleExport}
+            requestCount={isAdmin ? requests.length : 0}
+            onRequests={() => setShowRequests(true)}
+          />
         </div>
       </div>
       </div>
@@ -298,7 +335,16 @@ export default function App() {
       {/* Page content */}
       <div style={{ flex: 1, width: "100%" }}>
         <div key={currentPage} className={slideDir === "right" ? "slide-from-right" : "slide-from-left"}>
-          {currentPage === "Dashboard" && <Dashboard />}
+          {currentPage === "Dashboard" && (
+            <Dashboard
+              tasks={tasks}
+              projects={projects}
+              onAddTask={addTask}
+              onUpdateTask={updateTask}
+              scratchPadEnabled={featureFlags.scratchPadEnabled ?? false}
+              onToggleScratchPad={(val) => setFeatureFlag("scratchPadEnabled", val)}
+            />
+          )}
           {currentPage === "Tasks" && (
             <Tasks
               tasks={tasks}
@@ -347,6 +393,14 @@ export default function App() {
           onExcel={handleExportExcel}
           onBackup={handleExportBackup}
           onCancel={() => setShowExportChoice(false)}
+        />
+      )}
+
+      {/* Requests modal (admin only) */}
+      {showRequests && (
+        <RequestsModal
+          requests={requests}
+          onClose={() => setShowRequests(false)}
         />
       )}
 
