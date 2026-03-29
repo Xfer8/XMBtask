@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { getPalette } from "../../colors";
 
-const PROJECT_COLORS = ["blue","green","teal","purple","pink","orange","red","yellow"];
+const PROJECT_COLORS = [
+  "red","rose","orange","amber","yellow","lime",
+  "green","emerald","teal","cyan","blue","indigo",
+  "purple","violet","fuchsia","pink",
+];
 const EMPTY_PROJECT  = { title:"", description:"", status:"Active", color:"blue" };
 
 const inputStyle = {

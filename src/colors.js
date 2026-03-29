@@ -41,6 +41,40 @@ export const COLOR_PALETTES = {
     glow:  { text: "#D1D5DB", bg: "#374151", border: "#4B5563", hoverText: "#F3F4F6", hoverBg: "#475368", hoverBorder: "#D1D5DB" },
     solid: { text: "#2A2A2A", bg: "#D1D5DB", border: null,      hoverText: "#2A2A2A", hoverBg: "#E5E7EB", hoverBorder: null },
   },
+
+  // ── Extended palette ────────────────────────────────────────────────────────
+  rose: {
+    glow:  { text: "#FB7185", bg: "#3B0B14", border: "#9F1239", hoverText: "#FDA4AF", hoverBg: "#4D111C", hoverBorder: "#FB7185" },
+    solid: { text: "#2A2A2A", bg: "#FB7185", border: null,      hoverText: "#2A2A2A", hoverBg: "#FDA4AF", hoverBorder: null },
+  },
+  amber: {
+    glow:  { text: "#FBBF24", bg: "#2D1E00", border: "#7A4900", hoverText: "#FCD34D", hoverBg: "#3D2800", hoverBorder: "#FBBF24" },
+    solid: { text: "#2A2A2A", bg: "#FBBF24", border: null,      hoverText: "#2A2A2A", hoverBg: "#FCD34D", hoverBorder: null },
+  },
+  lime: {
+    glow:  { text: "#A3E635", bg: "#1C2B00", border: "#3F6600", hoverText: "#BEF264", hoverBg: "#243600", hoverBorder: "#A3E635" },
+    solid: { text: "#1C2B00", bg: "#A3E635", border: null,      hoverText: "#1C2B00", hoverBg: "#BEF264", hoverBorder: null },
+  },
+  emerald: {
+    glow:  { text: "#34D399", bg: "#053B24", border: "#0D7A4C", hoverText: "#6EE7B7", hoverBg: "#074D2F", hoverBorder: "#34D399" },
+    solid: { text: "#053B24", bg: "#34D399", border: null,      hoverText: "#053B24", hoverBg: "#6EE7B7", hoverBorder: null },
+  },
+  cyan: {
+    glow:  { text: "#22D3EE", bg: "#052D37", border: "#0C6B84", hoverText: "#67E8F9", hoverBg: "#073B4A", hoverBorder: "#22D3EE" },
+    solid: { text: "#052D37", bg: "#22D3EE", border: null,      hoverText: "#052D37", hoverBg: "#67E8F9", hoverBorder: null },
+  },
+  indigo: {
+    glow:  { text: "#818CF8", bg: "#1B1944", border: "#3730A3", hoverText: "#A5B4FC", hoverBg: "#232258", hoverBorder: "#818CF8" },
+    solid: { text: "#2A2A2A", bg: "#818CF8", border: null,      hoverText: "#2A2A2A", hoverBg: "#A5B4FC", hoverBorder: null },
+  },
+  violet: {
+    glow:  { text: "#C084FC", bg: "#2A1145", border: "#6D28D9", hoverText: "#D8B4FE", hoverBg: "#36155A", hoverBorder: "#C084FC" },
+    solid: { text: "#2A2A2A", bg: "#C084FC", border: null,      hoverText: "#2A2A2A", hoverBg: "#D8B4FE", hoverBorder: null },
+  },
+  fuchsia: {
+    glow:  { text: "#E879F9", bg: "#2D0A38", border: "#86198F", hoverText: "#F0ABFC", hoverBg: "#3B0E4B", hoverBorder: "#E879F9" },
+    solid: { text: "#2A2A2A", bg: "#E879F9", border: null,      hoverText: "#2A2A2A", hoverBg: "#F0ABFC", hoverBorder: null },
+  },
 };
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
