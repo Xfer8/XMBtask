@@ -6,7 +6,7 @@ import "./SettingsMenu.css";
 export default function SettingsMenu({ onImport, onExport, requestCount = 0, onRequests }) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
-  const { signOutUser } = useAuth();
+  const { signOutUser, isAdmin } = useAuth();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -59,7 +59,7 @@ export default function SettingsMenu({ onImport, onExport, requestCount = 0, onR
           <button className="settings-dropdown-item" onClick={handleSettings}>
             Settings
           </button>
-          {onRequests && (
+          {isAdmin && onRequests && (
             <button
               className="settings-dropdown-item"
               onClick={() => { setIsOpen(false); onRequests(); }}
