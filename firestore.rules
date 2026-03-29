@@ -27,6 +27,12 @@ service cloud.firestore {
       allow read, delete: if isAdmin();
     }
 
+    // Feedback — any authenticated user may submit; only admins may read/delete
+    match /feedback/{feedbackId} {
+      allow create: if request.auth != null;
+      allow read, delete: if isAdmin();
+    }
+
     // User data — only accessible by the owner
     match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;

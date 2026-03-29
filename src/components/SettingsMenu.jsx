@@ -3,7 +3,7 @@ import CogIcon from "./CogIcon";
 import { useAuth } from "../contexts/AuthContext";
 import "./SettingsMenu.css";
 
-export default function SettingsMenu({ onImport, onExport, requestCount = 0, onRequests }) {
+export default function SettingsMenu({ onImport, onExport, requestCount = 0, onRequests, onFeedback }) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
   const { signOutUser, isAdmin } = useAuth();
@@ -59,6 +59,14 @@ export default function SettingsMenu({ onImport, onExport, requestCount = 0, onR
           <button className="settings-dropdown-item" onClick={handleSettings}>
             Settings
           </button>
+          {onFeedback && (
+            <button
+              className="settings-dropdown-item"
+              onClick={() => { setIsOpen(false); onFeedback(); }}
+            >
+              Feedback
+            </button>
+          )}
           {isAdmin && onRequests && (
             <button
               className="settings-dropdown-item"

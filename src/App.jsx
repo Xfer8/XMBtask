@@ -9,7 +9,9 @@ import { useAuth } from "./contexts/AuthContext";
 import { loadProjects, saveProjects, loadTasks, saveTasks } from "./services/dataService";
 import { subscribeToRequests } from "./services/requestsService";
 import { subscribeToFeatureFlags, setFeatureFlag } from "./services/featureFlagsService";
+import { subscribeToFeedback, deleteFeedback } from "./services/feedbackService";
 import RequestsModal from "./components/RequestsModal";
+import FeedbackModal from "./components/FeedbackModal";
 import { exportToXlsx, importFromXlsx } from "./services/xlsxService";
 import { exportBackup, importBackup } from "./services/backupService";
 
@@ -168,7 +170,13 @@ function AuthenticatedApp() {
   const [requests,         setRequests]         = useState([]);
   const [showRequests,     setShowRequests]     = useState(false);
   const [featureFlags,     setFeatureFlags]     = useState({ scratchPadEnabled: false });
-  const fileInputRef = useRef(null);
+  const [showFeedback,     setShowFeedback]     = useState(false);
+  const fileInputRef   = useRef(null);
+  // Always-current refs for use inside async feedback processing
+  const projectsRef    = useRef([]);
+  const tasksRef       = useRef([]);
+  useEffect(() => { projectsRef.current = projects; }, [projects]);
+  useEffect(() => { tasksRef.current    = tasks;    }, [tasks]);
 
   // ── Load from storage on mount ──────────────────────────────────────────────
   useEffect(() => {
@@ -190,6 +198,66 @@ function AuthenticatedApp() {
   useEffect(() => {
     return subscribeToFeatureFlags(setFeatureFlags);
   }, []);
+
+  // ── Subscribe to feedback + auto-convert to tasks (admin only) ───────────────
+  useEffect(() => {
+    if (!isAdmin || !storageReady) return;
+    return subscribeToFeedback(async (items) => {
+      if (items.length === 0) return;
+
+      const TYPE_LABELS = {
+        "new-feature":      "New Feature",
+        "existing-feature": "Existing Feature",
+        "general":          "General Feedback",
+        "other":            "Other",
+      };
+
+      let currentProjects = [...projectsRef.current];
+      let currentTasks    = [...tasksRef.current];
+
+      // Find or create "Feature Requests" project
+      let featProj = currentProjects.find(p => p.title === "Feature Requests");
+      if (!featProj) {
+        featProj = {
+          title:       "Feature Requests",
+          description: "User-submitted feedback and feature requests.",
+          status:      "Active",
+          color:       "green",
+        };
+        const newId = generateProjectId(currentProjects);
+        featProj = { ...featProj, id: newId };
+        currentProjects = [...currentProjects, featProj];
+        setProjects(currentProjects);
+      }
+
+      // Build one task per feedback item
+      const newTasks = items.map(fb => {
+        const typeLabel = TYPE_LABELS[fb.type] ?? fb.type;
+        const short     = fb.description.length > 60
+          ? fb.description.slice(0, 60) + "…"
+          : fb.description;
+        const task = {
+          id:          generateTaskId(currentTasks),
+          title:       `${typeLabel}: ${short}`,
+          description: `${fb.description}\n\nSubmitted by: ${fb.userName} (${fb.userEmail})`,
+          status:      "Not Started",
+          priority:    "Medium",
+          dueDate:     null,
+          owner:       "",
+          projectId:   featProj.id,
+          images:      [],
+          updates:     [],
+          subtasks:    [],
+          links:       [],
+        };
+        currentTasks = [...currentTasks, task]; // keep IDs unique across batch
+        return task;
+      });
+
+      setTasks(ts => [...ts, ...newTasks]);
+      await Promise.all(items.map(fb => deleteFeedback(fb.id)));
+    });
+  }, [isAdmin, storageReady]);
 
   // ── Persist on change ───────────────────────────────────────────────────────
   useEffect(() => {
@@ -327,6 +395,7 @@ function AuthenticatedApp() {
             onExport={handleExport}
             requestCount={isAdmin ? requests.length : 0}
             onRequests={() => setShowRequests(true)}
+            onFeedback={() => setShowFeedback(true)}
           />
         </div>
       </div>
@@ -402,6 +471,11 @@ function AuthenticatedApp() {
           requests={requests}
           onClose={() => setShowRequests(false)}
         />
+      )}
+
+      {/* Feedback modal */}
+      {showFeedback && (
+        <FeedbackModal onClose={() => setShowFeedback(false)} />
       )}
 
       {/* Import confirmation modal */}
