@@ -4,6 +4,7 @@ import TaskModal         from "../components/tasks/TaskModal";
 import ProjectGroup      from "../components/tasks/ProjectGroup";
 import ProjectBar        from "../components/tasks/ProjectBar";
 import AnimatedTaskList  from "../components/tasks/AnimatedTaskList";
+import AnimatedGroupList from "../components/tasks/AnimatedGroupList";
 
 const EMPTY_TASK = {
   title:"", description:"", status:"Not Started", priority:"Medium",
@@ -127,44 +128,43 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
       ? []
       : filteredTasks.filter(t => !t.projectId || !projects.find(p => p.id === t.projectId));
 
+    if (filteredTasks.length === 0) {
+      return (
+        <div style={{ fontSize:"13px", color:"#55555e", textAlign:"center", padding:"40px 0" }}>
+          {q ? "No tasks match your search." : "No tasks yet — click \"New Task\" to get started."}
+        </div>
+      );
+    }
+
     return (
-      <div style={{ display:"flex", flexDirection:"column", gap:"40px" }}>
+      <AnimatedGroupList gap="40px">
         {projs.map(project => {
           const projectTasks = filteredTasks.filter(t => t.projectId === project.id);
           if (projectTasks.length === 0) return null;
           return (
-            <div key={project.id}>
-              <ProjectGroup
-                project={project}
-                tasks={projectTasks}
-                onEdit={openEdit}
-                onUpdate={onUpdate}
-                allProjects={projects}
-                filterKey={filterId ?? "__all__"}
-              />
-            </div>
-          );
-        })}
-
-        {uncatTasks.length > 0 && (
-          <div>
             <ProjectGroup
-              project={null}
-              tasks={uncatTasks}
+              key={project.id}
+              project={project}
+              tasks={projectTasks}
               onEdit={openEdit}
               onUpdate={onUpdate}
               allProjects={projects}
               filterKey={filterId ?? "__all__"}
             />
-          </div>
-        )}
-
-        {filteredTasks.length === 0 && (
-          <div style={{ fontSize:"13px", color:"#55555e", textAlign:"center", padding:"40px 0" }}>
-            {q ? "No tasks match your search." : "No tasks yet — click \"New Task\" to get started."}
-          </div>
-        )}
-      </div>
+          );
+        })}
+        {uncatTasks.length > 0 ? (
+          <ProjectGroup
+            key="__uncat__"
+            project={null}
+            tasks={uncatTasks}
+            onEdit={openEdit}
+            onUpdate={onUpdate}
+            allProjects={projects}
+            filterKey={filterId ?? "__all__"}
+          />
+        ) : null}
+      </AnimatedGroupList>
     );
   };
 

@@ -3,33 +3,31 @@ import TaskCard from "../TaskCard";
 
 // ── AnimatedTaskList ────────────────────────────────────────────────────────────
 // Renders a sorted list of TaskCards and animates reordering using the FLIP
-// technique (First-Last-Invert-Play):
+// technique (First-Last-Invert-Play).
 //
-//  1. After every React commit, measure each item's new natural position.
-//  2. Compare to the positions stored from the previous render.
-//  3. For items that moved, snap them back to their old position via a
-//     translateY transform (no transition), then remove the transform with
-//     a CSS transition so they smoothly slide to their new position.
-//  4. Save the current positions for the next render.
-//
-// Because useLayoutEffect runs before the browser paints, the user never
-// sees the element in the "wrong" position — they only see the animation.
+// Positions are measured RELATIVE to the container (not absolute viewport).
+// This prevents double-translation when AnimatedGroupList is simultaneously
+// animating the parent group container — if the whole group moves as a unit,
+// each task's position relative to the container stays the same (dy = 0),
+// so no task-level animation fires. Only genuine internal reorders animate.
 
 export default function AnimatedTaskList({ tasks, projects, onEdit, onUpdate, gap = "10px" }) {
-  const wrappers = useRef({});  // task id → wrapper DOM element
-  const prevY    = useRef({});  // task id → natural top from last render
+  const containerRef = useRef(null);
+  const wrappers     = useRef({});  // task id → wrapper DOM element
+  const prevY        = useRef({});  // task id → relative top from last render
 
   useLayoutEffect(() => {
     const W = wrappers.current;
     const P = prevY.current;
 
-    // ── Step 1: measure natural (post-commit) positions ──────────────────
+    // ── Step 1: measure positions relative to this container ─────────────
+    const containerTop = containerRef.current?.getBoundingClientRect().top ?? 0;
     const nextY = {};
     Object.entries(W).forEach(([id, el]) => {
-      if (el) nextY[id] = el.getBoundingClientRect().top;
+      if (el) nextY[id] = el.getBoundingClientRect().top - containerTop;
     });
 
-    // ── Step 2 & 3: FLIP any item whose position changed ─────────────────
+    // ── Step 2 & 3: FLIP any item that moved within the list ─────────────
     Object.entries(W).forEach(([id, el]) => {
       if (!el || P[id] === undefined) return;   // new item — no old position
       const dy = P[id] - nextY[id];
@@ -47,12 +45,12 @@ export default function AnimatedTaskList({ tasks, projects, onEdit, onUpdate, ga
       });
     });
 
-    // ── Step 4: store positions for the next render ───────────────────────
+    // ── Step 4: store relative positions for the next render ─────────────
     prevY.current = nextY;
   });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap }}>
+    <div ref={containerRef} style={{ display: "flex", flexDirection: "column", gap }}>
       {tasks.map(task => (
         <div
           key={task.id}
