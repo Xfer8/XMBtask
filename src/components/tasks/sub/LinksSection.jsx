@@ -1,13 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import MutedBadge    from "../../ui/MutedBadge";
 import ImagePasteZone from "./ImagePasteZone";
-
-const LINK_TYPES       = ["Source", "SLG", "RA", "Checklist", "Jira", "Email", "Link"];
-const LINK_TYPE_COLORS = {
-  Source:"yellow", Jira:"blue", Email:"purple", Link:"gray", Other:"gray",
-  // Sherlock-family types — all orange; legacy "Sherlock" kept for existing data
-  SLG:"orange", RA:"orange", Checklist:"orange", Sherlock:"orange",
-};
+import { LINK_TYPES, LINK_TYPE_COLORS } from "../../../linkTypes";
 const generateLinkId   = () => `LK${Date.now()}`;
 const EMPTY_LINK       = { url:"", displayName:"", type:"", images:[] };
 
