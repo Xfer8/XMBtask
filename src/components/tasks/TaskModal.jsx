@@ -154,7 +154,7 @@ export default function TaskModal({ title, task, tasks = [], projects = [], onUp
               ))}
             </select>
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"12px", marginBottom:"12px" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(140px, 1fr))", gap:"12px", marginBottom:"12px" }}>
             <div>
               <label style={labelStyle}>Status</label>
               <select value={task.status} onChange={e => set("status", e.target.value)} style={{ ...inputStyle, cursor:"pointer" }}>
@@ -168,13 +168,13 @@ export default function TaskModal({ title, task, tasks = [], projects = [], onUp
               </select>
             </div>
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"12px" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(140px, 1fr))", gap:"12px" }}>
             <div>
               <label style={labelStyle}>Due Date</label>
               <input
                 type="date" value={task.dueDate ?? ""}
                 onChange={e => set("dueDate", e.target.value || null)}
-                style={{ ...inputStyle, colorScheme:"dark" }}
+                style={{ ...inputStyle, colorScheme:"dark", height:"36px", boxSizing:"border-box" }}
               />
             </div>
             <div>
@@ -182,7 +182,7 @@ export default function TaskModal({ title, task, tasks = [], projects = [], onUp
               <input
                 type="text" value={task.owner} placeholder="Alt owner name"
                 onChange={e => set("owner", e.target.value)}
-                style={inputStyle}
+                style={{ ...inputStyle, height:"36px", boxSizing:"border-box" }}
               />
             </div>
           </div>

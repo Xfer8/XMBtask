@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import MutedBadge    from "../../ui/MutedBadge";
 import ImagePasteZone from "./ImagePasteZone";
 
@@ -62,75 +62,81 @@ const emailBadgeValue = l =>
   (l.images?.length ? `${l.images.length} image${l.images.length !== 1 ? "s" : ""}` : "(none)");
 
 // ── QuickPasteZone ────────────────────────────────────────────────────────────
-// Focused zone that accepts Ctrl+V. Detects images → Email type, or text →
-// auto-detected URL type, then calls onDetected({ type, url, displayName, images }).
+// Accepts paste on both desktop (Ctrl+V) and mobile (long-press → Paste).
+// Uses a transparent <textarea> overlay so mobile browsers fire paste events
+// reliably — mobile only fires paste on actual form elements, not divs.
+// Note: image paste works on desktop & Android; iOS restricts image clipboard
+// access in web apps, so only text/URL paste is possible there.
 function QuickPasteZone({ onDetected }) {
   const ref = useRef(null);
   const [focused, setFocused] = useState(false);
 
-  // Auto-focus when mounted so the user can paste immediately
-  useEffect(() => { ref.current?.focus(); }, []);
+  const handlePaste = e => {
+    e.preventDefault();
+    const items = Array.from(e.clipboardData?.items ?? []);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    // ── Images → Email type ────────────────────────────────────────────────
+    const imgItems = items.filter(i => i.type.startsWith("image/"));
+    if (imgItems.length > 0) {
+      Promise.all(
+        imgItems.map(item => new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = evt => resolve(evt.target.result);
+          reader.readAsDataURL(item.getAsFile());
+        }))
+      ).then(imgs => onDetected({ type: "Email", url: "", displayName: "", images: imgs }));
+      return;
+    }
 
-    const h = e => {
-      const items = Array.from(e.clipboardData?.items ?? []);
-
-      // ── Images → Email type ──────────────────────────────────────────────
-      const imgItems = items.filter(i => i.type.startsWith("image/"));
-      if (imgItems.length > 0) {
-        e.preventDefault();
-        Promise.all(
-          imgItems.map(item => new Promise(resolve => {
-            const reader = new FileReader();
-            reader.onload = evt => resolve(evt.target.result);
-            reader.readAsDataURL(item.getAsFile());
-          }))
-        ).then(imgs => onDetected({ type: "Email", url: "", displayName: "", images: imgs }));
-        return;
-      }
-
-      // ── Text / URL → auto-detect type ────────────────────────────────────
-      const textItem = items.find(i => i.type === "text/plain");
-      if (textItem) {
-        e.preventDefault();
-        textItem.getAsString(text => {
-          const url         = text.trim();
-          const detected    = detectType(url) ?? "Link";
-          const displayName = autoName(detected, url) ?? "";
-          onDetected({ type: detected, url, displayName, images: [] });
-        });
-      }
-    };
-
-    el.addEventListener("paste", h);
-    return () => el.removeEventListener("paste", h);
-  }, [onDetected]);
+    // ── Text / URL → auto-detect type ──────────────────────────────────────
+    const textItem = items.find(i => i.type === "text/plain");
+    if (textItem) {
+      textItem.getAsString(text => {
+        const url         = text.trim();
+        const detected    = detectType(url) ?? "Link";
+        const displayName = autoName(detected, url) ?? "";
+        onDetected({ type: detected, url, displayName, images: [] });
+      });
+    }
+  };
 
   return (
-    <div
-      ref={ref}
-      tabIndex={0}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
-      style={{
-        minHeight:  "52px",
+    <div style={{ position: "relative", minHeight: "52px" }}>
+      {/* Visual layer */}
+      <div style={{
+        position:     "absolute", inset: 0,
         borderRadius: "8px",
-        padding:    "0 14px",
-        border:     `1.5px dashed ${focused ? "#4ADE80" : "#3a3a3a"}`,
-        outline:    "none",
-        cursor:     "default",
-        display:    "flex",
-        alignItems: "center",
-        transition: "border-color 0.15s",
-      }}
-    >
-      <span style={{ fontSize:"12px", color: focused ? "#888890" : "#55555e", display:"flex", alignItems:"center", gap:"7px", transition:"color 0.15s" }}>
-        <PasteIcon />
-        Quick add — paste an image or URL (Ctrl+V)
-      </span>
+        padding:      "0 14px",
+        border:       `1.5px dashed ${focused ? "#4ADE80" : "#3a3a3a"}`,
+        display:      "flex",
+        alignItems:   "center",
+        pointerEvents:"none",
+        transition:   "border-color 0.15s",
+      }}>
+        <span style={{ fontSize:"12px", color: focused ? "#888890" : "#55555e", display:"flex", alignItems:"center", gap:"7px", transition:"color 0.15s" }}>
+          <PasteIcon />
+          Quick add — paste an image or URL (Ctrl+V / long-press)
+        </span>
+      </div>
+      {/* Interaction layer — transparent textarea captures paste on mobile & desktop */}
+      <textarea
+        ref={ref}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        onPaste={handlePaste}
+        rows={1}
+        style={{
+          position:   "absolute", inset: 0,
+          width:      "100%", height: "100%",
+          opacity:    0,
+          resize:     "none",
+          border:     "none",
+          background: "transparent",
+          outline:    "none",
+          cursor:     "pointer",
+          boxSizing:  "border-box",
+        }}
+      />
     </div>
   );
 }
