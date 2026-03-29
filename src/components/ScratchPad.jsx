@@ -190,17 +190,17 @@ export default function ScratchPad({ tasks = [], projects = [], onAddTask, onUpd
         {/* Under construction — shown to non-admins when disabled */}
         {!enabled && !isAdmin ? (
           <div style={{
-            border:       "1px dashed #333338",
+            border:       "1px dashed #c8a830",
             borderRadius: "8px",
             padding:      "20px 18px",
           }}>
             <div style={{ display: "flex", alignItems: "flex-start", gap: "14px" }}>
-              <div style={{ fontSize: "22px", lineHeight: 1, opacity: 0.35, flexShrink: 0, marginTop: "2px" }}>🚧</div>
+              <div style={{ fontSize: "22px", lineHeight: 1, opacity: 0.6, flexShrink: 0, marginTop: "2px" }}>🚧</div>
               <div>
-                <div style={{ fontSize: "13px", fontWeight: 600, color: "#555560", marginBottom: "6px" }}>
+                <div style={{ fontSize: "13px", fontWeight: 600, color: "#c8a830", marginBottom: "6px" }}>
                   Coming Soon
                 </div>
-                <div style={{ fontSize: "12px", color: "#444450", lineHeight: 1.6 }}>
+                <div style={{ fontSize: "12px", color: "#888890", lineHeight: 1.6 }}>
                   Paste meeting notes, emails, or any block of text and let AI pull out the actionable tasks for you — complete with suggested priorities, due dates, and project assignments. Review each suggestion before adding it to your task list.
                 </div>
               </div>
