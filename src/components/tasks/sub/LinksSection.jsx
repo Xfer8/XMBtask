@@ -2,14 +2,18 @@ import { useState, useRef, useEffect } from "react";
 import MutedBadge    from "../../ui/MutedBadge";
 import ImagePasteZone from "./ImagePasteZone";
 
-const LINK_TYPES       = ["Source", "Sherlock", "Jira", "Email", "Link"];
-const LINK_TYPE_COLORS = { Source:"yellow", Sherlock:"orange", Jira:"blue", Email:"purple", Link:"gray", Other:"gray" };
+const LINK_TYPES       = ["Source", "SLG", "RA", "Checklist", "Jira", "Email", "Link"];
+const LINK_TYPE_COLORS = {
+  Source:"yellow", Jira:"blue", Email:"purple", Link:"gray", Other:"gray",
+  // Sherlock-family types — all orange; legacy "Sherlock" kept for existing data
+  SLG:"orange", RA:"orange", Checklist:"orange", Sherlock:"orange",
+};
 const generateLinkId   = () => `LK${Date.now()}`;
 const EMPTY_LINK       = { url:"", displayName:"", type:"", images:[] };
 
 // Types that auto-save on paste without opening the full form.
 // Email is excluded — user may want to add more images or a display name.
-const AUTO_SAVE_TYPES  = new Set(["Sherlock", "Jira"]);
+const AUTO_SAVE_TYPES  = new Set(["SLG", "RA", "Checklist", "Jira"]);
 
 const inputStyle = {
   width:"100%", boxSizing:"border-box", background:"#1e1e1e",
@@ -42,18 +46,32 @@ const PasteIcon = ({ size=13 }) => (
 );
 
 // ── type / name helpers ────────────────────────────────────────────────────────
+
+// Maps the "view" path segment from sherlock.epic.com URLs to link types.
+// e.g. view=slg/home → "SLG",  view=ra/home → "RA",  view=checklist/home → "Checklist"
+const SHERLOCK_VIEW_MAP = { slg: "SLG", ra: "RA", checklist: "Checklist" };
+
 const detectType = url => {
   try {
-    const host = new URL(url).hostname.toLowerCase();
-    if (host.includes("atlassian.net"))     return "Jira";
-    if (host.includes("sherlock.epic.com")) return "Sherlock";
+    const parsed = new URL(url);
+    const host   = parsed.hostname.toLowerCase();
+    if (host.includes("atlassian.net")) return "Jira";
+    if (host.includes("sherlock.epic.com")) {
+      const view    = parsed.searchParams.get("view") ?? "";
+      const viewKey = view.split("/")[0].toLowerCase();
+      return SHERLOCK_VIEW_MAP[viewKey] ?? "SLG"; // default to SLG for unknown views
+    }
   } catch (_) {}
   return null;
 };
 
 const autoName = (type, url) => {
-  if (type === "Sherlock") { const m = url.match(/[?&#]id=(\d+)/i); return m ? m[1] : null; }
-  if (type === "Jira")     { const m = url.match(/\/([A-Z]+-\d+)/); return m ? m[1] : null; }
+  if (type === "SLG" || type === "RA" || type === "Checklist") {
+    // ID lives in the hash portion: …#cid=1079&id=10951839&rv=0
+    const m = url.match(/[?&#]id=(\d+)/i);
+    return m ? m[1] : null;
+  }
+  if (type === "Jira") { const m = url.match(/\/([A-Z]+-\d+)/); return m ? m[1] : null; }
   return null;
 };
 
