@@ -143,7 +143,10 @@ function ImportConfirmModal({ preview, fileType, onConfirm, onCancel }) {
   );
 }
 
-const PAGE_ORDER = ["Dashboard", "Tasks", "Projects"];
+const PAGE_ORDER  = ["Dashboard", "Tasks", "Projects"];
+const PAGE_HASHES = { Dashboard: "#dashboard", Tasks: "#tasks", Projects: "#projects" };
+const HASH_PAGES  = { "#dashboard": "Dashboard", "#tasks": "Tasks", "#projects": "Projects" };
+const pageFromHash = () => HASH_PAGES[window.location.hash] ?? "Dashboard";
 
 export default function App() {
   const { user } = useAuth();
@@ -159,8 +162,10 @@ export default function App() {
 
 function AuthenticatedApp() {
   const { isAdmin } = useAuth();
-  const [currentPage,   setCurrentPage]   = useState("Dashboard");
+  const [currentPage,   setCurrentPage]   = useState(pageFromHash);
   const [slideDir,      setSlideDir]      = useState("right");
+  const currentPageRef = useRef(currentPage);
+  useEffect(() => { currentPageRef.current = currentPage; }, [currentPage]);
   const [projects,      setProjects]      = useState([]);
   const [tasks,         setTasks]         = useState([]);
   const [storageReady,  setStorageReady]  = useState(false);
@@ -177,6 +182,17 @@ function AuthenticatedApp() {
   const tasksRef       = useRef([]);
   useEffect(() => { projectsRef.current = projects; }, [projects]);
   useEffect(() => { tasksRef.current    = tasks;    }, [tasks]);
+
+  // ── Sync page with URL hash (back/forward + direct links) ──────────────────
+  useEffect(() => {
+    const onHashChange = () => {
+      const page = pageFromHash();
+      setSlideDir(PAGE_ORDER.indexOf(page) >= PAGE_ORDER.indexOf(currentPageRef.current) ? "right" : "left");
+      setCurrentPage(page);
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
   // ── Load from storage on mount ──────────────────────────────────────────────
   useEffect(() => {
@@ -383,6 +399,7 @@ function AuthenticatedApp() {
             onNavigate={(page) => {
               setSlideDir(PAGE_ORDER.indexOf(page) >= PAGE_ORDER.indexOf(currentPage) ? "right" : "left");
               setCurrentPage(page);
+              window.location.hash = PAGE_HASHES[page];
             }}
             currentPage={currentPage}
           />
