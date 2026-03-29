@@ -46,17 +46,15 @@ export default function Dashboard({ tasks = [], projects = [], onAddTask, onUpda
       boxSizing:  "border-box",
       width:      "100%",
     }}>
-      {(isAdmin || scratchPadEnabled) && (
-        <ScratchPad
-          tasks={tasks}
-          projects={projects}
-          onAddTask={onAddTask}
-          onUpdateTask={onUpdateTask}
-          isAdmin={isAdmin}
-          enabled={scratchPadEnabled}
-          onToggle={onToggleScratchPad}
-        />
-      )}
+      <ScratchPad
+        tasks={tasks}
+        projects={projects}
+        onAddTask={onAddTask}
+        onUpdateTask={onUpdateTask}
+        isAdmin={isAdmin}
+        enabled={scratchPadEnabled}
+        onToggle={onToggleScratchPad}
+      />
 
       <RemindersContainer
         reminders={reminders}
