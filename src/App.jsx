@@ -169,6 +169,8 @@ function AuthenticatedApp() {
   const [projects,      setProjects]      = useState([]);
   const [tasks,         setTasks]         = useState([]);
   const [storageReady,  setStorageReady]  = useState(false);
+  const [loadError,     setLoadError]     = useState(false);
+  const [saveStatus,    setSaveStatus]    = useState("idle"); // "idle"|"saving"|"saved"|"error"
   const [showExportChoice, setShowExportChoice] = useState(false);
   const [pendingImport,    setPendingImport]    = useState(null); // { projects, tasks, fileType }
   const [importError,      setImportError]      = useState(null);
@@ -195,11 +197,23 @@ function AuthenticatedApp() {
   }, []);
 
   // ── Load from storage on mount ──────────────────────────────────────────────
+  // IMPORTANT: storageReady must only become true if the load SUCCEEDS.
+  // If it were set true after a failed load (which returns []), the save
+  // effects below would immediately overwrite Firestore with empty arrays.
   useEffect(() => {
     const load = async () => {
-      setProjects(await loadProjects());
-      setTasks(await loadTasks());
-      setStorageReady(true);
+      try {
+        const [loadedProjects, loadedTasks] = await Promise.all([
+          loadProjects(),
+          loadTasks(),
+        ]);
+        setProjects(loadedProjects);
+        setTasks(loadedTasks);
+        setStorageReady(true);
+      } catch (err) {
+        console.error("Failed to load data from Firestore:", err);
+        setLoadError(true); // storageReady stays false — saves are blocked
+      }
     };
     load();
   }, []);
@@ -275,16 +289,40 @@ function AuthenticatedApp() {
     });
   }, [isAdmin, storageReady]);
 
-  // ── Persist on change ───────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!storageReady) return;
-    saveProjects(projects);
-  }, [projects, storageReady]);
+  // ── Persist on change (debounced to prevent concurrent-write race conditions) ─
+  // Without debouncing, rapid successive changes fire multiple simultaneous
+  // Firestore writes. If they complete out of order, an older write (with less
+  // data) can land after a newer one, silently discarding recent changes.
+  // The debounce ensures only one write is in flight at a time, always with
+  // the latest snapshot of state.
+  const saveTimerRef  = useRef(null);
+  const savedStatusTimerRef = useRef(null);
+
+  const scheduleSave = (saveFn, data) => {
+    setSaveStatus("saving");
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      try {
+        await saveFn(data);
+        setSaveStatus("saved");
+        if (savedStatusTimerRef.current) clearTimeout(savedStatusTimerRef.current);
+        savedStatusTimerRef.current = setTimeout(() => setSaveStatus("idle"), 2000);
+      } catch (err) {
+        console.error("Firestore save failed:", err);
+        setSaveStatus("error");
+      }
+    }, 600);
+  };
 
   useEffect(() => {
     if (!storageReady) return;
-    saveTasks(tasks);
-  }, [tasks, storageReady]);
+    scheduleSave(saveProjects, projects);
+  }, [projects, storageReady]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!storageReady) return;
+    scheduleSave(saveTasks, tasks);
+  }, [tasks, storageReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Project CRUD ────────────────────────────────────────────────────────────
   const addProject    = (p)  => setProjects(ps => [...ps, { ...p, id: generateProjectId(ps) }]);
@@ -405,8 +443,22 @@ function AuthenticatedApp() {
           />
         </div>
 
-        {/* Cog — right */}
-        <div style={{ display:"flex", alignItems:"center", justifyContent:"flex-end" }}>
+        {/* Save status + Cog — right */}
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"flex-end", gap:"10px" }}>
+          {saveStatus === "saving" && (
+            <span style={{ fontSize:"10px", color:"#555560", letterSpacing:"0.03em" }}>Saving…</span>
+          )}
+          {saveStatus === "saved" && (
+            <span style={{ fontSize:"10px", color:"#4ADE80", letterSpacing:"0.03em" }}>✓ Saved</span>
+          )}
+          {saveStatus === "error" && (
+            <span
+              title="Changes may not have been saved. Check your connection and try again."
+              style={{ fontSize:"10px", color:"#FF6B6B", letterSpacing:"0.03em", cursor:"help" }}
+            >
+              ⚠ Save failed
+            </span>
+          )}
           <SettingsMenu
             onImport={handleImport}
             onExport={handleExport}
@@ -417,6 +469,40 @@ function AuthenticatedApp() {
         </div>
       </div>
       </div>
+
+      {/* Load error — shown if Firestore failed to load on startup */}
+      {loadError && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 700,
+          background: "rgba(0,0,0,0.85)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <div style={{
+            background: "#2c2c2c", border: "1px solid #943636", borderRadius: "14px",
+            padding: "32px 36px", maxWidth: "380px", textAlign: "center",
+            boxShadow: "0 16px 48px rgba(0,0,0,0.6)",
+          }}>
+            <div style={{ fontSize: "28px", marginBottom: "12px" }}>⚠️</div>
+            <div style={{ fontSize: "15px", fontWeight: 700, color: "#f0f0f0", marginBottom: "8px" }}>
+              Failed to load your data
+            </div>
+            <div style={{ fontSize: "13px", color: "#888890", lineHeight: 1.6, marginBottom: "24px" }}>
+              Could not connect to the database. Your data is safe — nothing has been changed.
+              Check your connection and reload the page.
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                background: "#4ADE80", border: "none", borderRadius: "8px",
+                color: "#0a1a0f", fontSize: "13px", fontWeight: 700,
+                padding: "10px 24px", cursor: "pointer", fontFamily: "inherit",
+              }}
+            >
+              Reload
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Page content */}
       <div style={{ flex: 1, width: "100%" }}>

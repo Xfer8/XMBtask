@@ -18,35 +18,26 @@ const userDataDoc = (type) => {
 // ── Projects ──────────────────────────────────────────────────────────────────
 
 export const loadProjects = async () => {
-  try {
-    const snap = await getDoc(userDataDoc("projects"));
-    return snap.exists() ? snap.data().items : [];
-  } catch {
-    return [];
-  }
+  // Errors propagate to the caller — never silently return [] on failure,
+  // as that would cause the save effect to overwrite real data with nothing.
+  const snap = await getDoc(userDataDoc("projects"));
+  return snap.exists() ? snap.data().items : [];
 };
 
 export const saveProjects = async (projects) => {
-  try {
-    await setDoc(userDataDoc("projects"), { items: projects });
-  } catch { /* ignore */ }
+  // Errors propagate to the caller so they can be shown to the user.
+  await setDoc(userDataDoc("projects"), { items: projects });
 };
 
 // ── Tasks ─────────────────────────────────────────────────────────────────────
 
 export const loadTasks = async () => {
-  try {
-    const snap = await getDoc(userDataDoc("tasks"));
-    return snap.exists() ? snap.data().items : [];
-  } catch {
-    return [];
-  }
+  const snap = await getDoc(userDataDoc("tasks"));
+  return snap.exists() ? snap.data().items : [];
 };
 
 export const saveTasks = async (tasks) => {
-  try {
-    await setDoc(userDataDoc("tasks"), { items: tasks });
-  } catch { /* ignore */ }
+  await setDoc(userDataDoc("tasks"), { items: tasks });
 };
 
 // ── Reminders ─────────────────────────────────────────────────────────────────
