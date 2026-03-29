@@ -68,9 +68,12 @@ export default function TaskModal({ title, task, tasks = [], projects = [], onUp
     else onCancel(snapshot);
   };
 
-  // Backdrop click while dirty → pulse the footer to guide user to Save/Cancel
+  // Backdrop click:
+  //  • Valid (or clean) → save and close (changes are already live in state)
+  //  • Dirty but invalid (missing title / project) → pulse footer so the user
+  //    knows what still needs filling in before they can leave
   const handleBackdropClick = () => {
-    if (isDirty) {
+    if (isDirty && !valid) {
       setFlashFooter(true);
       footerRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
       setTimeout(() => setFlashFooter(false), 600);

@@ -298,12 +298,30 @@ function AuthenticatedApp() {
   const saveTimerRef  = useRef(null);
   const savedStatusTimerRef = useRef(null);
 
-  const scheduleSave = (saveFn, data) => {
+  // Tracks which data types are waiting for the debounce timer to fire.
+  // Keyed by "tasks" | "projects" so that a projects change doesn't evict a
+  // pending tasks save (and vice-versa) when both change within the 600 ms window.
+  const pendingSaveRef = useRef(null); // { tasks?: [...], projects?: [...] }
+
+  const executePendingSave = async () => {
+    const pending = pendingSaveRef.current;
+    if (!pending) return;
+    pendingSaveRef.current = null;
+    const ops = [];
+    if (pending.tasks     !== undefined) ops.push(saveTasks(pending.tasks));
+    if (pending.projects  !== undefined) ops.push(saveProjects(pending.projects));
+    await Promise.all(ops);
+  };
+
+  const scheduleSave = (key, data) => {
+    // Merge this type into the pending batch
+    pendingSaveRef.current = { ...(pendingSaveRef.current ?? {}), [key]: data };
     setSaveStatus("saving");
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(async () => {
+      saveTimerRef.current = null;
       try {
-        await saveFn(data);
+        await executePendingSave();
         setSaveStatus("saved");
         if (savedStatusTimerRef.current) clearTimeout(savedStatusTimerRef.current);
         savedStatusTimerRef.current = setTimeout(() => setSaveStatus("idle"), 2000);
@@ -314,14 +332,29 @@ function AuthenticatedApp() {
     }, 600);
   };
 
+  // Flush any pending debounced save immediately when the tab becomes hidden
+  // (covers tab close, browser close, Alt+Tab away on mobile, power loss after
+  // the OS has had a chance to fire the event).
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState !== "hidden") return;
+      if (!saveTimerRef.current) return; // nothing pending
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+      executePendingSave().catch(() => {}); // best-effort; offline persistence will retry
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (!storageReady) return;
-    scheduleSave(saveProjects, projects);
+    scheduleSave("projects", projects);
   }, [projects, storageReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!storageReady) return;
-    scheduleSave(saveTasks, tasks);
+    scheduleSave("tasks", tasks);
   }, [tasks, storageReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Project CRUD ────────────────────────────────────────────────────────────
