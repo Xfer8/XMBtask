@@ -662,7 +662,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
           {links.length > 0 && (
             <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
               {links.map(link => {
-                const colorMap   = { Source: "yellow", Sherlock: "orange", Jira: "blue", Email: "purple", Link: "gray", Other: "gray" };
+                const colorMap   = { Source: "yellow", Sherlock: "orange", SLG: "orange", RA: "orange", Checklist: "orange", Jira: "blue", Email: "purple", Link: "gray", Other: "gray" };
                 const isEmailImg = link.type === "Email" && link.images?.length > 0;
                 const badgeVal   = link.type === "Email"
                   ? (link.displayName || (link.images?.length ? `${link.images.length} image${link.images.length !== 1 ? "s" : ""}` : "(none)"))
