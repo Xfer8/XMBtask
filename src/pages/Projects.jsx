@@ -17,90 +17,108 @@ function ProjectCard({ project, taskCount, onEdit, onDelete }) {
   const statusPal  = getPalette(isActive ? "green" : "gray");
 
   return (
+    // Flex row: first child is the color bar, second is the content.
+    // borderLeft is omitted entirely — the bar IS the left edge.
+    // overflow:hidden + borderRadius:"0 12px 12px 0" gives square left corners
+    // and clips the bar flush against the card boundary.
     <div
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
+        display:"flex",
         background: hov ? "#313131" : "#2a2a2a",
         border:`1px solid ${hov ? "#555560" : "#444450"}`,
-        borderLeft:`3px solid ${p.text}`,
-        borderRadius:"12px",
-        padding:"14px 18px",
+        borderLeft:"none",
+        borderRadius:"0 12px 12px 0",
+        overflow:"hidden",
         transition:"background 0.15s, border-color 0.15s",
       }}
     >
-      {/* Header row */}
-      <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
-        {/* Color dot + title */}
-        <div style={{ width:"9px", height:"9px", borderRadius:"50%", background:p.text, flexShrink:0 }}/>
-        <span style={{ fontSize:"14px", fontWeight:700, color:"#f0f0f0", flex:1, minWidth:0 }}>
-          {project.title}
-        </span>
+      {/* ── Color bar ── full-height via flex stretch; grows on hover ─────── */}
+      <div style={{
+        width: hov ? "8px" : "5px",
+        flexShrink: 0,
+        background: p.text,
+        transition: "width 0.2s ease",
+      }} />
 
-        {/* Task count */}
-        {taskCount > 0 && (
-          <span style={{ fontSize:"11px", color:"#55555e", whiteSpace:"nowrap" }}>
-            {taskCount} task{taskCount !== 1 ? "s" : ""}
+      {/* ── Card content ─────────────────────────────────────────────────── */}
+      <div style={{ flex:1, padding:"14px 18px" }}>
+
+        {/* Header row */}
+        <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+          {/* Color dot + title */}
+          <div style={{ width:"9px", height:"9px", borderRadius:"50%", background:p.text, flexShrink:0 }}/>
+          <span style={{ fontSize:"14px", fontWeight:700, color:"#f0f0f0", flex:1, minWidth:0 }}>
+            {project.title}
           </span>
-        )}
 
-        {/* Status badge */}
-        <span style={{
-          fontSize:"10px", fontWeight:700, padding:"2px 9px", borderRadius:"9999px",
-          background: statusPal.bg, color: statusPal.text, whiteSpace:"nowrap", flexShrink:0,
-        }}>
-          {project.status}
-        </span>
+          {/* Task count */}
+          {taskCount > 0 && (
+            <span style={{ fontSize:"11px", color:"#55555e", whiteSpace:"nowrap" }}>
+              {taskCount} task{taskCount !== 1 ? "s" : ""}
+            </span>
+          )}
 
-        {/* Edit button */}
-        <button
-          onClick={() => onEdit(project)}
-          style={{
-            background:"none", border:"1px solid #3a3a3a", borderRadius:"6px",
-            cursor:"pointer", color:"#888890", fontSize:"12px",
-            padding:"3px 10px", fontFamily:"inherit", flexShrink:0,
-            transition:"border-color 0.15s, color 0.15s",
-          }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor="#555560"; e.currentTarget.style.color="#f0f0f0"; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor="#3a3a3a"; e.currentTarget.style.color="#888890"; }}
-        >
-          Edit
-        </button>
+          {/* Status badge */}
+          <span style={{
+            fontSize:"10px", fontWeight:700, padding:"2px 9px", borderRadius:"9999px",
+            background: statusPal.bg, color: statusPal.text, whiteSpace:"nowrap", flexShrink:0,
+          }}>
+            {project.status}
+          </span>
 
-        {/* Delete / Confirm */}
-        {confirmDel ? (
-          <div style={{ display:"flex", alignItems:"center", gap:"6px", flexShrink:0 }}>
-            <span style={{ fontSize:"11px", color:"#888890" }}>Delete?</span>
-            <button
-              onClick={() => { onDelete(project.id); setConfirmDel(false); }}
-              style={{ background:"#4A1B1B", border:"1px solid #943636", borderRadius:"6px", cursor:"pointer", color:"#FF6B6B", fontSize:"12px", padding:"3px 10px", fontFamily:"inherit" }}
-            >Yes</button>
-            <button
-              onClick={() => setConfirmDel(false)}
-              style={{ background:"none", border:"1px solid #3a3a3a", borderRadius:"6px", cursor:"pointer", color:"#888890", fontSize:"12px", padding:"3px 10px", fontFamily:"inherit" }}
-            >No</button>
-          </div>
-        ) : (
+          {/* Edit button */}
           <button
-            onClick={() => setConfirmDel(true)}
+            onClick={() => onEdit(project)}
             style={{
               background:"none", border:"1px solid #3a3a3a", borderRadius:"6px",
-              cursor:"pointer", color:"#55555e", fontSize:"13px",
-              padding:"3px 8px", fontFamily:"inherit", flexShrink:0, lineHeight:1,
+              cursor:"pointer", color:"#888890", fontSize:"12px",
+              padding:"3px 10px", fontFamily:"inherit", flexShrink:0,
               transition:"border-color 0.15s, color 0.15s",
             }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor="#943636"; e.currentTarget.style.color="#FF6B6B"; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor="#3a3a3a"; e.currentTarget.style.color="#55555e"; }}
-          >✕</button>
-        )}
-      </div>
+            onMouseEnter={e => { e.currentTarget.style.borderColor="#555560"; e.currentTarget.style.color="#f0f0f0"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor="#3a3a3a"; e.currentTarget.style.color="#888890"; }}
+          >
+            Edit
+          </button>
 
-      {/* Description */}
-      {project.description && (
-        <div style={{ fontSize:"13px", color:"#888890", lineHeight:"1.5", marginTop:"8px", paddingLeft:"17px" }}>
-          {project.description}
+          {/* Delete / Confirm */}
+          {confirmDel ? (
+            <div style={{ display:"flex", alignItems:"center", gap:"6px", flexShrink:0 }}>
+              <span style={{ fontSize:"11px", color:"#888890" }}>Delete?</span>
+              <button
+                onClick={() => { onDelete(project.id); setConfirmDel(false); }}
+                style={{ background:"#4A1B1B", border:"1px solid #943636", borderRadius:"6px", cursor:"pointer", color:"#FF6B6B", fontSize:"12px", padding:"3px 10px", fontFamily:"inherit" }}
+              >Yes</button>
+              <button
+                onClick={() => setConfirmDel(false)}
+                style={{ background:"none", border:"1px solid #3a3a3a", borderRadius:"6px", cursor:"pointer", color:"#888890", fontSize:"12px", padding:"3px 10px", fontFamily:"inherit" }}
+              >No</button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmDel(true)}
+              style={{
+                background:"none", border:"1px solid #3a3a3a", borderRadius:"6px",
+                cursor:"pointer", color:"#55555e", fontSize:"13px",
+                padding:"3px 8px", fontFamily:"inherit", flexShrink:0, lineHeight:1,
+                transition:"border-color 0.15s, color 0.15s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor="#943636"; e.currentTarget.style.color="#FF6B6B"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor="#3a3a3a"; e.currentTarget.style.color="#55555e"; }}
+            >✕</button>
+          )}
         </div>
-      )}
+
+        {/* Description */}
+        {project.description && (
+          <div style={{ fontSize:"13px", color:"#888890", lineHeight:"1.5", marginTop:"8px", paddingLeft:"17px" }}>
+            {project.description}
+          </div>
+        )}
+
+      </div>
     </div>
   );
 }
