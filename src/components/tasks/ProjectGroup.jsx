@@ -74,11 +74,11 @@ const Sep = () => (
 // Status pill clicks crossfade the task list; FLIP is reserved for task reorders
 // within a stable filter view.
 
-export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProjects, filterKey }) {
+export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProjects, filterKey, defaultShowDone = false }) {
   const pal = project ? getPalette(project.color) : getPalette("gray");
 
   const [selected,  setSelected]  = useState(null);
-  const [showDone,  setShowDone]  = useState(false);
+  const [showDone,  setShowDone]  = useState(defaultShowDone);
 
   const toggle = (status) => {
     const next = selected === status ? null : status;

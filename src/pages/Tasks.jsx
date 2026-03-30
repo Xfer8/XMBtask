@@ -57,42 +57,53 @@ function ToggleSegment({ label, active, onClick }) {
 
 export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDelete }) {
   const [editing,         setEditing]         = useState(null);
-  // frozenTasks: snapshot taken when the modal opens.
-  // The task list renders this instead of the live `tasks` prop while the modal
-  // is open, so background animations/re-renders don't happen as the user types.
-  // Cleared on Save/Close/Cancel/Delete so the list updates normally afterward.
   const [frozenTasks,     setFrozenTasks]     = useState(null);
   const displayTasks = frozenTasks ?? tasks;
   const [search,          setSearch]          = useState("");
-  const [viewMode,        setViewMode]        = useState("by-project"); // "by-project" | "all-tasks"
+  const [viewMode,        setViewMode]        = useState("by-project");
   const [activeProjectId, setActiveProjectId] = useState(null);
+  const [showCompleted,   setShowCompleted]   = useState(false);
 
   const handleProjectFilter = (id) => {
     setActiveProjectId(id);
-    setViewMode("by-project"); // always switch to By Project when a project is selected
+    setViewMode("by-project");
+  };
+
+  // ── Task update wrapper — auto-clears project filter when the last open
+  //    task in the active project is marked Done ───────────────────────────────
+  const handleTaskUpdate = (updated) => {
+    onUpdate?.(updated);
+    if (activeProjectId) {
+      // Check against the live tasks prop (not frozen) with the update applied
+      const merged  = tasks.map(t => t.id === updated.id ? updated : t);
+      const hasOpen = merged.some(
+        t => t.projectId === activeProjectId && t.status !== "Done"
+      );
+      if (!hasOpen) setActiveProjectId(null);
+    }
   };
 
   // ── Open handlers ──────────────────────────────────────────────────────────
   const openNew = () => {
-    setFrozenTasks([...tasks]); // freeze display before adding the blank task
+    setFrozenTasks([...tasks]);
     const newTask = { ...EMPTY_TASK, id: generateId(tasks) };
     onAdd?.(newTask);
     setEditing({ task: newTask, isNew: true });
   };
 
   const openEdit = task => {
-    setFrozenTasks([...tasks]); // freeze display at current state
+    setFrozenTasks([...tasks]);
     setEditing({ task: { ...task }, isNew: false });
   };
 
   // ── Modal callbacks ────────────────────────────────────────────────────────
   const handleUpdate = updated => {
-    onUpdate?.(updated); // still updates live state → Firestore saves fire normally
+    handleTaskUpdate(updated);
     setEditing(e => ({ ...e, task: updated }));
   };
 
   const handleClose = () => {
-    setFrozenTasks(null); // unfreeze — list updates to live state with animations
+    setFrozenTasks(null);
     setEditing(null);
   };
 
@@ -118,16 +129,32 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
       )
     : displayTasks;
 
+  // ── Completed projects (all tasks Done, at least one task) ────────────────
+  // Computed from live tasks so it updates immediately when a task is marked Done.
+  const completedProjects = projects.filter(p => {
+    if (p.status !== "Active") return false;
+    const pts = tasks.filter(t => t.projectId === p.id);
+    return pts.length > 0 && pts.every(t => t.status === "Done");
+  });
+
   // ── By-project grouping ────────────────────────────────────────────────────
   const renderGroupsContent = (filterId) => {
-    const projs = projects.filter(p =>
-      p.status === "Active" && (!filterId || p.id === filterId)
+    // Active projects: have at least one non-Done task (and match filter if set)
+    const activeProjs = projects.filter(p =>
+      p.status === "Active" &&
+      (!filterId || p.id === filterId) &&
+      tasks.some(t => t.projectId === p.id && t.status !== "Done")
     );
+
     const uncatTasks = filterId
       ? []
       : filteredTasks.filter(t => !t.projectId || !projects.find(p => p.id === t.projectId));
 
-    if (filteredTasks.length === 0) {
+    const hasActiveContent =
+      activeProjs.some(p => filteredTasks.some(t => t.projectId === p.id)) ||
+      uncatTasks.length > 0;
+
+    if (filteredTasks.length === 0 && completedProjects.length === 0) {
       return (
         <div style={{ fontSize:"13px", color:"#55555e", textAlign:"center", padding:"40px 0" }}>
           {q ? "No tasks match your search." : "No tasks yet — click \"New Task\" to get started."}
@@ -136,34 +163,117 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
     }
 
     return (
-      <AnimatedGroupList gap="40px" animated={false}>
-        {projs.map(project => {
-          const projectTasks = filteredTasks.filter(t => t.projectId === project.id);
-          if (projectTasks.length === 0) return null;
-          return (
-            <ProjectGroup
-              key={project.id}
-              project={project}
-              tasks={projectTasks}
-              onEdit={openEdit}
-              onUpdate={onUpdate}
-              allProjects={projects}
-              filterKey={filterId ?? "__all__"}
-            />
-          );
-        })}
-        {uncatTasks.length > 0 ? (
-          <ProjectGroup
-            key="__uncat__"
-            project={null}
-            tasks={uncatTasks}
-            onEdit={openEdit}
-            onUpdate={onUpdate}
-            allProjects={projects}
-            filterKey={filterId ?? "__all__"}
-          />
-        ) : null}
-      </AnimatedGroupList>
+      <>
+        {/* ── Active project groups ──────────────────────────────────────── */}
+        {hasActiveContent && (
+          <AnimatedGroupList gap="40px" animated={false}>
+            {activeProjs.map(project => {
+              const projectTasks = filteredTasks.filter(t => t.projectId === project.id);
+              if (projectTasks.length === 0) return null;
+              return (
+                <ProjectGroup
+                  key={project.id}
+                  project={project}
+                  tasks={projectTasks}
+                  onEdit={openEdit}
+                  onUpdate={handleTaskUpdate}
+                  allProjects={projects}
+                  filterKey={filterId ?? "__all__"}
+                />
+              );
+            })}
+            {uncatTasks.length > 0 ? (
+              <ProjectGroup
+                key="__uncat__"
+                project={null}
+                tasks={uncatTasks}
+                onEdit={openEdit}
+                onUpdate={handleTaskUpdate}
+                allProjects={projects}
+                filterKey={filterId ?? "__all__"}
+              />
+            ) : null}
+          </AnimatedGroupList>
+        )}
+
+        {/* ── Completed Projects section ─────────────────────────────────── */}
+        {completedProjects.length > 0 && !filterId && (
+          <div style={{ marginTop: hasActiveContent ? "48px" : "0" }}>
+            {/* Section header */}
+            <button
+              onClick={() => setShowCompleted(v => !v)}
+              style={{
+                width:      "100%",
+                background: "none",
+                border:     "none",
+                cursor:     "pointer",
+                padding:    "0",
+                fontFamily: "inherit",
+                display:    "flex",
+                alignItems: "center",
+                gap:        "10px",
+                marginBottom: showCompleted ? "24px" : "0",
+              }}
+            >
+              {/* Chevron */}
+              <span style={{
+                fontSize:   "9px",
+                color:      "#555560",
+                display:    "inline-block",
+                transform:  showCompleted ? "rotate(90deg)" : "rotate(0deg)",
+                transition: "transform 0.15s",
+                flexShrink: 0,
+              }}>▶</span>
+
+              {/* Label */}
+              <span style={{
+                fontSize:      "13px",
+                fontWeight:    700,
+                color:         "#555560",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                whiteSpace:    "nowrap",
+              }}>
+                Completed Projects
+              </span>
+
+              <span style={{ fontSize:"12px", color:"#444450", whiteSpace:"nowrap" }}>
+                {completedProjects.length} project{completedProjects.length !== 1 ? "s" : ""}
+              </span>
+
+              {/* Rule line */}
+              <div style={{
+                flex:       1,
+                height:     "2px",
+                background: "#2e2e2e",
+                borderRadius:"1px",
+              }} />
+            </button>
+
+            {/* Collapsed project groups */}
+            {showCompleted && (
+              <AnimatedGroupList gap="40px" animated={false}>
+                {completedProjects.map(project => {
+                  const projectTasks = filteredTasks.filter(t => t.projectId === project.id);
+                  if (projectTasks.length === 0) return null;
+                  return (
+                    <ProjectGroup
+                      key={project.id}
+                      project={project}
+                      tasks={projectTasks}
+                      onEdit={openEdit}
+                      onUpdate={handleTaskUpdate}
+                      allProjects={projects}
+                      filterKey="__completed__"
+                      defaultShowDone={true}
+                    />
+                  );
+                })}
+              </AnimatedGroupList>
+            )}
+          </div>
+        )}
+      </>
     );
   };
 
@@ -269,7 +379,6 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
             active={viewMode === "by-project"}
             onClick={() => setViewMode("by-project")}
           />
-          {/* Vertical divider */}
           <div style={{
             width:        "1px",
             background:   "#3a3a3a",
@@ -304,7 +413,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
               tasks={sortTasks(filteredTasks)}
               projects={projects}
               onEdit={openEdit}
-              onUpdate={onUpdate}
+              onUpdate={handleTaskUpdate}
               animated={false}
             />
           )
