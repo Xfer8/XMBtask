@@ -66,7 +66,16 @@ const autoName = (type, url) => {
     const m = url.match(/[?&#]id=(\d+)/i);
     return m ? m[1] : null;
   }
-  if (type === "Jira") { const m = url.match(/\/([A-Z]+-\d+)/); return m ? m[1] : null; }
+  if (type === "Jira") {
+    // Check query param first: ?selectedIssue=RELEASE-32441
+    try {
+      const sel = new URL(url).searchParams.get("selectedIssue");
+      if (sel) return sel;
+    } catch (_) {}
+    // Fall back to path segment: /browse/RELEASE-32441
+    const m = url.match(/\/([A-Z]+-\d+)/);
+    return m ? m[1] : null;
+  }
   return null;
 };
 
