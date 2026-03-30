@@ -5,10 +5,11 @@ import {
 } from "firebase/firestore";
 
 // Any authenticated user can submit feedback
-export async function submitFeedback({ type, description, userEmail, userName }) {
+export async function submitFeedback({ type, description, userEmail, userName, images = [] }) {
   await addDoc(collection(db, "feedback"), {
     type,
     description,
+    images,                              // array of { url, storagePath } objects
     userEmail:   userEmail ?? "Unknown",
     userName:    userName  ?? "Unknown",
     submittedAt: serverTimestamp(),

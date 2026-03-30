@@ -1,11 +1,15 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    // Task images — owned by the uploading user
     match /users/{userId}/images/{allPaths=**} {
-      // Any authenticated user can read (needed for cross-user task sharing in future)
-      allow read: if request.auth != null;
-      // Only the owning user can write/delete their own images
+      allow read:  if request.auth != null;
       allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    // Feedback screenshots — any authenticated user can upload; any can read
+    match /feedback/images/{allPaths=**} {
+      allow read:  if request.auth != null;
+      allow write: if request.auth != null;
     }
   }
 }
