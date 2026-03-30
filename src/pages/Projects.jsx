@@ -39,13 +39,13 @@ function ProjectCard({ project, taskCount, onEdit, onDelete }) {
       <div style={{
         position:"absolute",
         left:0, top:0, bottom:0,
-        width: hov ? "40px" : "5px",
+        width: hov ? "34px" : "5px",
         background: p.text,
         transition: "width 0.2s ease",
       }} />
 
-      {/* ── Card content ── paddingLeft:44px = max bar (40px) + 4px gap ───── */}
-      <div style={{ padding:"14px 18px 14px 44px" }}>
+      {/* ── Card content ── paddingLeft:38px = max bar (34px) + 4px gap ───── */}
+      <div style={{ padding:"14px 18px 14px 38px" }}>
 
         {/* Header row */}
         <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
