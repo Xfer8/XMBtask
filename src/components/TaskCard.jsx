@@ -524,6 +524,7 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
                 fontSize: "12px", color: "#b0b0b0", lineHeight: 1.6,
                 overflow: "hidden", display: "-webkit-box",
                 WebkitLineClamp: 4, WebkitBoxOrient: "vertical",
+                whiteSpace: "pre-wrap",
                 cursor: "pointer",
               }}
             >
