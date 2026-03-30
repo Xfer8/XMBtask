@@ -65,28 +65,9 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
   const displayTasks = frozenTasks ?? tasks;
   const [search,          setSearch]          = useState("");
   const [viewMode,        setViewMode]        = useState("by-project"); // "by-project" | "all-tasks"
-  const [slideDir,        setSlideDir]        = useState("right");
-  const viewModeMounted = useRef(false); // suppress slide on initial mount
   const [activeProjectId, setActiveProjectId] = useState(null);
-  // outgoing: null = no crossfade active
-  //           { projectId } = crossfade active; this filter drives the fading-out layer
-  const [outgoing, setOutgoing] = useState(null);
 
-  // ── Project filter — crossfade transition ──────────────────────────────────
-  // Old content becomes an absolute overlay playing xfadeOut.
-  // New content renders in normal flow playing xfadeIn.
-  // Both happen simultaneously for a true crossfade.
-  const fadeTimerRef = useRef(null);
-
-  const handleProjectFilter = (id) => {
-    if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
-    setOutgoing({ projectId: activeProjectId }); // freeze old content as outgoing layer
-    setActiveProjectId(id);                       // new content renders immediately
-    fadeTimerRef.current = setTimeout(() => {
-      setOutgoing(null);
-      fadeTimerRef.current = null;
-    }, 160); // slightly longer than the 120ms CSS animation to ensure it finishes
-  };
+  const handleProjectFilter = (id) => setActiveProjectId(id);
 
   // ── Open handlers ──────────────────────────────────────────────────────────
   const openNew = () => {
@@ -152,7 +133,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
     }
 
     return (
-      <AnimatedGroupList gap="40px">
+      <AnimatedGroupList gap="40px" animated={false}>
         {projs.map(project => {
           const projectTasks = filteredTasks.filter(t => t.projectId === project.id);
           if (projectTasks.length === 0) return null;
@@ -218,24 +199,48 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
           + New Task
         </button>
 
-        {/* Search input */}
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search..."
-          style={{
-            flex:         1,
-            background:   "#1e1e1e",
-            border:       "1px solid #3a3a3a",
-            borderRadius: "5px",
-            color:        "#f0f0f0",
-            fontSize:     "13px",
-            padding:      "0 12px",
-            height:       "34px",
-            fontFamily:   "inherit",
-            outline:      "none",
-          }}
-        />
+        {/* Search input + clear button */}
+        <div style={{ position: "relative", flex: 1 }}>
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search..."
+            style={{
+              width:        "100%",
+              boxSizing:    "border-box",
+              background:   "#1e1e1e",
+              border:       "1px solid #3a3a3a",
+              borderRadius: "5px",
+              color:        "#f0f0f0",
+              fontSize:     "13px",
+              padding:      search ? "0 30px 0 12px" : "0 12px",
+              height:       "34px",
+              fontFamily:   "inherit",
+              outline:      "none",
+            }}
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              style={{
+                position:   "absolute",
+                right:      "8px",
+                top:        "50%",
+                transform:  "translateY(-50%)",
+                background: "none",
+                border:     "none",
+                cursor:     "pointer",
+                color:      "#555560",
+                fontSize:   "14px",
+                lineHeight: 1,
+                padding:    "2px 4px",
+                fontFamily: "inherit",
+              }}
+            >
+              ✕
+            </button>
+          )}
+        </div>
 
         {/* View toggle */}
         <div style={{
@@ -253,7 +258,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
           <ToggleSegment
             label="By Project"
             active={viewMode === "by-project"}
-            onClick={() => { viewModeMounted.current = true; setSlideDir("left"); setViewMode("by-project"); }}
+            onClick={() => setViewMode("by-project")}
           />
           {/* Vertical divider */}
           <div style={{
@@ -266,38 +271,17 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
           <ToggleSegment
             label="All Tasks"
             active={viewMode === "all-tasks"}
-            onClick={() => { viewModeMounted.current = true; setSlideDir("right"); setViewMode("all-tasks"); setActiveProjectId(null); }}
+            onClick={() => { setViewMode("all-tasks"); setActiveProjectId(null); }}
           />
         </div>
       </div>
 
       {/* ── Content ─────────────────────────────────────────────────────────── */}
-      <div
-        key={viewMode}
-        className={viewModeMounted.current ? (slideDir === "right" ? "slide-from-right" : "slide-from-left") : undefined}
-      >
+      <div>
         {viewMode === "by-project" ? (
 
           // ── By Project view ────────────────────────────────────────────────
-          // Crossfade: incoming content is in normal flow (xfade-in).
-          // Outgoing content is an absolute overlay (xfade-out), removed after animation.
-          <div style={{ position: "relative" }}>
-
-            {/* Incoming (live) layer */}
-            <div key={activeProjectId ?? "__all__"} className={outgoing ? "xfade-in" : undefined}>
-              {renderGroupsContent(activeProjectId)}
-            </div>
-
-            {/* Outgoing layer — absolute overlay, fades out */}
-            {outgoing && (
-              <div
-                className="xfade-out"
-                style={{ position:"absolute", top:0, left:0, right:0, pointerEvents:"none" }}
-              >
-                {renderGroupsContent(outgoing.projectId)}
-              </div>
-            )}
-          </div>
+          renderGroupsContent(activeProjectId)
 
         ) : (
 
@@ -312,6 +296,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
               projects={projects}
               onEdit={openEdit}
               onUpdate={onUpdate}
+              animated={false}
             />
           )
         )}

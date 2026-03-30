@@ -77,24 +77,13 @@ const Sep = () => (
 export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProjects, filterKey }) {
   const pal = project ? getPalette(project.color) : getPalette("gray");
 
-  const [selected,       setSelected]       = useState(null);
-  const [showDone,       setShowDone]       = useState(false);
-  const [outgoingFilter, setOutgoingFilter] = useState(null); // { selected } | null
-  const fadeTimerRef = useRef(null);
+  const [selected,  setSelected]  = useState(null);
+  const [showDone,  setShowDone]  = useState(false);
 
-  // Crossfade on status pill click — same pattern as project-level crossfade.
-  // Also syncs the Done section: auto-expand when Done filter is active,
-  // auto-collapse for any other filter (overrides any manual toggle).
   const toggle = (status) => {
     const next = selected === status ? null : status;
-    if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
-    setOutgoingFilter({ selected });  // freeze current filter as the outgoing layer
-    setSelected(next);                // incoming layer renders with new filter
-    setShowDone(next === "Done");     // expand iff Done filter is now active
-    fadeTimerRef.current = setTimeout(() => {
-      setOutgoingFilter(null);
-      fadeTimerRef.current = null;
-    }, 160);
+    setSelected(next);
+    setShowDone(next === "Done"); // expand iff Done filter is now active
   };
 
   const presentStatuses = STATUS_OPTIONS.filter(s => tasks.some(t => t.status === s));
@@ -129,6 +118,7 @@ export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProj
           projects={allProjects}
           onEdit={interactive ? onEdit : undefined}
           onUpdate={interactive ? onUpdate : undefined}
+          animated={false}
         />
 
         {/* Done tasks collapsible */}
@@ -146,10 +136,9 @@ export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProj
               }}
             >
               <span style={{
-                display:    "inline-block",
-                transform:  showDone ? "rotate(90deg)" : "rotate(0deg)",
-                transition: "transform 0.15s",
-                fontSize:   "9px",
+                display:   "inline-block",
+                transform: showDone ? "rotate(90deg)" : "rotate(0deg)",
+                fontSize:  "9px",
               }}>▶</span>
               {showDone ? "Hide" : "Show"} completed ({doneTasks.length})
             </button>
@@ -233,33 +222,8 @@ export default function ProjectGroup({ project, tasks, onEdit, onUpdate, allProj
         }} />
       </div>
 
-      {/* ── Task list — crossfade on filter change, FLIP on task reorder ──── */}
-      <div style={{ position: "relative" }}>
-
-        {/* Incoming (live) layer */}
-        <div
-          key={selected ?? "__all__"}
-          className={outgoingFilter ? "xfade-in" : undefined}
-        >
-          {renderTaskContent(selected, true)}
-        </div>
-
-        {/* Outgoing layer — absolute overlay, fades out */}
-        {outgoingFilter && (
-          <div
-            className="xfade-out"
-            style={{
-              position:      "absolute",
-              top:           0,
-              left:          0,
-              right:         0,
-              pointerEvents: "none",
-            }}
-          >
-            {renderTaskContent(outgoingFilter.selected, false)}
-          </div>
-        )}
-      </div>
+      {/* ── Task list ─────────────────────────────────────────────────────── */}
+      {renderTaskContent(selected, true)}
     </div>
   );
 }

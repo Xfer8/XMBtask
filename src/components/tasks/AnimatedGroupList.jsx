@@ -10,11 +10,13 @@ import { useRef, useLayoutEffect, Children } from "react";
 // containers sit at the top of the FLIP hierarchy — nothing above them is
 // also FLIP-animating.
 
-export default function AnimatedGroupList({ children, gap = "40px" }) {
+export default function AnimatedGroupList({ children, gap = "40px", animated = true }) {
   const wrappers = useRef({});
   const prevY    = useRef({});
 
   useLayoutEffect(() => {
+    if (!animated) return;           // FLIP disabled — skip entirely
+
     const W = wrappers.current;
     const P = prevY.current;
 

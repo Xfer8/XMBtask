@@ -11,12 +11,14 @@ import TaskCard from "../TaskCard";
 // each task's position relative to the container stays the same (dy = 0),
 // so no task-level animation fires. Only genuine internal reorders animate.
 
-export default function AnimatedTaskList({ tasks, projects, onEdit, onUpdate, gap = "10px" }) {
+export default function AnimatedTaskList({ tasks, projects, onEdit, onUpdate, gap = "10px", animated = true }) {
   const containerRef = useRef(null);
   const wrappers     = useRef({});  // task id → wrapper DOM element
   const prevY        = useRef({});  // task id → relative top from last render
 
   useLayoutEffect(() => {
+    if (!animated) return;           // FLIP disabled — skip entirely
+
     const W = wrappers.current;
     const P = prevY.current;
 
