@@ -44,8 +44,8 @@ function ProjectCard({ project, taskCount, onEdit, onDelete }) {
         transition: "width 0.2s ease",
       }} />
 
-      {/* ── Card content ── paddingLeft:38px = max bar (34px) + 4px gap ───── */}
-      <div style={{ padding:"14px 18px 14px 38px" }}>
+      {/* ── Card content ── paddingLeft:44px = max bar (34px) + 10px gap ──── */}
+      <div style={{ padding:"14px 18px 14px 44px" }}>
 
         {/* Header row */}
         <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
