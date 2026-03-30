@@ -57,6 +57,12 @@ function ToggleSegment({ label, active, onClick }) {
 
 export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDelete }) {
   const [editing,         setEditing]         = useState(null);
+  // frozenTasks: snapshot taken when the modal opens.
+  // The task list renders this instead of the live `tasks` prop while the modal
+  // is open, so background animations/re-renders don't happen as the user types.
+  // Cleared on Save/Close/Cancel/Delete so the list updates normally afterward.
+  const [frozenTasks,     setFrozenTasks]     = useState(null);
+  const displayTasks = frozenTasks ?? tasks;
   const [search,          setSearch]          = useState("");
   const [viewMode,        setViewMode]        = useState("by-project"); // "by-project" | "all-tasks"
   const [slideDir,        setSlideDir]        = useState("right");
@@ -84,28 +90,37 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
 
   // ── Open handlers ──────────────────────────────────────────────────────────
   const openNew = () => {
+    setFrozenTasks([...tasks]); // freeze display before adding the blank task
     const newTask = { ...EMPTY_TASK, id: generateId(tasks) };
     onAdd?.(newTask);
     setEditing({ task: newTask, isNew: true });
   };
 
-  const openEdit = task => setEditing({ task: { ...task }, isNew: false });
+  const openEdit = task => {
+    setFrozenTasks([...tasks]); // freeze display at current state
+    setEditing({ task: { ...task }, isNew: false });
+  };
 
   // ── Modal callbacks ────────────────────────────────────────────────────────
   const handleUpdate = updated => {
-    onUpdate?.(updated);
+    onUpdate?.(updated); // still updates live state → Firestore saves fire normally
     setEditing(e => ({ ...e, task: updated }));
   };
 
-  const handleClose = () => setEditing(null);
+  const handleClose = () => {
+    setFrozenTasks(null); // unfreeze — list updates to live state with animations
+    setEditing(null);
+  };
 
   const handleCancel = snapshot => {
+    setFrozenTasks(null);
     if (editing.isNew) onDelete?.(snapshot.id);
     else onUpdate?.(snapshot);
     setEditing(null);
   };
 
   const handleDelete = () => {
+    setFrozenTasks(null);
     onDelete?.(editing.task.id);
     setEditing(null);
   };
@@ -113,11 +128,11 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
   // ── Search filter ──────────────────────────────────────────────────────────
   const q = search.toLowerCase().trim();
   const filteredTasks = q
-    ? tasks.filter(t =>
+    ? displayTasks.filter(t =>
         t.title.toLowerCase().includes(q) ||
         (t.description ?? "").toLowerCase().includes(q)
       )
-    : tasks;
+    : displayTasks;
 
   // ── By-project grouping ────────────────────────────────────────────────────
   const renderGroupsContent = (filterId) => {
