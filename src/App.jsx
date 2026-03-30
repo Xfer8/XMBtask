@@ -236,6 +236,7 @@ function AuthenticatedApp() {
       if (items.length === 0) return;
 
       const TYPE_LABELS = {
+        "bug-report":       "Bug Report",
         "new-feature":      "New Feature",
         "existing-feature": "Existing Feature",
         "general":          "General Feedback",
@@ -275,7 +276,7 @@ function AuthenticatedApp() {
           dueDate:     null,
           owner:       "",
           projectId:   featProj.id,
-          images:      [],
+          images:      fb.images ?? [],
           updates:     [],
           subtasks:    [],
           links:       [],
