@@ -223,18 +223,24 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
             <button
               onClick={() => setSearch("")}
               style={{
-                position:   "absolute",
-                right:      "8px",
-                top:        "50%",
-                transform:  "translateY(-50%)",
-                background: "none",
-                border:     "none",
-                cursor:     "pointer",
-                color:      "#555560",
-                fontSize:   "14px",
-                lineHeight: 1,
-                padding:    "2px 4px",
-                fontFamily: "inherit",
+                position:     "absolute",
+                right:        "8px",
+                top:          "50%",
+                transform:    "translateY(-50%)",
+                background:   "#3a3a3a",
+                border:       "none",
+                borderRadius: "50%",
+                cursor:       "pointer",
+                color:        "#a0a0a8",
+                fontSize:     "11px",
+                lineHeight:   1,
+                width:        "18px",
+                height:       "18px",
+                display:      "flex",
+                alignItems:   "center",
+                justifyContent: "center",
+                fontFamily:   "inherit",
+                flexShrink:   0,
               }}
             >
               ✕
