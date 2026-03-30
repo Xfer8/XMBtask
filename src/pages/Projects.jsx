@@ -17,15 +17,15 @@ function ProjectCard({ project, taskCount, onEdit, onDelete }) {
   const statusPal  = getPalette(isActive ? "green" : "gray");
 
   return (
-    // Flex row: first child is the color bar, second is the content.
-    // borderLeft is omitted entirely — the bar IS the left edge.
-    // overflow:hidden + borderRadius:"0 12px 12px 0" gives square left corners
-    // and clips the bar flush against the card boundary.
+    // position:relative container — bar is absolutely positioned on the left
+    // so it can grow without shifting the content at all.
+    // overflow:hidden clips the bar flush; borderRadius:"0 12px 12px 0" squares
+    // the left corners.
     <div
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        display:"flex",
+        position:"relative",
         background: hov ? "#313131" : "#2a2a2a",
         border:`1px solid ${hov ? "#555560" : "#444450"}`,
         borderLeft:"none",
@@ -34,16 +34,18 @@ function ProjectCard({ project, taskCount, onEdit, onDelete }) {
         transition:"background 0.15s, border-color 0.15s",
       }}
     >
-      {/* ── Color bar ── full-height via flex stretch; grows on hover ─────── */}
+      {/* ── Color bar ── absolutely positioned so it never shifts the content */}
       <div style={{
+        position:"absolute",
+        left:0, top:0, bottom:0,
         width: hov ? "8px" : "5px",
-        flexShrink: 0,
         background: p.text,
         transition: "width 0.2s ease",
       }} />
 
-      {/* ── Card content ─────────────────────────────────────────────────── */}
-      <div style={{ flex:1, padding:"14px 18px" }}>
+      {/* ── Card content ── fixed left padding (= max bar width + gap) keeps
+           text and dot stationary regardless of bar size ──────────────────── */}
+      <div style={{ padding:"14px 18px 14px 16px" }}>
 
         {/* Header row */}
         <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
