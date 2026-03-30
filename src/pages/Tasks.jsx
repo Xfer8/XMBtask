@@ -67,7 +67,10 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
   const [viewMode,        setViewMode]        = useState("by-project"); // "by-project" | "all-tasks"
   const [activeProjectId, setActiveProjectId] = useState(null);
 
-  const handleProjectFilter = (id) => setActiveProjectId(id);
+  const handleProjectFilter = (id) => {
+    setActiveProjectId(id);
+    setViewMode("by-project"); // always switch to By Project when a project is selected
+  };
 
   // ── Open handlers ──────────────────────────────────────────────────────────
   const openNew = () => {
