@@ -49,8 +49,11 @@ function ProjectCard({ project, taskCount, onEdit, onDelete }) {
 
         {/* Header row */}
         <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
-          {/* Title */}
-          <span style={{ fontSize:"14px", fontWeight:700, color:"#f0f0f0", flex:1, minWidth:0 }}>
+          {/* Title — clickable to open edit */}
+          <span
+            onClick={() => onEdit(project)}
+            style={{ fontSize:"14px", fontWeight:700, color:"#f0f0f0", flex:1, minWidth:0, cursor:"pointer" }}
+          >
             {project.title}
           </span>
 
@@ -112,9 +115,12 @@ function ProjectCard({ project, taskCount, onEdit, onDelete }) {
           )}
         </div>
 
-        {/* Description */}
+        {/* Description — clickable to open edit */}
         {project.description && (
-          <div style={{ fontSize:"13px", color:"#888890", lineHeight:"1.5", marginTop:"8px" }}>
+          <div
+            onClick={() => onEdit(project)}
+            style={{ fontSize:"13px", color:"#888890", lineHeight:"1.5", marginTop:"8px", cursor:"pointer" }}
+          >
             {project.description}
           </div>
         )}
