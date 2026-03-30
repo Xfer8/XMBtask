@@ -26,6 +26,9 @@ const getDueDateColorKey = (iso) => {
   return "green";
 };
 
+// Works for both legacy base64 strings and new { url, storagePath } objects
+const imgSrc = img => typeof img === "string" ? img : img?.url ?? "";
+
 const hexToRgb = (hex) => {
   if (!hex || !hex.startsWith("#") || hex.length < 7) return "136, 136, 144";
   return [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)).join(", ");
@@ -535,14 +538,14 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
           {/* Image thumbnails */}
           {images.length > 0 && (
             <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-              {images.slice(0, 4).map((src, i) => (
+              {images.slice(0, 4).map((img, i) => (
                 <div
                   key={i}
                   onClick={e => { e.stopPropagation(); setViewerIndex(i); }}
                   style={{ position: "relative", cursor: "pointer", flexShrink: 0 }}
                 >
                   <img
-                    src={src} alt="attachment"
+                    src={imgSrc(img)} alt="attachment"
                     style={{ width: "52px", height: "40px", objectFit: "cover", borderRadius: "5px", display: "block", border: "1px solid #3a3a44" }}
                   />
                   {i === 3 && images.length > 4 && (

@@ -1,4 +1,8 @@
 import { useEffect, useState } from "react";
+import { deleteStorageImage } from "../../../services/storageService";
+
+// Works for both legacy base64 strings and new { url, storagePath } objects
+const imgSrc = img => typeof img === "string" ? img : img?.url ?? "";
 
 export default function ImageViewer({ images, startIndex = 0, onClose, onDelete }) {
   const [idx,           setIdx]          = useState(startIndex);
@@ -8,6 +12,11 @@ export default function ImageViewer({ images, startIndex = 0, onClose, onDelete 
   const next = () => { setConfirmDelete(false); setIdx(i => (i + 1) % images.length); };
 
   const handleDelete = () => {
+    // Delete from Firebase Storage if this is a Storage object
+    const imgToDelete = images[idx];
+    if (imgToDelete && typeof imgToDelete !== "string" && imgToDelete.storagePath) {
+      deleteStorageImage(imgToDelete.storagePath).catch(() => {});
+    }
     const newImages = images.filter((_, i) => i !== idx);
     if (newImages.length === 0) {
       onDelete(newImages);
@@ -110,7 +119,7 @@ export default function ImageViewer({ images, startIndex = 0, onClose, onDelete 
         )}
 
         <img
-          src={images[idx]}
+          src={imgSrc(images[idx])}
           alt={`Image ${idx + 1}`}
           style={{
             maxWidth: "100%", maxHeight: "80vh",
@@ -133,10 +142,10 @@ export default function ImageViewer({ images, startIndex = 0, onClose, onDelete 
             maxWidth: "90vw", overflowX: "auto", padding: "4px 0",
           }}
         >
-          {images.map((src, i) => (
+          {images.map((img, i) => (
             <img
               key={i}
-              src={src}
+              src={imgSrc(img)}
               alt={`Thumb ${i + 1}`}
               onClick={() => { setConfirmDelete(false); setIdx(i); }}
               style={{

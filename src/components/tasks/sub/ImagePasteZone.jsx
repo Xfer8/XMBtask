@@ -1,4 +1,8 @@
 import { useState, useRef, useEffect } from "react";
+import { uploadImage, deleteStorageImage } from "../../../services/storageService";
+
+// Helper: works for both legacy base64 strings and new { url, storagePath } objects
+const imgSrc = img => typeof img === "string" ? img : img?.url ?? "";
 
 const ImageIcon = ({ size=14 }) => (
   <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
@@ -9,26 +13,47 @@ const ImageIcon = ({ size=14 }) => (
 );
 
 export default function ImagePasteZone({ images, onChange }) {
-  const ref     = useRef(null);
-  const [focused, setFocused] = useState(false);
+  const ref            = useRef(null);
+  const imagesRef      = useRef(images);
+  const onChangeRef    = useRef(onChange);
+  const [focused,    setFocused]    = useState(false);
+  const [uploading,  setUploading]  = useState(0); // count of in-progress uploads
+
+  // Keep refs current so the paste handler doesn't close over stale values
+  useEffect(() => { imagesRef.current   = images;   }, [images]);
+  useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const h = e => {
+    const h = async e => {
       const items = Array.from(e.clipboardData?.items ?? []).filter(i => i.type.startsWith("image/"));
       if (!items.length) return;
-      items.forEach(item => {
-        const blob   = item.getAsFile();
-        const reader = new FileReader();
-        reader.onload = evt => onChange([...images, evt.target.result]);
-        reader.readAsDataURL(blob);
-      });
       e.preventDefault();
+      const blobs = items.map(item => item.getAsFile());
+      setUploading(v => v + blobs.length);
+      try {
+        const results = await Promise.allSettled(blobs.map(blob => uploadImage(blob)));
+        const newImgs = results
+          .filter(r => r.status === "fulfilled")
+          .map(r => r.value);
+        onChangeRef.current([...imagesRef.current, ...newImgs]);
+      } finally {
+        setUploading(v => v - blobs.length);
+      }
     };
     el.addEventListener("paste", h);
     return () => el.removeEventListener("paste", h);
-  }, [images, onChange]);
+  }, []); // runs once — uses refs for fresh values
+
+  const handleRemove = (i) => {
+    const img = images[i];
+    // Delete from Storage if it's a Storage object (not a legacy base64 string)
+    if (img && typeof img !== "string" && img.storagePath) {
+      deleteStorageImage(img.storagePath).catch(() => {});
+    }
+    onChange(images.filter((_, j) => j !== i));
+  };
 
   return (
     <div>
@@ -43,7 +68,7 @@ export default function ImagePasteZone({ images, onChange }) {
           display:"flex", flexWrap:"wrap", gap:"8px", alignItems:"center",
         }}
       >
-        {images.length === 0 && (
+        {images.length === 0 && uploading === 0 && (
           <span style={{ fontSize:"12px", color:"#55555e", display:"flex", alignItems:"center", gap:"6px" }}>
             <ImageIcon size={14}/>
             Click here, then paste an image (Ctrl+V)
@@ -51,9 +76,12 @@ export default function ImagePasteZone({ images, onChange }) {
         )}
         {images.map((img, i) => (
           <div key={i} style={{ position:"relative" }}>
-            <img src={img} alt="" style={{ width:"72px", height:"72px", objectFit:"cover", borderRadius:"6px", display:"block" }}/>
+            <img
+              src={imgSrc(img)} alt=""
+              style={{ width:"72px", height:"72px", objectFit:"cover", borderRadius:"6px", display:"block" }}
+            />
             <button
-              onClick={() => onChange(images.filter((_, j) => j !== i))}
+              onClick={() => handleRemove(i)}
               style={{
                 position:"absolute", top:"-6px", right:"-6px",
                 width:"18px", height:"18px", borderRadius:"50%",
@@ -62,6 +90,19 @@ export default function ImagePasteZone({ images, onChange }) {
                 display:"flex", alignItems:"center", justifyContent:"center",
               }}
             >✕</button>
+          </div>
+        ))}
+        {/* Loading placeholders while upload is in progress */}
+        {uploading > 0 && Array.from({ length: uploading }).map((_, i) => (
+          <div
+            key={`up-${i}`}
+            style={{
+              width:"72px", height:"72px", borderRadius:"6px",
+              background:"#222", border:"1px dashed #3a3a3a",
+              display:"flex", alignItems:"center", justifyContent:"center",
+            }}
+          >
+            <span style={{ fontSize:"10px", color:"#55555e" }}>⏳</span>
           </div>
         ))}
       </div>

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import MutedBadge    from "../../ui/MutedBadge";
 import ImagePasteZone from "./ImagePasteZone";
 import { LINK_TYPES, LINK_TYPE_COLORS } from "../../../linkTypes";
+import { uploadImage, deleteStorageImage } from "../../../services/storageService";
 const generateLinkId   = () => `LK${Date.now()}`;
 const EMPTY_LINK       = { url:"", displayName:"", type:"", images:[] };
 
@@ -86,20 +87,19 @@ function QuickPasteZone({ onDetected }) {
   // Auto-focus the textarea on mount so the user can Ctrl+V immediately
   useEffect(() => { ref.current?.focus(); }, []);
 
-  const handlePaste = e => {
+  const handlePaste = async e => {
     e.preventDefault();
     const items = Array.from(e.clipboardData?.items ?? []);
 
-    // ── Images → Email type ────────────────────────────────────────────────
+    // ── Images → Email type (uploaded to Firebase Storage) ────────────────
     const imgItems = items.filter(i => i.type.startsWith("image/"));
     if (imgItems.length > 0) {
-      Promise.all(
-        imgItems.map(item => new Promise(resolve => {
-          const reader = new FileReader();
-          reader.onload = evt => resolve(evt.target.result);
-          reader.readAsDataURL(item.getAsFile());
-        }))
-      ).then(imgs => onDetected({ type: "Email", url: "", displayName: "", images: imgs }));
+      const blobs = imgItems.map(item => item.getAsFile());
+      const results = await Promise.allSettled(blobs.map(blob => uploadImage(blob)));
+      const imgs = results
+        .filter(r => r.status === "fulfilled")
+        .map(r => r.value);
+      onDetected({ type: "Email", url: "", displayName: "", images: imgs });
       return;
     }
 
@@ -266,7 +266,16 @@ export default function LinksSection({ links, onChange }) {
             {confirmDel === l.id ? (
               <div style={{ display:"flex", alignItems:"center", gap:"6px", flexShrink:0 }}>
                 <span style={{ fontSize:"11px", color:"#888890" }}>Delete?</span>
-                <button onClick={() => { onChange(links.filter(x => x.id !== l.id)); setConfirmDel(null); }} style={{ ...saveBtnStyle, background:"#4A1B1B", color:"#FF6B6B", border:"1px solid #943636" }}>Yes</button>
+                <button onClick={() => {
+                // Delete any Storage images attached to this link
+                (l.images ?? []).forEach(img => {
+                  if (img && typeof img !== "string" && img.storagePath) {
+                    deleteStorageImage(img.storagePath).catch(() => {});
+                  }
+                });
+                onChange(links.filter(x => x.id !== l.id));
+                setConfirmDel(null);
+              }} style={{ ...saveBtnStyle, background:"#4A1B1B", color:"#FF6B6B", border:"1px solid #943636" }}>Yes</button>
                 <button onClick={() => setConfirmDel(null)} style={cancelBtnStyle}>No</button>
               </div>
             ) : (
