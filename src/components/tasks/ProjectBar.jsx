@@ -86,7 +86,8 @@ export default function ProjectBar({ tasks, projects, activeProjectId, onSelect 
       project: p,
       count:   openTasks.filter(t => t.projectId === p.id).length,
     }))
-    .filter(e => e.count > 0);
+    .filter(e => e.count > 0)
+    .sort((a, b) => b.count - a.count || a.project.title.localeCompare(b.project.title));
 
   if (entries.length === 0) return null;
 
