@@ -148,14 +148,52 @@ const PAGE_HASHES = { Dashboard: "#dashboard", Tasks: "#tasks", Projects: "#proj
 const HASH_PAGES  = { "#dashboard": "Dashboard", "#tasks": "Tasks", "#projects": "Projects" };
 const pageFromHash = () => HASH_PAGES[window.location.hash] ?? "Dashboard";
 
+const IS_DEV_SITE = window.location.hostname.includes("xmbtask-dev");
+
+function NotAuthorized() {
+  const { signOutUser } = useAuth();
+  return (
+    <div style={{
+      minHeight: "100vh", background: "#212121",
+      display: "flex", alignItems: "center", justifyContent: "center",
+    }}>
+      <div style={{
+        background: "#2a2a2a", border: "1px solid #444450", borderRadius: "14px",
+        padding: "40px 48px", maxWidth: "400px", textAlign: "center",
+        boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
+      }}>
+        <div style={{ fontSize: "15px", fontWeight: 700, color: "#f0f0f0", marginBottom: "8px" }}>
+          <span style={{ color: "#2DB86A" }}>XMB</span>task Dev
+        </div>
+        <div style={{ fontSize: "13px", color: "#888890", lineHeight: 1.6, marginBottom: "24px" }}>
+          This environment is restricted to administrators only.
+        </div>
+        <button
+          onClick={signOutUser}
+          style={{
+            background: "none", border: "1px solid #444450", borderRadius: "7px",
+            cursor: "pointer", color: "#888890", fontSize: "13px",
+            padding: "8px 20px", fontFamily: "inherit",
+          }}
+        >
+          Sign out
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   // Still checking auth state — show nothing to avoid flash
   if (user === undefined) return null;
 
   // Not signed in — show login screen
   if (user === null) return <Login />;
+
+  // Dev site is admin-only
+  if (IS_DEV_SITE && !isAdmin) return <NotAuthorized />;
 
   return <AuthenticatedApp />;
 }

@@ -8,8 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy:prod": "vite build && firebase deploy --only hosting:prod",
+    "deploy:dev": "vite build && firebase deploy --only hosting:dev"
   },
   "dependencies": {
     "@builder.io/react": "^9.1.3",

@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "kai3d-31415"
-  }
+  },
+  "targets": {
+    "kai3d-31415": {
+      "hosting": {
+        "prod": [
+          "xmbtask"
+        ],
+        "dev": [
+          "xmbtask-dev"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
