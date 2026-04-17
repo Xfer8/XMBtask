@@ -6,9 +6,17 @@ import AnimatedTaskList from "./AnimatedTaskList";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-const PRIORITY_ORDER = { High: 0, Medium: 1, Low: 2 };
-
+// Sort by create date descending (most recent first).
+// Falls back to ID number for legacy tasks without a createdAt.
 const sortTasks = tasks => [...tasks].sort((a, b) => {
+  const aTime = a.createdAt ? new Date(a.createdAt).getTime() : parseInt(a.id?.replace("XMB-T", "")) || 0;
+  const bTime = b.createdAt ? new Date(b.createdAt).getTime() : parseInt(b.id?.replace("XMB-T", "")) || 0;
+  return bTime - aTime;
+});
+
+/* Previous sort logic (priority → due date → title) — preserved for future use:
+const PRIORITY_ORDER = { High: 0, Medium: 1, Low: 2 };
+const sortTasksByPriority = tasks => [...tasks].sort((a, b) => {
   const pd = (PRIORITY_ORDER[a.priority] ?? 1) - (PRIORITY_ORDER[b.priority] ?? 1);
   if (pd !== 0) return pd;
   if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
@@ -16,6 +24,7 @@ const sortTasks = tasks => [...tasks].sort((a, b) => {
   if (b.dueDate) return 1;
   return a.title.localeCompare(b.title);
 });
+*/
 
 const STATUS_OPTIONS = ["Not Started", "In Progress", "Needs Review", "Done"];
 

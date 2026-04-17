@@ -689,6 +689,13 @@ export default function TaskCard({ task, projects = [], onEdit, onUpdate }) {
             </div>
           )}
 
+          {/* Create date — bottom right */}
+          {task.createdAt && (
+            <div style={{ textAlign: "right", fontSize: "10px", color: "#444450" }}>
+              Created {formatShortDate(task.createdAt)}
+            </div>
+          )}
+
         </div>
       </div>
 

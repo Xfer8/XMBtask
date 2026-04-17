@@ -86,7 +86,7 @@ export default function Tasks({ tasks = [], projects = [], onAdd, onUpdate, onDe
   // ── Open handlers ──────────────────────────────────────────────────────────
   const openNew = () => {
     setFrozenTasks([...tasks]);
-    const newTask = { ...EMPTY_TASK, id: generateId(tasks) };
+    const newTask = { ...EMPTY_TASK, id: generateId(tasks), createdAt: new Date().toISOString() };
     onAdd?.(newTask);
     setEditing({ task: newTask, isNew: true });
   };
