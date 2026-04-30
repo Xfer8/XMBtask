@@ -6,7 +6,7 @@
     "kai3d-31415": {
       "hosting": {
         "prod": [
-          "xmbtask"
+          "kai3d-31415"
         ],
         "dev": [
           "xmbtask-dev"
