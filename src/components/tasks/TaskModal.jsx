@@ -44,7 +44,6 @@ export default function TaskModal({ title, task, tasks = [], projects = [], onUp
   // Snapshot taken on mount for cancel/restore
   const [snapshot]    = useState(() => JSON.parse(JSON.stringify(task)));
   const [showConfirm, setShowConfirm] = useState(false);
-  const [flashFooter, setFlashFooter] = useState(false);
   const descRef    = useRef(null);
   const footerRef  = useRef(null);
 
@@ -85,7 +84,7 @@ export default function TaskModal({ title, task, tasks = [], projects = [], onUp
     };
     document.addEventListener("keydown", h);
     return () => document.removeEventListener("keydown", h);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // Primary button behaviour:
   //  • Dirty + valid   → "Save"  → onClose (changes already in state)
@@ -223,14 +222,6 @@ export default function TaskModal({ title, task, tasks = [], projects = [], onUp
           display:"flex", alignItems:"center", justifyContent:"space-between",
           paddingTop:"16px", borderTop:"1px solid #2e2e33",
           borderRadius:"0 0 8px 8px",
-          transition: "box-shadow 0.15s, background 0.15s",
-          ...(flashFooter ? {
-            background:  "rgba(74,222,128,0.06)",
-            boxShadow:   "0 0 0 2px rgba(74,222,128,0.35)",
-            borderRadius:"8px",
-            padding:     "16px 10px 4px",
-            margin:      "0 -10px -4px",
-          } : {}),
         }}>
           <div>
             {onDelete && (

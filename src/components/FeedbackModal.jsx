@@ -109,7 +109,7 @@ export default function FeedbackModal({ onClose }) {
     };
     document.addEventListener("keydown", h);
     return () => document.removeEventListener("keydown", h);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const [pasteZoneFocused, setPasteZoneFocused] = useState(false);
 

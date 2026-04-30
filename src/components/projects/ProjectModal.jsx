@@ -56,7 +56,7 @@ export default function ProjectModal({ title, initial, onSave, onCancel, onDelet
     };
     document.addEventListener("keydown", h);
     return () => document.removeEventListener("keydown", h);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // Primary button:
   //  • Dirty + valid   → "Save Project" → onSave(form)

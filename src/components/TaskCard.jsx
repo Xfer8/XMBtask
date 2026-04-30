@@ -227,7 +227,7 @@ function DueDateCell({ dueDate, colorKey, onChange }) {
   useEffect(() => {
     if (open && inputRef.current) {
       inputRef.current.focus();
-      try { inputRef.current.showPicker(); } catch {}
+      try { inputRef.current.showPicker(); } catch { /* showPicker not supported / not user-initiated */ }
     }
   }, [open]);
 

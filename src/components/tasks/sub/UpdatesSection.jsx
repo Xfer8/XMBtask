@@ -38,7 +38,6 @@ const TrashIcon = () => (
 // ── Single update row ──────────────────────────────────────────────────────────
 
 function UpdateRow({ update, onEdit, onDelete }) {
-  const [hov, setHov] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
 
   const iconBtn = (onClick, children, danger = false) => (
@@ -70,8 +69,7 @@ function UpdateRow({ update, onEdit, onDelete }) {
 
   return (
     <div
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => { setHov(false); setConfirmDel(false); }}
+      onMouseLeave={() => setConfirmDel(false)}
       style={{
         background:"#1E1E1E", borderRadius:"8px", padding:"10px 12px",
         borderLeft:"2px solid #3a3a3a", position:"relative",

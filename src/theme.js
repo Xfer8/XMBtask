@@ -1,19 +1,3 @@
-// ─── Surface Tokens ───────────────────────────────────────────────────────────
-// Layer backgrounds from deepest (base) to highest (modal).
-export const SURFACE = {
-  base:         "#141418", // deepest — calendar text input bg
-  sunken:       "#1a1a1e", // sunken rows — update history, subtask/link rows
-  input:        "#1e1e1e", // form inputs, inner modal panels
-  popover:      "#1e1e24", // dropdowns, calendar bg, badge select
-  raised:       "#2a2a2e", // floating panels — update popover
-  modal:        "#2c2c2c", // full modal backgrounds
-  highlight:    "#2e2e36", // last-update row bg, calendar day hover
-  divider:      "#2e2e33", // form section dividers, progress bar track
-  borderSoft:   "#3a3a3a", // input/checkbox borders
-  borderMid:    "#3a3a44", // popover/dropdown borders
-  borderStrong: "#444450", // card borders, column divider
-};
-
 // ─── Theme Tokens ─────────────────────────────────────────────────────────────
 // Semantic app-level tokens. Import these instead of hardcoding hex values.
 export const THEME = {

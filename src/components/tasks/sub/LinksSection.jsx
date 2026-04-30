@@ -56,7 +56,7 @@ const detectType = url => {
       const viewKey = view.split("/")[0].toLowerCase();
       return SHERLOCK_VIEW_MAP[viewKey] ?? "SLG"; // default to SLG for unknown views
     }
-  } catch (_) {}
+  } catch { /* invalid URL — fall through */ }
   return null;
 };
 
@@ -71,7 +71,7 @@ const autoName = (type, url) => {
     try {
       const sel = new URL(url).searchParams.get("selectedIssue");
       if (sel) return sel;
-    } catch (_) {}
+    } catch { /* invalid URL — fall through */ }
     // Fall back to path segment: /browse/RELEASE-32441
     const m = url.match(/\/([A-Z]+-\d+)/);
     return m ? m[1] : null;

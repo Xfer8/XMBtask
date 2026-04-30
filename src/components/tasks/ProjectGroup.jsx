@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { getPalette } from "../../colors";
 import { STATUS_COLORS } from "../../theme";
 import TaskCard from "../TaskCard";
