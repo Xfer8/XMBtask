@@ -13,7 +13,9 @@ dist-ssr
 *.local
 .env
 .env.*
-!.env.example
+
+# Firebase deploy cache (auto-generated)
+.firebase/
 
 # Claude Code internal files
 .claude/
