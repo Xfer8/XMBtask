@@ -8,7 +8,6 @@ import Login from "./pages/Login";
 import { useAuth } from "./contexts/AuthContext";
 import { loadProjects, saveProjects, loadTasks, saveTasks } from "./services/dataService";
 import { subscribeToRequests } from "./services/requestsService";
-import { subscribeToFeatureFlags, setFeatureFlag } from "./services/featureFlagsService";
 import { subscribeToFeedback, deleteFeedback } from "./services/feedbackService";
 import RequestsModal from "./components/RequestsModal";
 import FeedbackModal from "./components/FeedbackModal";
@@ -242,7 +241,6 @@ function AuthenticatedApp() {
   const [importError,      setImportError]      = useState(null);
   const [requests,         setRequests]         = useState([]);
   const [showRequests,     setShowRequests]     = useState(false);
-  const [featureFlags,     setFeatureFlags]     = useState({ scratchPadEnabled: false });
   const [showFeedback,     setShowFeedback]     = useState(false);
   const fileInputRef   = useRef(null);
   // Always-current refs for use inside async feedback processing
@@ -289,11 +287,6 @@ function AuthenticatedApp() {
     if (!isAdmin) return;
     return subscribeToRequests(setRequests);
   }, [isAdmin]);
-
-  // ── Subscribe to feature flags ───────────────────────────────────────────────
-  useEffect(() => {
-    return subscribeToFeatureFlags(setFeatureFlags);
-  }, []);
 
   // ── Subscribe to feedback + auto-convert to tasks (admin only) ───────────────
   useEffect(() => {
@@ -608,14 +601,7 @@ function AuthenticatedApp() {
       <div style={{ flex: 1, width: "100%" }}>
         <div key={currentPage} className={slideDir === "right" ? "slide-from-right" : "slide-from-left"}>
           {currentPage === "Dashboard" && (
-            <Dashboard
-              tasks={tasks}
-              projects={projects}
-              onAddTask={addTask}
-              onUpdateTask={updateTask}
-              scratchPadEnabled={featureFlags.scratchPadEnabled ?? false}
-              onToggleScratchPad={(val) => setFeatureFlag("scratchPadEnabled", val)}
-            />
+            <Dashboard />
           )}
           {currentPage === "Tasks" && (
             <Tasks
