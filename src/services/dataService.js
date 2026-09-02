@@ -8,6 +8,7 @@
 
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
+import { IS_DEMO_MODE, loadDemoCollection, saveDemoCollection } from "../demoMode";
 
 const userDataDoc = (type) => {
   const uid = auth.currentUser?.uid;
@@ -18,6 +19,7 @@ const userDataDoc = (type) => {
 // ── Projects ──────────────────────────────────────────────────────────────────
 
 export const loadProjects = async () => {
+  if (IS_DEMO_MODE) return loadDemoCollection("projects");
   // Errors propagate to the caller — never silently return [] on failure,
   // as that would cause the save effect to overwrite real data with nothing.
   const snap = await getDoc(userDataDoc("projects"));
@@ -25,6 +27,7 @@ export const loadProjects = async () => {
 };
 
 export const saveProjects = async (projects) => {
+  if (IS_DEMO_MODE) return saveDemoCollection("projects", projects);
   // Errors propagate to the caller so they can be shown to the user.
   await setDoc(userDataDoc("projects"), { items: projects });
 };
@@ -32,17 +35,20 @@ export const saveProjects = async (projects) => {
 // ── Tasks ─────────────────────────────────────────────────────────────────────
 
 export const loadTasks = async () => {
+  if (IS_DEMO_MODE) return loadDemoCollection("tasks");
   const snap = await getDoc(userDataDoc("tasks"));
   return snap.exists() ? snap.data().items : [];
 };
 
 export const saveTasks = async (tasks) => {
+  if (IS_DEMO_MODE) return saveDemoCollection("tasks", tasks);
   await setDoc(userDataDoc("tasks"), { items: tasks });
 };
 
 // ── Reminders ─────────────────────────────────────────────────────────────────
 
 export const loadReminders = async () => {
+  if (IS_DEMO_MODE) return loadDemoCollection("reminders");
   try {
     const snap = await getDoc(userDataDoc("reminders"));
     return snap.exists() ? snap.data().items : [];
@@ -50,6 +56,7 @@ export const loadReminders = async () => {
 };
 
 export const saveReminders = async (reminders) => {
+  if (IS_DEMO_MODE) return saveDemoCollection("reminders", reminders);
   try {
     await setDoc(userDataDoc("reminders"), { items: reminders });
   } catch { /* ignore */ }
@@ -58,6 +65,7 @@ export const saveReminders = async (reminders) => {
 // ── Reminder Completions ───────────────────────────────────────────────────────
 
 export const loadCompletions = async () => {
+  if (IS_DEMO_MODE) return loadDemoCollection("completions");
   try {
     const snap = await getDoc(userDataDoc("completions"));
     return snap.exists() ? snap.data().items : [];
@@ -65,6 +73,7 @@ export const loadCompletions = async () => {
 };
 
 export const saveCompletions = async (completions) => {
+  if (IS_DEMO_MODE) return saveDemoCollection("completions", completions);
   try {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - 30);

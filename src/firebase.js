@@ -6,6 +6,7 @@ import {
   persistentMultipleTabManager,
 } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { IS_DEMO_MODE } from "./demoMode";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBQTzuiw28rBbXNzCwxqdJvI69jgoZybHc",
@@ -17,16 +18,27 @@ const firebaseConfig = {
   measurementId: "G-1L0LNWWGD9"
 };
 
-export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
+export let app = null;
+export let auth = null;
+export let googleProvider = null;
+export let db = null;
+export let storage = null;
 
-// Persistent local cache: writes are queued locally when offline and synced
-// automatically on reconnect. Multi-tab manager keeps multiple open tabs in sync.
-export const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager(),
-  }),
-});
+// Demo mode intentionally does not initialize Firebase. This makes the local
+// preview incapable of authenticating, reading, writing, or uploading against
+// the production project even if a service guard is accidentally missed.
+if (!IS_DEMO_MODE) {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  googleProvider = new GoogleAuthProvider();
 
-export const storage = getStorage(app);
+  // Persistent local cache: writes are queued locally when offline and synced
+  // automatically on reconnect. Multi-tab manager keeps multiple open tabs in sync.
+  db = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+      tabManager: persistentMultipleTabManager(),
+    }),
+  });
+
+  storage = getStorage(app);
+}

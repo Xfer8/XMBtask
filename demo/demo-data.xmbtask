@@ -1,0 +1,2065 @@
+{
+  "version": 1,
+  "demoDataVersion": 1,
+  "label": "SANITIZED DEMO DATA — NO PRODUCTION CONTENT",
+  "generatedAt": "2026-09-02T05:04:40.852Z",
+  "sanitization": {
+    "content": "All titles, descriptions, owners, updates, reminders, and links are synthetic.",
+    "identities": "No user IDs, email addresses, account metadata, or real names are included.",
+    "attachments": "All task and link image arrays are empty; no storage paths are included.",
+    "links": "All non-empty URLs use the reserved example.com domain.",
+    "dates": "Dates are generated relative to the day this file is rebuilt."
+  },
+  "sourceProfile": {
+    "projects": 8,
+    "tasks": 67,
+    "reminders": 9,
+    "completions": 0,
+    "note": "Only aggregate counts and feature distribution were retained from the retired dataset."
+  },
+  "projects": [
+    {
+      "id": "XMB-P1",
+      "title": "Home Studio Refresh",
+      "color": "orange",
+      "status": "Active",
+      "description": "Plan a comfortable, organized space for focused creative work."
+    },
+    {
+      "id": "XMB-P2",
+      "title": "Family Trip Planning",
+      "color": "green",
+      "status": "Active",
+      "description": "Coordinate a relaxed fictional weekend trip from research through packing."
+    },
+    {
+      "id": "XMB-P3",
+      "title": "Garden & Patio",
+      "color": "yellow",
+      "status": "Active",
+      "description": "Track seasonal improvements for an imaginary outdoor space."
+    },
+    {
+      "id": "XMB-P4",
+      "title": "Digital Photo Library",
+      "color": "teal",
+      "status": "Active",
+      "description": "Organize a fictional collection of photos into a durable archive."
+    },
+    {
+      "id": "XMB-P5",
+      "title": "Community Event",
+      "color": "purple",
+      "status": "Active",
+      "description": "Demonstrate planning tasks for a small neighborhood gathering."
+    },
+    {
+      "id": "XMB-P6",
+      "title": "Personal Learning Plan",
+      "color": "pink",
+      "status": "Active",
+      "description": "Build a repeatable study routine around a made-up course."
+    },
+    {
+      "id": "XMB-P7",
+      "title": "Household Maintenance",
+      "color": "red",
+      "status": "Active",
+      "description": "Show recurring planning for ordinary home upkeep."
+    },
+    {
+      "id": "XMB-P8",
+      "title": "Recipe Collection",
+      "color": "amber",
+      "status": "Active",
+      "description": "Create and test a small fictional set of weeknight recipes."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "XMB-T1",
+      "title": "Define success criteria for Home Studio Refresh",
+      "description": "Synthetic demo task for Home Studio Refresh. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P1",
+      "status": "Not Started",
+      "priority": "High",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-06-04T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L1",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/1",
+          "images": []
+        },
+        {
+          "id": "XMB-L2",
+          "type": "Email",
+          "displayName": "Demo Email reference",
+          "url": "https://example.com/xmbtask-demo/email/2",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T2",
+      "title": "Define success criteria for Family Trip Planning",
+      "description": "Synthetic demo task for Family Trip Planning. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P2",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-06-05T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [
+        {
+          "id": "XMB-S1",
+          "title": "Gather the inputs",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S2",
+          "title": "Review the draft",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S3",
+          "title": "Confirm the next step",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        }
+      ],
+      "links": [
+        {
+          "id": "XMB-L26",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/26",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T3",
+      "title": "Define success criteria for Garden & Patio",
+      "description": "Synthetic demo task for Garden & Patio. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P3",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-06-06T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U1",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-05T12:00:00.000Z"
+        },
+        {
+          "id": "XMB-U2",
+          "text": "Follow-up complete; the example is ready for the next workflow step.",
+          "timestamp": "2026-08-06T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L43",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/43",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T4",
+      "title": "Define success criteria for Digital Photo Library",
+      "description": "Synthetic demo task for Digital Photo Library. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P4",
+      "status": "In Progress",
+      "priority": "Medium",
+      "dueDate": "2026-08-31",
+      "owner": "",
+      "createdAt": "2026-06-07T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U25",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-20T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": []
+    },
+    {
+      "id": "XMB-T5",
+      "title": "Define success criteria for Community Event",
+      "description": "Synthetic demo task for Community Event. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P5",
+      "status": "Done",
+      "priority": "High",
+      "dueDate": null,
+      "owner": "Demo Owner",
+      "createdAt": "2026-06-08T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L3",
+          "type": "Link",
+          "displayName": "Demo Link reference",
+          "url": "https://example.com/xmbtask-demo/link/3",
+          "images": []
+        },
+        {
+          "id": "XMB-L4",
+          "type": "SLG",
+          "displayName": "Demo SLG reference",
+          "url": "https://example.com/xmbtask-demo/slg/4",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T6",
+      "title": "Define success criteria for Personal Learning Plan",
+      "description": "Synthetic demo task for Personal Learning Plan. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P6",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "Demo Owner",
+      "createdAt": "2026-06-09T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L27",
+          "type": "Email",
+          "displayName": "Demo Email reference",
+          "url": "https://example.com/xmbtask-demo/email/27",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T7",
+      "title": "Define success criteria for Household Maintenance",
+      "description": "Synthetic demo task for Household Maintenance. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P7",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": "2026-09-03",
+      "owner": "",
+      "createdAt": "2026-06-10T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [
+        {
+          "id": "XMB-S4",
+          "title": "Gather the inputs",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S5",
+          "title": "Review the draft",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S6",
+          "title": "Confirm the next step",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        }
+      ],
+      "links": [
+        {
+          "id": "XMB-L44",
+          "type": "Email",
+          "displayName": "Demo Email reference",
+          "url": "https://example.com/xmbtask-demo/email/44",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T8",
+      "title": "Define success criteria for Recipe Collection",
+      "description": "Synthetic demo task for Recipe Collection. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P8",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-06-11T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U17",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-13T12:00:00.000Z"
+        },
+        {
+          "id": "XMB-U18",
+          "text": "Follow-up complete; the example is ready for the next workflow step.",
+          "timestamp": "2026-08-14T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": []
+    },
+    {
+      "id": "XMB-T9",
+      "title": "Collect reference ideas for Home Studio Refresh",
+      "description": "Synthetic demo task for Home Studio Refresh. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P1",
+      "status": "Not Started",
+      "priority": "High",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-06-12T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U33",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-28T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L5",
+          "type": "Checklist",
+          "displayName": "Demo Checklist reference",
+          "url": "https://example.com/xmbtask-demo/checklist/5",
+          "images": []
+        },
+        {
+          "id": "XMB-L6",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/6",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T10",
+      "title": "Collect reference ideas for Family Trip Planning",
+      "description": "Synthetic demo task for Family Trip Planning. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P2",
+      "status": "In Progress",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-06-13T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L28",
+          "type": "Link",
+          "displayName": "Demo Link reference",
+          "url": "https://example.com/xmbtask-demo/link/28",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T11",
+      "title": "Collect reference ideas for Garden & Patio",
+      "description": "Synthetic demo task for Garden & Patio. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P3",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": "2026-09-07",
+      "owner": "",
+      "createdAt": "2026-06-14T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L45",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/45",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T12",
+      "title": "Collect reference ideas for Digital Photo Library",
+      "description": "Synthetic demo task for Digital Photo Library. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P4",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-06-15T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U3",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-06T12:00:00.000Z"
+        },
+        {
+          "id": "XMB-U4",
+          "text": "Follow-up complete; the example is ready for the next workflow step.",
+          "timestamp": "2026-08-07T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [
+        {
+          "id": "XMB-S7",
+          "title": "Gather the inputs",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S8",
+          "title": "Review the draft",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S9",
+          "title": "Confirm the next step",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "XMB-T13",
+      "title": "Collect reference ideas for Community Event",
+      "description": "Synthetic demo task for Community Event. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P5",
+      "status": "Done",
+      "priority": "Low",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-06-16T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U26",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-21T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L7",
+          "type": "Email",
+          "displayName": "Demo Email reference",
+          "url": "https://example.com/xmbtask-demo/email/7",
+          "images": []
+        },
+        {
+          "id": "XMB-L8",
+          "type": "Link",
+          "displayName": "Demo Link reference",
+          "url": "https://example.com/xmbtask-demo/link/8",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T14",
+      "title": "Collect reference ideas for Personal Learning Plan",
+      "description": "Synthetic demo task for Personal Learning Plan. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P6",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": "2026-09-10",
+      "owner": "",
+      "createdAt": "2026-06-17T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L29",
+          "type": "SLG",
+          "displayName": "Demo SLG reference",
+          "url": "https://example.com/xmbtask-demo/slg/29",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T15",
+      "title": "Collect reference ideas for Household Maintenance",
+      "description": "Synthetic demo task for Household Maintenance. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P7",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-06-18T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L46",
+          "type": "Email",
+          "displayName": "Demo Email reference",
+          "url": "https://example.com/xmbtask-demo/email/46",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T16",
+      "title": "Collect reference ideas for Recipe Collection",
+      "description": "Synthetic demo task for Recipe Collection. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P8",
+      "status": "In Progress",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "Demo Owner",
+      "createdAt": "2026-06-19T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": []
+    },
+    {
+      "id": "XMB-T17",
+      "title": "Draft the first checklist for Home Studio Refresh",
+      "description": "Synthetic demo task for Home Studio Refresh. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P1",
+      "status": "Done",
+      "priority": "Low",
+      "dueDate": null,
+      "owner": "Demo Owner",
+      "createdAt": "2026-06-20T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U19",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-14T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [
+        {
+          "id": "XMB-S10",
+          "title": "Gather the inputs",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S11",
+          "title": "Review the draft",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S12",
+          "title": "Confirm the next step",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        }
+      ],
+      "links": [
+        {
+          "id": "XMB-L9",
+          "type": "SLG",
+          "displayName": "Demo SLG reference",
+          "url": "https://example.com/xmbtask-demo/slg/9",
+          "images": []
+        },
+        {
+          "id": "XMB-L10",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/10",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T18",
+      "title": "Draft the first checklist for Family Trip Planning",
+      "description": "Synthetic demo task for Family Trip Planning. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P2",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": "2026-08-30",
+      "owner": "",
+      "createdAt": "2026-06-21T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U34",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-29T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L30",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/30",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T19",
+      "title": "Draft the first checklist for Garden & Patio",
+      "description": "Synthetic demo task for Garden & Patio. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P3",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-06-22T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L47",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/47",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T20",
+      "title": "Draft the first checklist for Digital Photo Library",
+      "description": "Synthetic demo task for Digital Photo Library. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P4",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-06-23T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": []
+    },
+    {
+      "id": "XMB-T21",
+      "title": "Draft the first checklist for Community Event",
+      "description": "Synthetic demo task for Community Event. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P5",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": "2026-09-02",
+      "owner": "",
+      "createdAt": "2026-06-24T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U5",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-07T12:00:00.000Z"
+        },
+        {
+          "id": "XMB-U6",
+          "text": "Follow-up complete; the example is ready for the next workflow step.",
+          "timestamp": "2026-08-08T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L11",
+          "type": "Email",
+          "displayName": "Demo Email reference",
+          "url": "https://example.com/xmbtask-demo/email/11",
+          "images": []
+        },
+        {
+          "id": "XMB-L12",
+          "type": "Link",
+          "displayName": "Demo Link reference",
+          "url": "https://example.com/xmbtask-demo/link/12",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T22",
+      "title": "Draft the first checklist for Personal Learning Plan",
+      "description": "Synthetic demo task for Personal Learning Plan. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P6",
+      "status": "In Progress",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-06-25T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U27",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-22T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [
+        {
+          "id": "XMB-S13",
+          "title": "Gather the inputs",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S14",
+          "title": "Review the draft",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S15",
+          "title": "Confirm the next step",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        }
+      ],
+      "links": [
+        {
+          "id": "XMB-L31",
+          "type": "Email",
+          "displayName": "Demo Email reference",
+          "url": "https://example.com/xmbtask-demo/email/31",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T23",
+      "title": "Draft the first checklist for Household Maintenance",
+      "description": "Synthetic demo task for Household Maintenance. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P7",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-06-26T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L48",
+          "type": "Email",
+          "displayName": "Demo Email reference",
+          "url": "https://example.com/xmbtask-demo/email/48",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T24",
+      "title": "Draft the first checklist for Recipe Collection",
+      "description": "Synthetic demo task for Recipe Collection. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P8",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-06-27T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": []
+    },
+    {
+      "id": "XMB-T25",
+      "title": "Review the budget for Home Studio Refresh",
+      "description": "Synthetic demo task for Home Studio Refresh. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P1",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": "2026-09-06",
+      "owner": "",
+      "createdAt": "2026-06-28T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L13",
+          "type": "SLG",
+          "displayName": "Demo SLG reference",
+          "url": "https://example.com/xmbtask-demo/slg/13",
+          "images": []
+        },
+        {
+          "id": "XMB-L14",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/14",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T26",
+      "title": "Review the budget for Family Trip Planning",
+      "description": "Synthetic demo task for Family Trip Planning. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P2",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-06-29T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U20",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-15T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L32",
+          "type": "Link",
+          "displayName": "Demo Link reference",
+          "url": "https://example.com/xmbtask-demo/link/32",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T27",
+      "title": "Review the budget for Garden & Patio",
+      "description": "Synthetic demo task for Garden & Patio. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P3",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-06-30T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U35",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-30T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [
+        {
+          "id": "XMB-S16",
+          "title": "Gather the inputs",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S17",
+          "title": "Review the draft",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S18",
+          "title": "Confirm the next step",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        }
+      ],
+      "links": [
+        {
+          "id": "XMB-L49",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/49",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T28",
+      "title": "Review the budget for Digital Photo Library",
+      "description": "Synthetic demo task for Digital Photo Library. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P4",
+      "status": "In Progress",
+      "priority": "Medium",
+      "dueDate": "2026-09-09",
+      "owner": "Demo Owner",
+      "createdAt": "2026-07-01T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": []
+    },
+    {
+      "id": "XMB-T29",
+      "title": "Review the budget for Community Event",
+      "description": "Synthetic demo task for Community Event. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P5",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-02T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L15",
+          "type": "Email",
+          "displayName": "Demo Email reference",
+          "url": "https://example.com/xmbtask-demo/email/15",
+          "images": []
+        },
+        {
+          "id": "XMB-L16",
+          "type": "Link",
+          "displayName": "Demo Link reference",
+          "url": "https://example.com/xmbtask-demo/link/16",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T30",
+      "title": "Review the budget for Personal Learning Plan",
+      "description": "Synthetic demo task for Personal Learning Plan. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P6",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-03T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U7",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-08T12:00:00.000Z"
+        },
+        {
+          "id": "XMB-U8",
+          "text": "Follow-up complete; the example is ready for the next workflow step.",
+          "timestamp": "2026-08-09T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L33",
+          "type": "SLG",
+          "displayName": "Demo SLG reference",
+          "url": "https://example.com/xmbtask-demo/slg/33",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T31",
+      "title": "Review the budget for Household Maintenance",
+      "description": "Synthetic demo task for Household Maintenance. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P7",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-04T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U28",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-23T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L50",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/50",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T32",
+      "title": "Review the budget for Recipe Collection",
+      "description": "Synthetic demo task for Recipe Collection. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P8",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": "2026-08-29",
+      "owner": "",
+      "createdAt": "2026-07-05T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [
+        {
+          "id": "XMB-S19",
+          "title": "Gather the inputs",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S20",
+          "title": "Review the draft",
+          "status": "open",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S21",
+          "title": "Confirm the next step",
+          "status": "open",
+          "url": "",
+          "urlDisplayName": ""
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "XMB-T33",
+      "title": "Schedule the next work session for Home Studio Refresh",
+      "description": "Synthetic demo task for Home Studio Refresh. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P1",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-06T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L17",
+          "type": "SLG",
+          "displayName": "Demo SLG reference",
+          "url": "https://example.com/xmbtask-demo/slg/17",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T34",
+      "title": "Schedule the next work session for Family Trip Planning",
+      "description": "Synthetic demo task for Family Trip Planning. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P2",
+      "status": "In Progress",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-07T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L34",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/34",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T35",
+      "title": "Schedule the next work session for Garden & Patio",
+      "description": "Synthetic demo task for Garden & Patio. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P3",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": "2026-09-01",
+      "owner": "",
+      "createdAt": "2026-07-08T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U21",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-16T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L51",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/51",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T36",
+      "title": "Schedule the next work session for Digital Photo Library",
+      "description": "Synthetic demo task for Digital Photo Library. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P4",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-09T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": []
+    },
+    {
+      "id": "XMB-T37",
+      "title": "Schedule the next work session for Community Event",
+      "description": "Synthetic demo task for Community Event. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P5",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-10T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [
+        {
+          "id": "XMB-S22",
+          "title": "Gather the inputs",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S23",
+          "title": "Review the draft",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        }
+      ],
+      "links": [
+        {
+          "id": "XMB-L18",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/18",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T38",
+      "title": "Schedule the next work session for Personal Learning Plan",
+      "description": "Synthetic demo task for Personal Learning Plan. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P6",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-11T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L35",
+          "type": "Email",
+          "displayName": "Demo Email reference",
+          "url": "https://example.com/xmbtask-demo/email/35",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T39",
+      "title": "Schedule the next work session for Household Maintenance",
+      "description": "Synthetic demo task for Household Maintenance. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P7",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": "2026-09-05",
+      "owner": "Demo Owner",
+      "createdAt": "2026-07-12T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U9",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-09T12:00:00.000Z"
+        },
+        {
+          "id": "XMB-U10",
+          "text": "Follow-up complete; the example is ready for the next workflow step.",
+          "timestamp": "2026-08-10T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L52",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/52",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T40",
+      "title": "Schedule the next work session for Recipe Collection",
+      "description": "Synthetic demo task for Recipe Collection. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P8",
+      "status": "In Progress",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-13T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U29",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-24T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": []
+    },
+    {
+      "id": "XMB-T41",
+      "title": "Compare available options for Home Studio Refresh",
+      "description": "Synthetic demo task for Home Studio Refresh. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P1",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-14T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L19",
+          "type": "Email",
+          "displayName": "Demo Email reference",
+          "url": "https://example.com/xmbtask-demo/email/19",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T42",
+      "title": "Compare available options for Family Trip Planning",
+      "description": "Synthetic demo task for Family Trip Planning. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P2",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": "2026-09-08",
+      "owner": "",
+      "createdAt": "2026-07-15T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [
+        {
+          "id": "XMB-S24",
+          "title": "Gather the inputs",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S25",
+          "title": "Review the draft",
+          "status": "complete",
+          "url": "",
+          "urlDisplayName": ""
+        }
+      ],
+      "links": [
+        {
+          "id": "XMB-L36",
+          "type": "Link",
+          "displayName": "Demo Link reference",
+          "url": "https://example.com/xmbtask-demo/link/36",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T43",
+      "title": "Compare available options for Garden & Patio",
+      "description": "Synthetic demo task for Garden & Patio. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P3",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-16T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L53",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/53",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T44",
+      "title": "Compare available options for Digital Photo Library",
+      "description": "Synthetic demo task for Digital Photo Library. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P4",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-17T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U22",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-17T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": []
+    },
+    {
+      "id": "XMB-T45",
+      "title": "Compare available options for Community Event",
+      "description": "Synthetic demo task for Community Event. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P5",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-18T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L20",
+          "type": "Link",
+          "displayName": "Demo Link reference",
+          "url": "https://example.com/xmbtask-demo/link/20",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T46",
+      "title": "Compare available options for Personal Learning Plan",
+      "description": "Synthetic demo task for Personal Learning Plan. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P6",
+      "status": "In Progress",
+      "priority": "Medium",
+      "dueDate": "2026-08-28",
+      "owner": "",
+      "createdAt": "2026-07-19T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L37",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/37",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T47",
+      "title": "Compare available options for Household Maintenance",
+      "description": "Synthetic demo task for Household Maintenance. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P7",
+      "status": "In Progress",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-20T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [
+        {
+          "id": "XMB-S26",
+          "title": "Gather the inputs",
+          "status": "open",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S27",
+          "title": "Review the draft",
+          "status": "open",
+          "url": "",
+          "urlDisplayName": ""
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "XMB-T48",
+      "title": "Compare available options for Recipe Collection",
+      "description": "Synthetic demo task for Recipe Collection. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P8",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-21T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U11",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-10T12:00:00.000Z"
+        },
+        {
+          "id": "XMB-U12",
+          "text": "Follow-up complete; the example is ready for the next workflow step.",
+          "timestamp": "2026-08-11T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": []
+    },
+    {
+      "id": "XMB-T49",
+      "title": "Complete the first milestone for Home Studio Refresh",
+      "description": "Synthetic demo task for Home Studio Refresh. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P1",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": "2026-08-31",
+      "owner": "",
+      "createdAt": "2026-07-22T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U30",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-25T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L21",
+          "type": "SLG",
+          "displayName": "Demo SLG reference",
+          "url": "https://example.com/xmbtask-demo/slg/21",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T50",
+      "title": "Complete the first milestone for Family Trip Planning",
+      "description": "Synthetic demo task for Family Trip Planning. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P2",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "Demo Owner",
+      "createdAt": "2026-07-23T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L38",
+          "type": "Email",
+          "displayName": "Demo Email reference",
+          "url": "https://example.com/xmbtask-demo/email/38",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T51",
+      "title": "Complete the first milestone for Garden & Patio",
+      "description": "Synthetic demo task for Garden & Patio. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P3",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-24T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": []
+    },
+    {
+      "id": "XMB-T52",
+      "title": "Complete the first milestone for Digital Photo Library",
+      "description": "Synthetic demo task for Digital Photo Library. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P4",
+      "status": "In Progress",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-25T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [
+        {
+          "id": "XMB-S28",
+          "title": "Gather the inputs",
+          "status": "open",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S29",
+          "title": "Review the draft",
+          "status": "open",
+          "url": "",
+          "urlDisplayName": ""
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "XMB-T53",
+      "title": "Complete the first milestone for Community Event",
+      "description": "Synthetic demo task for Community Event. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P5",
+      "status": "In Progress",
+      "priority": "Medium",
+      "dueDate": "2026-09-04",
+      "owner": "",
+      "createdAt": "2026-07-26T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U23",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-18T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L22",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/22",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T54",
+      "title": "Complete the first milestone for Personal Learning Plan",
+      "description": "Synthetic demo task for Personal Learning Plan. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P6",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-27T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L39",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/39",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T55",
+      "title": "Complete the first milestone for Household Maintenance",
+      "description": "Synthetic demo task for Household Maintenance. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P7",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-28T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": []
+    },
+    {
+      "id": "XMB-T56",
+      "title": "Complete the first milestone for Recipe Collection",
+      "description": "Synthetic demo task for Recipe Collection. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P8",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": "2026-09-07",
+      "owner": "",
+      "createdAt": "2026-07-29T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": []
+    },
+    {
+      "id": "XMB-T57",
+      "title": "Share a progress update for Home Studio Refresh",
+      "description": "Synthetic demo task for Home Studio Refresh. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P1",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-30T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U13",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-11T12:00:00.000Z"
+        },
+        {
+          "id": "XMB-U14",
+          "text": "Follow-up complete; the example is ready for the next workflow step.",
+          "timestamp": "2026-08-12T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [
+        {
+          "id": "XMB-S30",
+          "title": "Gather the inputs",
+          "status": "open",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S31",
+          "title": "Review the draft",
+          "status": "open",
+          "url": "",
+          "urlDisplayName": ""
+        }
+      ],
+      "links": [
+        {
+          "id": "XMB-L23",
+          "type": "Email",
+          "displayName": "Demo Email reference",
+          "url": "https://example.com/xmbtask-demo/email/23",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T58",
+      "title": "Share a progress update for Family Trip Planning",
+      "description": "Synthetic demo task for Family Trip Planning. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P2",
+      "status": "In Progress",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U31",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-26T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L40",
+          "type": "Email",
+          "displayName": "Demo Email reference",
+          "url": "https://example.com/xmbtask-demo/email/40",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T59",
+      "title": "Share a progress update for Garden & Patio",
+      "description": "Synthetic demo task for Garden & Patio. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P3",
+      "status": "In Progress",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-08-01T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": []
+    },
+    {
+      "id": "XMB-T60",
+      "title": "Share a progress update for Digital Photo Library",
+      "description": "Synthetic demo task for Digital Photo Library. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P4",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": "2026-09-11",
+      "owner": "",
+      "createdAt": "2026-08-02T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": []
+    },
+    {
+      "id": "XMB-T61",
+      "title": "Share a progress update for Community Event",
+      "description": "Synthetic demo task for Community Event. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P5",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "Demo Owner",
+      "createdAt": "2026-08-03T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L24",
+          "type": "Link",
+          "displayName": "Demo Link reference",
+          "url": "https://example.com/xmbtask-demo/link/24",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T62",
+      "title": "Share a progress update for Personal Learning Plan",
+      "description": "Synthetic demo task for Personal Learning Plan. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P6",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-08-04T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U24",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-19T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [
+        {
+          "id": "XMB-S32",
+          "title": "Gather the inputs",
+          "status": "open",
+          "url": "",
+          "urlDisplayName": ""
+        },
+        {
+          "id": "XMB-S33",
+          "title": "Review the draft",
+          "status": "open",
+          "url": "",
+          "urlDisplayName": ""
+        }
+      ],
+      "links": [
+        {
+          "id": "XMB-L41",
+          "type": "Jira",
+          "displayName": "Demo Jira reference",
+          "url": "https://example.com/xmbtask-demo/jira/41",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T63",
+      "title": "Share a progress update for Household Maintenance",
+      "description": "Synthetic demo task for Household Maintenance. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P7",
+      "status": "Not Started",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-08-05T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": []
+    },
+    {
+      "id": "XMB-T64",
+      "title": "Share a progress update for Recipe Collection",
+      "description": "Synthetic demo task for Recipe Collection. Use it to show planning, filtering, editing, and progress tracking without exposing production content.",
+      "projectId": "XMB-P8",
+      "status": "In Progress",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-08-06T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": []
+    },
+    {
+      "id": "XMB-T65",
+      "title": "Close out the project notes for Home Studio Refresh",
+      "description": "",
+      "projectId": "XMB-P1",
+      "status": "In Progress",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-08-07T12:00:00.000Z",
+      "images": [],
+      "updates": [],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L25",
+          "type": "SLG",
+          "displayName": "Demo SLG reference",
+          "url": "https://example.com/xmbtask-demo/slg/25",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T66",
+      "title": "Close out the project notes for Family Trip Planning",
+      "description": "",
+      "projectId": "XMB-P2",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": null,
+      "owner": "",
+      "createdAt": "2026-08-08T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U15",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-12T12:00:00.000Z"
+        },
+        {
+          "id": "XMB-U16",
+          "text": "Follow-up complete; the example is ready for the next workflow step.",
+          "timestamp": "2026-08-13T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": [
+        {
+          "id": "XMB-L42",
+          "type": "Email",
+          "displayName": "Demo Email reference",
+          "url": "https://example.com/xmbtask-demo/email/42",
+          "images": []
+        }
+      ]
+    },
+    {
+      "id": "XMB-T67",
+      "title": "Close out the project notes for Garden & Patio",
+      "description": "",
+      "projectId": "XMB-P3",
+      "status": "Done",
+      "priority": "Medium",
+      "dueDate": "2026-09-03",
+      "owner": "",
+      "createdAt": "2026-08-09T12:00:00.000Z",
+      "images": [],
+      "updates": [
+        {
+          "id": "XMB-U32",
+          "text": "Reviewed the demo task and recorded a clear next action.",
+          "timestamp": "2026-08-27T12:00:00.000Z"
+        }
+      ],
+      "subtasks": [],
+      "links": []
+    }
+  ],
+  "reminders": [
+    {
+      "id": "XMB-R1",
+      "text": "Review today's priorities",
+      "description": "A synthetic daily planning reminder.",
+      "displayName": "Planning note",
+      "url": "https://example.com/xmbtask-demo/reminders/1",
+      "days": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday"
+      ],
+      "time": "08:30",
+      "createdAt": "2026-07-24T12:00:00.000Z"
+    },
+    {
+      "id": "XMB-R2",
+      "text": "Capture end-of-day notes",
+      "description": "",
+      "displayName": "Daily notes",
+      "url": "https://example.com/xmbtask-demo/reminders/2",
+      "days": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday"
+      ],
+      "time": "16:30",
+      "createdAt": "2026-07-25T12:00:00.000Z"
+    },
+    {
+      "id": "XMB-R3",
+      "text": "Plan the weekly focus",
+      "description": "",
+      "displayName": "Weekly plan",
+      "url": "https://example.com/xmbtask-demo/reminders/3",
+      "days": [
+        "Monday"
+      ],
+      "time": "09:00",
+      "createdAt": "2026-07-26T12:00:00.000Z"
+    },
+    {
+      "id": "XMB-R4",
+      "text": "Check the household list",
+      "description": "",
+      "displayName": "Home checklist",
+      "url": "https://example.com/xmbtask-demo/reminders/4",
+      "days": [
+        "Tuesday"
+      ],
+      "time": "18:00",
+      "createdAt": "2026-07-27T12:00:00.000Z"
+    },
+    {
+      "id": "XMB-R5",
+      "text": "Water patio plants",
+      "description": "",
+      "displayName": "Garden checklist",
+      "url": "https://example.com/xmbtask-demo/reminders/5",
+      "days": [
+        "Wednesday"
+      ],
+      "time": "07:30",
+      "createdAt": "2026-07-28T12:00:00.000Z"
+    },
+    {
+      "id": "XMB-R6",
+      "text": "Review learning notes",
+      "description": "",
+      "displayName": "Study notes",
+      "url": "https://example.com/xmbtask-demo/reminders/6",
+      "days": [
+        "Thursday"
+      ],
+      "time": "19:00",
+      "createdAt": "2026-07-29T12:00:00.000Z"
+    },
+    {
+      "id": "XMB-R7",
+      "text": "Choose a weekend recipe",
+      "description": "",
+      "displayName": "Recipe list",
+      "url": "https://example.com/xmbtask-demo/reminders/7",
+      "days": [
+        "Friday"
+      ],
+      "time": "17:00",
+      "createdAt": "2026-07-30T12:00:00.000Z"
+    },
+    {
+      "id": "XMB-R8",
+      "text": "Back up the demo photo library",
+      "description": "",
+      "displayName": "",
+      "url": "",
+      "days": [
+        "Saturday"
+      ],
+      "time": "10:00",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    },
+    {
+      "id": "XMB-R9",
+      "text": "Reset the workspace for next week",
+      "description": "",
+      "displayName": "",
+      "url": "",
+      "days": [
+        "Sunday"
+      ],
+      "time": "17:30",
+      "createdAt": "2026-08-01T12:00:00.000Z"
+    }
+  ],
+  "completions": []
+}

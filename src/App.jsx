@@ -14,6 +14,7 @@ import RequestsModal from "./components/RequestsModal";
 import FeedbackModal from "./components/FeedbackModal";
 import { exportToXlsx, importFromXlsx } from "./services/xlsxService";
 import { exportBackup, importBackup } from "./services/backupService";
+import { IS_DEMO_MODE, resetDemoData } from "./demoMode";
 
 const generateTaskId = (tasks) => {
   const max = tasks.reduce((m, t) => Math.max(m, parseInt(t.id.replace("XMB-T", "")) || 0), 0);
@@ -24,6 +25,33 @@ const generateProjectId = (projects) => {
   const max = projects.reduce((m, p) => Math.max(m, parseInt(p.id.replace("XMB-P", "")) || 0), 0);
   return `XMB-P${String(max + 1).padStart(3, "0")}`;
 };
+
+function DemoModeBadge() {
+  const handleReset = () => {
+    if (!window.confirm("Reset all local demo changes and reload the sanitized dataset?")) return;
+    resetDemoData();
+    window.location.reload();
+  };
+
+  return (
+    <div style={{
+      position: "fixed", right: "18px", bottom: "18px", zIndex: 550,
+      display: "flex", alignItems: "center", gap: "10px",
+      background: "#14271c", border: "1px solid #2DB86A", borderRadius: "9px",
+      padding: "8px 10px 8px 12px", boxShadow: "0 10px 30px rgba(0,0,0,0.45)",
+      color: "#9ae6b4", fontSize: "11px", letterSpacing: "0.02em",
+    }}>
+      <span><strong style={{ color: "#4ADE80" }}>LOCAL DEMO</strong> · Firebase disabled</span>
+      <button onClick={handleReset} style={{
+        background: "#213c2b", color: "#d8fbe4", border: "1px solid #376a49",
+        borderRadius: "6px", padding: "5px 8px", cursor: "pointer",
+        font: "inherit", fontWeight: 700,
+      }}>
+        Reset data
+      </button>
+    </div>
+  );
+}
 
 // ── Export choice modal ────────────────────────────────────────────────────────
 function ExportChoiceModal({ onExcel, onBackup, onCancel }) {
@@ -249,7 +277,7 @@ function AuthenticatedApp() {
         setTasks(loadedTasks);
         setStorageReady(true);
       } catch (err) {
-        console.error("Failed to load data from Firestore:", err);
+        console.error("Failed to load data:", err);
         setLoadError(true); // storageReady stays false — saves are blocked
       }
     };
@@ -536,7 +564,7 @@ function AuthenticatedApp() {
             onExport={handleExport}
             requestCount={isAdmin ? requests.length : 0}
             onRequests={() => setShowRequests(true)}
-            onFeedback={() => setShowFeedback(true)}
+            onFeedback={IS_DEMO_MODE ? undefined : () => setShowFeedback(true)}
           />
         </div>
       </div>
@@ -662,6 +690,8 @@ function AuthenticatedApp() {
           onCancel={() => setPendingImport(null)}
         />
       )}
+
+      {IS_DEMO_MODE && <DemoModeBadge />}
     </div>
   );
 }

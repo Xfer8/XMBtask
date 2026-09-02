@@ -20,6 +20,10 @@ dist-ssr
 # Claude Code internal files
 .claude/
 .claire/
+.codex/
+
+# Local Git archive artifacts
+archive/*.bundle
 
 # Editor directories and files
 .vscode/*
