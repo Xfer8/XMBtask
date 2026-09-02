@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "demo": "vite --mode demo --host 127.0.0.1",
+    "prototype": "vite --mode prototype --host 127.0.0.1",
     "build": "vite build",
+    "build:prototype": "vite build --mode prototype",
     "lint": "eslint .",
     "preview": "vite preview",
     "deploy:prod": "vite build && firebase deploy --only hosting:prod",
