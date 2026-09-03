@@ -954,8 +954,15 @@ button {
   display: flex;
   grid-column: 5;
   align-items: center;
+  justify-content: center;
   font-family: 'DM Mono', monospace;
   font-size: 12px;
+  text-align: center;
+}
+
+.prototype-activity-header > span:nth-child(5) {
+  justify-self: center;
+  text-align: center;
 }
 
 .prototype-activity-row time {
@@ -1710,6 +1717,19 @@ button {
   .prototype-activity-header,
   .prototype-activity-group {
     min-width: 820px;
+  }
+
+  .prototype-activity-table.has-actions .prototype-activity-header,
+  .prototype-activity-table.has-actions .prototype-activity-group {
+    min-width: 0;
+    grid-template-columns: 100px 108px minmax(110px, 1fr) 80px 72px 102px 36px;
+    gap: 0 6px;
+    padding-inline: 14px;
+  }
+
+  .prototype-activity-table.has-actions .prototype-activity-event {
+    margin-left: -14px;
+    padding-left: 14px;
   }
 
   .prototype-field-editor {
