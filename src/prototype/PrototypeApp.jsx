@@ -192,7 +192,7 @@ function buildActivityGroups(visibleEvents, allEvents, now = Date.now()) {
 
   return [...groups.values()].map((group) => ({
     ...group,
-    events: [...group.events].sort((left, right) => new Date(left.occurredAt) - new Date(right.occurredAt)),
+    events: [...group.events].sort((left, right) => new Date(right.occurredAt) - new Date(left.occurredAt)),
   }))
 }
 

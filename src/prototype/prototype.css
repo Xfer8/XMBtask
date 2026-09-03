@@ -771,7 +771,7 @@ button {
   display: grid;
   grid-template-columns: 118px 142px minmax(190px, 1fr) 104px 92px 126px;
   align-items: center;
-  gap: 16px;
+  gap: 0 16px;
   padding: 0 22px;
 }
 
@@ -1433,7 +1433,7 @@ button {
   .prototype-activity-header,
   .prototype-activity-group {
     grid-template-columns: 100px 124px minmax(160px, 1fr) 92px 84px 112px;
-    gap: 10px;
+    gap: 0 10px;
     padding-inline: 16px;
   }
 
