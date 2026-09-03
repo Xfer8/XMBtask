@@ -41,9 +41,12 @@ function createDefaultState() {
       resetDay: 1,
       resetTime: '00:00',
       timezone: 'America/New_York',
+      remainingFormat: 'clock',
+      recentActivityLimit: 5,
       checkoutFields: [
-        { id: 'purpose', label: 'Purpose', type: 'short_text', required: true, options: [] },
-        { id: 'expected-return', label: 'Expected return', type: 'short_text', required: false, options: [] },
+        { id: 'device', label: 'Device', type: 'select', required: true, showInCurrentState: true, options: ['Tablet', 'Phone', 'Laptop'] },
+        { id: 'purpose', label: 'Purpose', type: 'short_text', required: true, showInCurrentState: false, options: [] },
+        { id: 'expected-return', label: 'Expected return', type: 'short_text', required: false, showInCurrentState: true, options: [] },
       ],
       checkinFields: [
         { id: 'outcome', label: 'Outcome', type: 'select', required: false, options: ['Completed', 'Partially completed', 'Cancelled'] },
@@ -56,6 +59,7 @@ function createDefaultState() {
       remainingSeconds: 18 * 60 * 60 + 42 * 60,
       checkedOutAt: null,
       checkedOutBy: null,
+      checkoutDetails: [],
       lastTransitionAt: minutesAgo(45),
     },
     events: [
@@ -96,7 +100,29 @@ function createDefaultState() {
 function readState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
-    return saved ? JSON.parse(saved) : createDefaultState()
+    if (!saved) return createDefaultState()
+
+    const defaults = createDefaultState()
+    const parsed = JSON.parse(saved)
+    const savedCheckoutFields = parsed.settings?.checkoutFields ?? defaults.settings.checkoutFields
+    return {
+      ...defaults,
+      ...parsed,
+      settings: {
+        ...defaults.settings,
+        ...parsed.settings,
+        checkoutFields: savedCheckoutFields.map((field, index) => ({
+          ...field,
+          showInCurrentState: field.showInCurrentState ?? index === 0,
+        })),
+        checkinFields: parsed.settings?.checkinFields ?? defaults.settings.checkinFields,
+      },
+      timer: {
+        ...defaults.timer,
+        ...parsed.timer,
+        checkoutDetails: parsed.timer?.checkoutDetails ?? [],
+      },
+    }
   } catch {
     return createDefaultState()
   }
@@ -108,6 +134,14 @@ function formatDuration(totalSeconds, showSign = false) {
   const minutes = Math.floor((safe % 3600) / 60)
   const seconds = safe % 60
   return `${showSign ? '+' : ''}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+}
+
+function formatRemaining(totalSeconds, format = 'clock') {
+  const safe = Math.max(0, Math.floor(totalSeconds))
+  const hours = Math.floor(safe / 3600)
+  const minutes = Math.floor((safe % 3600) / 60)
+  if (format === 'words') return `${hours}h ${minutes}m`
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
 }
 
 function getTimerSnapshot(timer, now = Date.now()) {
@@ -146,9 +180,9 @@ function actionLabel(type) {
 }
 
 function eventSummary(event) {
-  const meaningful = event.details?.filter((item) => item.value !== '' && item.value !== false)
+  const meaningful = event.details?.filter((item) => item.value !== '' && item.value !== undefined && item.value !== null)
   if (!meaningful?.length) return 'No additional details'
-  return meaningful.map((item) => `${item.label}: ${item.value === true ? 'Yes' : item.value}`).join(' · ')
+  return meaningful.map((item) => `${item.label}: ${typeof item.value === 'boolean' ? (item.value ? 'Yes' : 'No') : item.value}`).join(' · ')
 }
 
 function Icon({ name, size = 20 }) {
@@ -211,28 +245,42 @@ function EventBadge({ type }) {
   return <span className={`prototype-event-badge is-${type}`}>{actionLabel(type)}</span>
 }
 
-function RecentActivity({ events, onViewAll }) {
+function ActivityTable({ events, remainingFormat, label = 'Timer activity' }) {
+  return (
+    <div className="prototype-activity-table" role="table" aria-label={label}>
+      <div className="prototype-activity-header" role="row">
+        <span role="columnheader">Event</span>
+        <span role="columnheader">Member</span>
+        <span role="columnheader">Details</span>
+        <span role="columnheader">Remaining</span>
+        <span role="columnheader">Date & time</span>
+      </div>
+      {events.map((event) => (
+        <article className="prototype-activity-row" role="row" key={event.id}>
+          <div className="prototype-activity-event" role="cell"><EventBadge type={event.type} /></div>
+          <div className="prototype-member-cell" role="cell"><Avatar user={event.actor} small /><span><strong>{event.actor.name}</strong><small>{event.actor.role}</small></span></div>
+          <div className="prototype-detail-cell" role="cell">{eventSummary(event)}</div>
+          <div className="prototype-remaining-cell" role="cell">{formatRemaining(event.remainingAfter, remainingFormat)}</div>
+          <time role="cell" dateTime={event.occurredAt}>{formatDateTime(event.occurredAt)}</time>
+        </article>
+      ))}
+    </div>
+  )
+}
+
+function RecentActivity({ events, onViewAll, remainingFormat, limit }) {
+  const rowLimit = Math.max(1, Number(limit) || 5)
   return (
     <section className="prototype-panel prototype-recent-panel">
       <div className="prototype-panel-heading">
         <div>
           <span className="prototype-kicker">Shared history</span>
           <h2>Recent activity</h2>
+          <p>Latest {Math.min(rowLimit, events.length)} of {events.length} recorded events</p>
         </div>
         <button type="button" className="prototype-text-button" onClick={onViewAll}>View all <Icon name="arrow" size={16} /></button>
       </div>
-      <div className="prototype-event-list">
-        {events.slice(0, 4).map((event) => (
-          <article className="prototype-event-row" key={event.id}>
-            <Avatar user={event.actor} small />
-            <div className="prototype-event-copy">
-              <div><strong>{event.actor.name}</strong> {actionLabel(event.type).toLowerCase()}</div>
-              <span>{eventSummary(event)}</span>
-            </div>
-            <time dateTime={event.occurredAt}>{formatShortTime(event.occurredAt)}</time>
-          </article>
-        ))}
-      </div>
+      <ActivityTable events={events.slice(0, rowLimit)} remainingFormat={remainingFormat} label="Recent timer activity" />
     </section>
   )
 }
@@ -243,6 +291,18 @@ function TimerPage({ state, snapshot, now, onAction, setPage }) {
   const allowance = Math.max(1, timer.allowanceSeconds)
   const remainingPercent = Math.max(0, Math.min(100, (snapshot.remaining / allowance) * 100))
   const checkedOutUser = MOCK_USERS.find((user) => user.id === timer.checkedOutBy)
+  const latestCheckoutDetails = events.find((event) => event.type === 'checkout')?.details ?? []
+  const rawCurrentDetails = timer.checkoutDetails?.length
+    ? timer.checkoutDetails
+    : latestCheckoutDetails.map((detail, index) => {
+        const field = settings.checkoutFields.find((item) => item.id === detail.id || item.label === detail.label)
+        return {
+          ...detail,
+          id: detail.id ?? field?.id ?? `legacy-detail-${index}`,
+          showInCurrentState: field?.showInCurrentState ?? index === 0,
+        }
+      })
+  const currentStateDetails = rawCurrentDetails.filter((detail) => detail.showInCurrentState && detail.value !== '' && detail.value !== undefined && detail.value !== null)
 
   return (
     <>
@@ -305,6 +365,13 @@ function TimerPage({ state, snapshot, now, onAction, setPage }) {
             <div className="prototype-state-icon"><Icon name={isOut ? 'timer' : 'check'} size={30} /></div>
             <h2>{isOut ? 'In use' : 'Checked in'}</h2>
             <p>{isOut ? 'Any member can check this back in. The acting user will be recorded.' : 'No time is being deducted from the weekly allowance.'}</p>
+            {isOut && currentStateDetails.length > 0 && (
+              <dl className="prototype-current-details">
+                {currentStateDetails.map((detail) => (
+                  <div key={detail.id}><dt>{detail.label}</dt><dd>{typeof detail.value === 'boolean' ? (detail.value ? 'Yes' : 'No') : detail.value}</dd></div>
+                ))}
+              </dl>
+            )}
             <div className="prototype-state-detail">
               <span>Last change</span>
               <strong>{formatDateTime(timer.lastTransitionAt)}</strong>
@@ -322,12 +389,17 @@ function TimerPage({ state, snapshot, now, onAction, setPage }) {
         </aside>
       </div>
 
-      <RecentActivity events={events} onViewAll={() => setPage('activity')} />
+      <RecentActivity
+        events={events}
+        onViewAll={() => setPage('activity')}
+        remainingFormat={settings.remainingFormat ?? 'clock'}
+        limit={settings.recentActivityLimit ?? 5}
+      />
     </>
   )
 }
 
-function ActivityPage({ events }) {
+function ActivityPage({ events, remainingFormat }) {
   const [filter, setFilter] = useState('all')
   const visibleEvents = filter === 'all' ? events : events.filter((event) => event.type === filter)
 
@@ -347,34 +419,54 @@ function ActivityPage({ events }) {
           ))}
         </div>
 
-        <div className="prototype-activity-table" role="table" aria-label="Timer activity">
-          <div className="prototype-activity-header" role="row">
-            <span role="columnheader">Event</span>
-            <span role="columnheader">Member</span>
-            <span role="columnheader">Details</span>
-            <span role="columnheader">Remaining</span>
-            <span role="columnheader">Date & time</span>
-          </div>
-          {visibleEvents.map((event) => (
-            <article className="prototype-activity-row" role="row" key={event.id}>
-              <div className="prototype-activity-event" role="cell"><EventBadge type={event.type} /></div>
-              <div className="prototype-member-cell" role="cell"><Avatar user={event.actor} small /><span><strong>{event.actor.name}</strong><small>{event.actor.role}</small></span></div>
-              <div className="prototype-detail-cell" role="cell">{eventSummary(event)}</div>
-              <div className="prototype-remaining-cell" role="cell">{formatDuration(event.remainingAfter)}</div>
-              <time role="cell" dateTime={event.occurredAt}>{formatDateTime(event.occurredAt)}</time>
-            </article>
-          ))}
-        </div>
+        <ActivityTable events={visibleEvents} remainingFormat={remainingFormat} />
       </section>
     </>
   )
 }
 
-function FieldBuilder({ title, description, fields, onChange, kind }) {
+function ChoiceOptionsEditor({ options, onChange }) {
+  const [draft, setDraft] = useState('')
+
+  const addDraft = (rawValue = draft) => {
+    const additions = rawValue.split(',').map((item) => item.trim()).filter(Boolean)
+    if (additions.length === 0) return
+    onChange([...new Set([...options, ...additions])])
+    setDraft('')
+  }
+
+  return (
+    <div className="prototype-choice-editor">
+      <div className="prototype-choice-chips">
+        {options.map((option) => (
+          <span key={option}>{option}<button type="button" onClick={() => onChange(options.filter((item) => item !== option))} aria-label={`Remove ${option}`}>×</button></span>
+        ))}
+      </div>
+      <input
+        value={draft}
+        placeholder="Type a choice, then press Enter or comma"
+        onChange={(event) => {
+          const value = event.target.value
+          if (value.includes(',')) addDraft(value)
+          else setDraft(value)
+        }}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault()
+            addDraft()
+          }
+        }}
+        onBlur={() => addDraft()}
+      />
+    </div>
+  )
+}
+
+function FieldBuilder({ title, description, fields, onChange, kind, allowCurrentState = false }) {
   const addField = () => {
     onChange([
       ...fields,
-      { id: uniqueId(kind), label: 'New field', type: 'short_text', required: false, options: [] },
+      { id: uniqueId(kind), label: 'New field', type: 'short_text', required: false, showInCurrentState: false, options: [] },
     ])
   }
 
@@ -410,14 +502,22 @@ function FieldBuilder({ title, description, fields, onChange, kind }) {
             </label>
             {field.type === 'select' && (
               <label className="prototype-options-field">
-                <span>Choices, separated by commas</span>
-                <input value={field.options.join(', ')} onChange={(event) => updateField(field.id, { options: event.target.value.split(',').map((item) => item.trim()).filter(Boolean) })} />
+                <span>Choices</span>
+                <ChoiceOptionsEditor options={field.options} onChange={(options) => updateField(field.id, { options })} />
               </label>
             )}
-            <label className="prototype-checkbox-label">
-              <input type="checkbox" checked={field.required} onChange={(event) => updateField(field.id, { required: event.target.checked })} />
-              <span>Required</span>
-            </label>
+            <div className="prototype-field-toggles">
+              <label className="prototype-checkbox-label">
+                <input type="checkbox" checked={field.required} onChange={(event) => updateField(field.id, { required: event.target.checked })} />
+                <span>Required</span>
+              </label>
+              {allowCurrentState && (
+                <label className="prototype-checkbox-label">
+                  <input type="checkbox" checked={field.showInCurrentState ?? false} onChange={(event) => updateField(field.id, { showInCurrentState: event.target.checked })} />
+                  <span>Show in current state</span>
+                </label>
+              )}
+            </div>
             <button type="button" className="prototype-icon-button is-danger" onClick={() => onChange(fields.filter((item) => item.id !== field.id))} aria-label={`Delete ${field.label}`}><Icon name="trash" size={17} /></button>
           </div>
         ))}
@@ -467,12 +567,34 @@ function SettingsPage({ state, setState, onStartNewWeek, onResetPrototype }) {
           <label><span>Time zone</span><select value={settings.timezone} onChange={(event) => updateSettings({ timezone: event.target.value })}><option>America/New_York</option><option>America/Chicago</option><option>America/Denver</option><option>America/Los_Angeles</option><option>UTC</option></select></label>
           <div className="prototype-schedule-preview"><Icon name="timer" size={18} /><span>Resets every <strong>{DAYS[settings.resetDay]}</strong> at <strong>{settings.resetTime}</strong></span></div>
         </section>
+
+        <section className="prototype-panel prototype-settings-card">
+          <div className="prototype-panel-heading">
+            <div>
+              <span className="prototype-kicker">Activity</span>
+              <h2>History display</h2>
+            </div>
+          </div>
+          <label className="prototype-settings-field">
+            <span>Remaining-time format</span>
+            <select value={settings.remainingFormat ?? 'clock'} onChange={(event) => updateSettings({ remainingFormat: event.target.value })}>
+              <option value="clock">HH:MM · 18:42</option>
+              <option value="words">Hours and minutes · 18h 42m</option>
+            </select>
+          </label>
+          <label className="prototype-settings-field">
+            <span>Rows shown on Timer page</span>
+            <input type="number" min="1" max="20" value={settings.recentActivityLimit ?? 5} onChange={(event) => updateSettings({ recentActivityLimit: Math.max(1, Math.min(20, Number(event.target.value) || 1)) })} />
+          </label>
+          <div className="prototype-format-preview"><span>Preview</span><strong>{formatRemaining(timer.remainingSeconds, settings.remainingFormat ?? 'clock')}</strong></div>
+        </section>
       </div>
 
       <FieldBuilder
         title="Check out questions"
         description="Information collected before the countdown starts."
         kind="checkout"
+        allowCurrentState
         fields={settings.checkoutFields}
         onChange={(checkoutFields) => updateSettings({ checkoutFields })}
       />
@@ -604,7 +726,12 @@ export default function PrototypeApp() {
     setState((current) => {
       const currentSnapshot = getTimerSnapshot(current.timer)
       const fields = mode === 'checkout' ? current.settings.checkoutFields : current.settings.checkinFields
-      const details = fields.map((field) => ({ label: field.label, value: values[field.id] ?? '' }))
+      const details = fields.map((field) => ({
+        id: field.id,
+        label: field.label,
+        value: values[field.id] ?? '',
+        showInCurrentState: mode === 'checkout' && (field.showInCurrentState ?? false),
+      }))
       const event = {
         id: uniqueId('event'),
         type: mode,
@@ -614,8 +741,8 @@ export default function PrototypeApp() {
         details,
       }
       const timer = mode === 'checkout'
-        ? { ...current.timer, status: 'checked_out', remainingSeconds: currentSnapshot.remaining, checkedOutAt: occurredAt, checkedOutBy: currentUser.id, lastTransitionAt: occurredAt }
-        : { ...current.timer, status: 'checked_in', remainingSeconds: currentSnapshot.remaining, checkedOutAt: null, checkedOutBy: null, lastTransitionAt: occurredAt }
+        ? { ...current.timer, status: 'checked_out', remainingSeconds: currentSnapshot.remaining, checkedOutAt: occurredAt, checkedOutBy: currentUser.id, checkoutDetails: details, lastTransitionAt: occurredAt }
+        : { ...current.timer, status: 'checked_in', remainingSeconds: currentSnapshot.remaining, checkedOutAt: null, checkedOutBy: null, checkoutDetails: [], lastTransitionAt: occurredAt }
       return { ...current, timer, events: [event, ...current.events] }
     })
 
@@ -691,7 +818,7 @@ export default function PrototypeApp() {
 
         <main className="prototype-main">
           {page === 'timer' && <TimerPage state={state} snapshot={snapshot} now={now} onAction={setActiveAction} setPage={setPage} />}
-          {page === 'activity' && <ActivityPage events={state.events} />}
+          {page === 'activity' && <ActivityPage events={state.events} remainingFormat={state.settings.remainingFormat} />}
           {page === 'settings' && <SettingsPage state={state} setState={setState} onStartNewWeek={startNewWeek} onResetPrototype={resetPrototype} />}
         </main>
       </div>

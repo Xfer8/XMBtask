@@ -552,6 +552,41 @@ button {
   line-height: 1.65;
 }
 
+.prototype-current-details {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0 0;
+}
+
+.prototype-current-details > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 9px 10px;
+  background: #1b1e1e;
+  border: 1px solid var(--prototype-border);
+  border-radius: 7px;
+}
+
+.prototype-current-details dt {
+  color: var(--prototype-dim);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.prototype-current-details dd {
+  overflow: hidden;
+  margin: 0;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .prototype-state-detail {
   display: grid;
   gap: 5px;
@@ -612,8 +647,13 @@ button {
 }
 
 .prototype-recent-panel {
+  overflow: hidden;
   margin-top: 18px;
-  padding: 24px 26px;
+}
+
+.prototype-recent-panel > .prototype-panel-heading {
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--prototype-border);
 }
 
 .prototype-panel-heading {
@@ -819,7 +859,7 @@ button {
 
 .prototype-settings-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 18px;
   margin-bottom: 18px;
 }
@@ -878,6 +918,34 @@ button {
 
 .prototype-big-input {
   margin-top: 22px;
+}
+
+.prototype-settings-field {
+  margin-top: 18px;
+}
+
+.prototype-format-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+  padding: 12px;
+  background: #1b1e1e;
+  border: 1px solid var(--prototype-border);
+  border-radius: 7px;
+}
+
+.prototype-format-preview span {
+  color: var(--prototype-dim);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.prototype-format-preview strong {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
 }
 
 .prototype-big-input > div {
@@ -942,7 +1010,7 @@ button {
 
 .prototype-field-editor {
   display: grid;
-  grid-template-columns: 30px minmax(150px, 1.2fr) minmax(130px, .7fr) auto auto;
+  grid-template-columns: 30px minmax(150px, 1.2fr) minmax(130px, .7fr) minmax(130px, auto) auto;
   align-items: end;
   gap: 10px;
   padding: 12px;
@@ -965,7 +1033,77 @@ button {
 }
 
 .prototype-options-field {
-  grid-column: 2 / 4;
+  grid-column: 2 / 5;
+}
+
+.prototype-choice-editor {
+  display: grid;
+  gap: 8px;
+  padding: 9px;
+  background: #191b1b;
+  border: 1px solid var(--prototype-border);
+  border-radius: 7px;
+}
+
+.prototype-choice-editor > input {
+  min-height: 34px;
+  background: #232626;
+}
+
+.prototype-choice-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.prototype-choice-chips:empty {
+  display: none;
+}
+
+.prototype-choice-chips > span {
+  display: inline-flex;
+  min-height: 27px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px 0 9px;
+  color: var(--prototype-green);
+  background: var(--prototype-green-soft);
+  border: 1px solid rgba(67, 218, 139, 0.18);
+  border-radius: 5px;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.prototype-choice-chips button {
+  width: 19px;
+  height: 19px;
+  padding: 0;
+  color: var(--prototype-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.prototype-choice-chips button:hover {
+  color: #ff8c84;
+  background: rgba(255, 94, 84, 0.08);
+}
+
+.prototype-field-toggles {
+  display: grid;
+  grid-column: 4;
+  grid-row: 1;
+  align-content: center;
+  gap: 2px;
+}
+
+.prototype-field-editor > .prototype-icon-button {
+  grid-column: 5;
+  grid-row: 1;
+  align-self: end;
 }
 
 .prototype-checkbox-label {
@@ -1449,8 +1587,7 @@ button {
   .prototype-status-panel,
   .prototype-settings-card,
   .prototype-form-builder,
-  .prototype-danger-zone,
-  .prototype-recent-panel {
+  .prototype-danger-zone {
     padding: 20px;
   }
 
@@ -1463,6 +1600,7 @@ button {
 
   .prototype-status-panel > .prototype-kicker,
   .prototype-status-panel > p,
+  .prototype-status-panel > .prototype-current-details,
   .prototype-status-panel > .prototype-state-detail {
     grid-column: 1 / -1;
   }
@@ -1536,6 +1674,11 @@ button {
 
   .prototype-field-editor .prototype-checkbox-label {
     grid-column: 2;
+  }
+
+  .prototype-field-editor .prototype-field-toggles {
+    grid-column: 2;
+    grid-row: auto;
   }
 
   .prototype-field-editor .prototype-icon-button {
