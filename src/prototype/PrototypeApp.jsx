@@ -257,6 +257,35 @@ function toDateTimeLocal(value) {
   return localDate.toISOString().slice(0, 16)
 }
 
+function createHistoricalSessionDraft(state, actor, now = Date.now()) {
+  const activeSession = getActiveSession(state.sessions)
+  const latestPossibleEnd = activeSession
+    ? new Date(activeSession.checkout.at).getTime()
+    : Math.floor(now / 60000) * 60000
+  const checkoutAt = new Date(latestPossibleEnd - 60 * 60 * 1000).toISOString()
+  const checkinAt = new Date(latestPossibleEnd).toISOString()
+  const detailsFromFields = (fields, includeCurrentState = false) => fields.map((field) => ({
+    id: field.id,
+    label: field.label,
+    value: '',
+    ...(includeCurrentState ? { showInCurrentState: field.showInCurrentState ?? false } : {}),
+  }))
+
+  return {
+    id: uniqueId('session'),
+    checkout: {
+      at: checkoutAt,
+      actor,
+      details: detailsFromFields(state.settings.checkoutFields, true),
+    },
+    checkin: {
+      at: checkinAt,
+      actor,
+      details: detailsFromFields(state.settings.checkinFields),
+    },
+  }
+}
+
 function formatShortTime(value) {
   return new Intl.DateTimeFormat(undefined, {
     hour: 'numeric',
@@ -500,7 +529,7 @@ function TimerPage({ state, snapshot, now, onAction, setPage }) {
   )
 }
 
-function ActivityPage({ state, remainingFormat, now, canManage, onEditSession }) {
+function ActivityPage({ state, remainingFormat, now, canManage, onEditSession, onAddSession }) {
   const [filter, setFilter] = useState('all')
   const sessions = sortSessionsNewest(state.sessions)
   const visibleSessions = filter === 'all' ? sessions : sessions.filter((session) => filter === 'active' ? !session.checkin : Boolean(session.checkin))
@@ -508,7 +537,10 @@ function ActivityPage({ state, remainingFormat, now, canManage, onEditSession })
   return (
     <>
       <PageHeading eyebrow="Shared history" title="Activity" description="Each row is one complete checkout session, with its start and end kept together.">
-        <div className={`prototype-admin-pill ${canManage ? 'is-enabled' : ''}`}><Icon name={canManage ? 'edit' : 'settings'} size={15} /> {canManage ? 'Owner editing enabled' : 'Owner editing only'}</div>
+        <div className="prototype-activity-heading-actions">
+          <div className={`prototype-admin-pill ${canManage ? 'is-enabled' : ''}`}><Icon name={canManage ? 'edit' : 'settings'} size={15} /> {canManage ? 'Owner editing enabled' : 'Owner editing only'}</div>
+          {canManage && <button type="button" className="prototype-secondary-button prototype-add-session-button" onClick={onAddSession}><Icon name="plus" size={17} /> Add session</button>}
+        </div>
       </PageHeading>
 
       <section className="prototype-panel prototype-activity-panel">
@@ -733,7 +765,7 @@ function FieldInput({ field, value, onChange }) {
   return <input type="text" value={value ?? ''} onChange={(event) => onChange(event.target.value)} />
 }
 
-function EditSessionSheet({ session, allSessions, state, remainingFormat, now, onClose, onSave, onDelete }) {
+function EditSessionSheet({ session, allSessions, state, remainingFormat, now, isNew = false, onClose, onSave, onDelete }) {
   const prepareDetails = (details = []) => details.map((detail, index) => ({
     ...detail,
     editorId: detail.id ?? `detail-${index}`,
@@ -755,7 +787,12 @@ function EditSessionSheet({ session, allSessions, state, remainingFormat, now, o
     checkin: session.checkin ? { ...session.checkin, at: new Date(previewEnd).toISOString() } : null,
   } : null
   const previewConflict = previewSession ? findSessionConflict(previewSession, allSessions) : null
-  const previewState = previewSession ? { ...state, sessions: state.sessions.map((item) => item.id === session.id ? previewSession : item) } : state
+  const previewState = previewSession ? {
+    ...state,
+    sessions: isNew
+      ? [...state.sessions, previewSession]
+      : state.sessions.map((item) => item.id === session.id ? previewSession : item),
+  } : state
   const previewRemaining = previewSession && !previewConflict ? getRemainingAt(previewState, previewEnd, now).remaining : null
 
   const updateDetail = (setter, editorId, patch) => {
@@ -778,6 +815,8 @@ function EditSessionSheet({ session, allSessions, state, remainingFormat, now, o
     const nextErrors = {}
     if (!checkoutAt || Number.isNaN(checkoutDate.getTime())) nextErrors.checkoutAt = 'Enter a valid check-out time.'
     if (session.checkin && (!checkinDate || Number.isNaN(checkinDate.getTime()))) nextErrors.checkinAt = 'Enter a valid check-in time.'
+    if (!Number.isNaN(checkoutDate.getTime()) && checkoutDate.getTime() > now) nextErrors.checkoutAt = 'Check-out cannot be in the future.'
+    if (checkinDate && !Number.isNaN(checkinDate.getTime()) && checkinDate.getTime() > now) nextErrors.checkinAt = 'Check-in cannot be in the future.'
     if (checkinDate && checkinDate <= checkoutDate) nextErrors.checkinAt = 'Check-in must occur after check-out.'
 
     if (Object.keys(nextErrors).length > 0) {
@@ -827,7 +866,11 @@ function EditSessionSheet({ session, allSessions, state, remainingFormat, now, o
         <div className={`prototype-sheet-accent ${session.checkin ? 'is-checkin' : 'is-checkout'}`} />
         <div className="prototype-sheet-header">
           <div className="prototype-action-icon"><Icon name="edit" size={22} /></div>
-          <div><span className="prototype-kicker">Calendar-style correction</span><h2 id="edit-session-title">Edit checkout session</h2><p>Start, end, duration, and weekly balance stay synchronized as one event.</p></div>
+          <div>
+            <span className="prototype-kicker">{isNew ? 'Historical activity' : 'Calendar-style correction'}</span>
+            <h2 id="edit-session-title">{isNew ? 'Add checkout session' : 'Edit checkout session'}</h2>
+            <p>{isNew ? 'Enter a complete check-out and check-in block from your paper log.' : 'Start, end, duration, and weekly balance stay synchronized as one event.'}</p>
+          </div>
           <button type="button" className="prototype-icon-button" onClick={onClose} aria-label="Close"><Icon name="close" size={20} /></button>
         </div>
 
@@ -867,9 +910,9 @@ function EditSessionSheet({ session, allSessions, state, remainingFormat, now, o
             <div className="prototype-admin-warning"><Icon name="activity" size={17} /><span>Duration and remaining time are derived automatically. They are never directly editable.</span></div>
           </div>
 
-          <div className="prototype-sheet-actions prototype-admin-sheet-actions">
-            <button type="button" className="prototype-admin-delete-button" onClick={() => { if (window.confirm('Delete this entire checkout session? Both endpoints and their details will be removed.')) onDelete(session.id) }}><Icon name="trash" size={17} /> Delete session</button>
-            <div><button type="button" className="prototype-cancel-button" onClick={onClose}>Cancel</button><button type="submit" className="prototype-submit-button is-admin">Save session <Icon name="check" size={18} /></button></div>
+          <div className={`prototype-sheet-actions prototype-admin-sheet-actions ${isNew ? 'is-create' : ''}`}>
+            {!isNew && <button type="button" className="prototype-admin-delete-button" onClick={() => { if (window.confirm('Delete this entire checkout session? Both endpoints and their details will be removed.')) onDelete(session.id) }}><Icon name="trash" size={17} /> Delete session</button>}
+            <div><button type="button" className="prototype-cancel-button" onClick={onClose}>Cancel</button><button type="submit" className="prototype-submit-button is-admin">{isNew ? 'Add session' : 'Save session'} <Icon name="check" size={18} /></button></div>
           </div>
         </form>
       </section>
@@ -933,6 +976,7 @@ export default function PrototypeApp() {
   })
   const [activeAction, setActiveAction] = useState(null)
   const [editingSessionId, setEditingSessionId] = useState(null)
+  const [newSessionDraft, setNewSessionDraft] = useState(null)
   const [toast, setToast] = useState('')
 
   useEffect(() => {
@@ -1040,8 +1084,9 @@ export default function PrototypeApp() {
 
   const saveEditedSession = (updatedSession) => {
     const invalidRange = updatedSession.checkin && new Date(updatedSession.checkin.at) <= new Date(updatedSession.checkout.at)
+    const occursInFuture = new Date(updatedSession.checkout.at).getTime() > now || (updatedSession.checkin && new Date(updatedSession.checkin.at).getTime() > now)
     const conflict = findSessionConflict(updatedSession, model.sessions)
-    if (invalidRange || conflict) {
+    if (invalidRange || occursInFuture || conflict) {
       setToast('Session not saved — correct the date conflict first.')
       return
     }
@@ -1053,6 +1098,23 @@ export default function PrototypeApp() {
     })
     setEditingSessionId(null)
     setToast('Checkout session updated. Derived totals were recalculated.')
+  }
+
+  const addHistoricalSession = (newSession) => {
+    const invalidRange = !newSession.checkin || new Date(newSession.checkin.at) <= new Date(newSession.checkout.at)
+    const occursInFuture = new Date(newSession.checkout.at).getTime() > now || new Date(newSession.checkin.at).getTime() > now
+    const conflict = findSessionConflict(newSession, model.sessions)
+    if (invalidRange || occursInFuture || conflict) {
+      setToast('Session not added — correct the date conflict first.')
+      return
+    }
+
+    setState((currentState) => {
+      const current = normalizeState(currentState)
+      return { ...current, sessions: sortSessionsNewest([...current.sessions, newSession]) }
+    })
+    setNewSessionDraft(null)
+    setToast('Historical checkout session added. Derived totals were recalculated.')
   }
 
   const deleteSession = (sessionId) => {
@@ -1103,7 +1165,7 @@ export default function PrototypeApp() {
 
         <main className="prototype-main">
           {page === 'timer' && <TimerPage state={model} snapshot={snapshot} now={now} onAction={setActiveAction} setPage={setPage} />}
-          {page === 'activity' && <ActivityPage state={model} remainingFormat={model.settings.remainingFormat} now={now} canManage={canManageActivity} onEditSession={setEditingSessionId} />}
+          {page === 'activity' && <ActivityPage state={model} remainingFormat={model.settings.remainingFormat} now={now} canManage={canManageActivity} onEditSession={setEditingSessionId} onAddSession={() => setNewSessionDraft(createHistoricalSessionDraft(model, currentUser, now))} />}
           {page === 'settings' && <SettingsPage state={model} snapshot={snapshot} setState={setState} onStartNewWeek={startNewWeek} onResetPrototype={resetPrototype} />}
         </main>
       </div>
@@ -1130,6 +1192,19 @@ export default function PrototypeApp() {
           onClose={() => setEditingSessionId(null)}
           onSave={saveEditedSession}
           onDelete={deleteSession}
+        />
+      )}
+
+      {newSessionDraft && canManageActivity && (
+        <EditSessionSheet
+          session={newSessionDraft}
+          allSessions={model.sessions}
+          state={model}
+          remainingFormat={model.settings.remainingFormat}
+          now={now}
+          isNew
+          onClose={() => setNewSessionDraft(null)}
+          onSave={addHistoricalSession}
         />
       )}
 

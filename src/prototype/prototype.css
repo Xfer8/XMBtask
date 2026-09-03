@@ -276,6 +276,24 @@ button {
   line-height: 1.6;
 }
 
+.prototype-activity-heading-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.prototype-add-session-button {
+  min-height: 36px;
+  color: var(--prototype-green);
+  background: var(--prototype-green-soft);
+  border-color: rgba(67, 218, 139, 0.3);
+}
+
+.prototype-add-session-button:hover {
+  background: rgba(67, 218, 139, 0.17);
+}
+
 .prototype-live-pill {
   display: flex;
   min-height: 32px;
@@ -1804,6 +1822,10 @@ button {
   gap: 9px;
 }
 
+.prototype-admin-sheet-actions.is-create {
+  justify-content: flex-end;
+}
+
 .prototype-admin-delete-button {
   display: inline-flex;
   min-height: 40px;
@@ -2132,6 +2154,11 @@ button {
   .prototype-page-heading p {
     max-width: 270px;
     font-size: 12px;
+  }
+
+  .prototype-activity-heading-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .prototype-live-pill {
