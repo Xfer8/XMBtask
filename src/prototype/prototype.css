@@ -1734,6 +1734,24 @@ button {
   padding-top: 4px;
 }
 
+.prototype-manual-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.prototype-manual-details-grid > label {
+  align-content: start;
+  padding: 12px;
+  background: #1b1e1e;
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+}
+
+.prototype-manual-details-grid > label.is-wide {
+  grid-column: 1 / -1;
+}
+
 .prototype-admin-details > div:first-child strong,
 .prototype-admin-details > div:first-child small {
   display: block;
@@ -2481,8 +2499,13 @@ button {
   }
 
   .prototype-admin-two-fields,
-  .prototype-admin-detail-row {
+  .prototype-admin-detail-row,
+  .prototype-manual-details-grid {
     grid-template-columns: 1fr;
+  }
+
+  .prototype-manual-details-grid > label.is-wide {
+    grid-column: auto;
   }
 
   .prototype-sheet-header {

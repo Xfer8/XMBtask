@@ -267,7 +267,7 @@ function createHistoricalSessionDraft(state, actor, now = Date.now()) {
   const detailsFromFields = (fields, includeCurrentState = false) => fields.map((field) => ({
     id: field.id,
     label: field.label,
-    value: '',
+    value: field.type === 'yes_no' ? false : '',
     ...(includeCurrentState ? { showInCurrentState: field.showInCurrentState ?? false } : {}),
   }))
 
@@ -769,7 +769,9 @@ function EditSessionSheet({ session, allSessions, state, remainingFormat, now, i
   const prepareDetails = (details = []) => details.map((detail, index) => ({
     ...detail,
     editorId: detail.id ?? `detail-${index}`,
-    value: typeof detail.value === 'boolean' ? (detail.value ? 'Yes' : 'No') : String(detail.value ?? ''),
+    value: isNew
+      ? detail.value
+      : typeof detail.value === 'boolean' ? (detail.value ? 'Yes' : 'No') : String(detail.value ?? ''),
   }))
   const [checkoutAt, setCheckoutAt] = useState(() => toDateTimeLocal(session.checkout.at))
   const [checkoutActorId, setCheckoutActorId] = useState(session.checkout.actor.id)
@@ -818,6 +820,18 @@ function EditSessionSheet({ session, allSessions, state, remainingFormat, now, i
     if (!Number.isNaN(checkoutDate.getTime()) && checkoutDate.getTime() > now) nextErrors.checkoutAt = 'Check-out cannot be in the future.'
     if (checkinDate && !Number.isNaN(checkinDate.getTime()) && checkinDate.getTime() > now) nextErrors.checkinAt = 'Check-in cannot be in the future.'
     if (checkinDate && checkinDate <= checkoutDate) nextErrors.checkinAt = 'Check-in must occur after check-out.'
+    if (isNew) {
+      const validateRequiredDetails = (details, fields, endpoint) => {
+        fields.forEach((field) => {
+          const value = details.find((detail) => detail.id === field.id)?.value
+          if (field.required && (value === undefined || value === null || value === '')) {
+            nextErrors[`${endpoint}-${field.id}`] = 'This field is required.'
+          }
+        })
+      }
+      validateRequiredDetails(checkoutDetails, state.settings.checkoutFields, 'checkout')
+      validateRequiredDetails(checkinDetails, state.settings.checkinFields, 'checkin')
+    }
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors)
@@ -848,10 +862,25 @@ function EditSessionSheet({ session, allSessions, state, remainingFormat, now, i
     if (Object.keys(nextErrors).length === 0) onSave(candidate)
   }
 
-  const renderDetails = (title, details, setter) => details.length > 0 && (
+  const renderDetails = (title, details, setter, configuredFields, endpoint) => details.length > 0 && (
     <div className="prototype-admin-details">
-      <div><strong>{title}</strong><small>Edit the values captured at this endpoint.</small></div>
-      {details.map((detail) => (
+      <div><strong>{title}</strong><small>{isNew ? 'Complete the same questions used by the live workflow.' : 'Edit the values captured at this endpoint.'}</small></div>
+      {isNew ? (
+        <div className="prototype-manual-details-grid">
+          {configuredFields.map((field) => {
+            const detail = details.find((item) => item.id === field.id)
+            if (!detail) return null
+            const errorKey = `${endpoint}-${field.id}`
+            return (
+              <label className={`${errors[errorKey] ? 'has-error' : ''} ${field.type === 'long_text' ? 'is-wide' : ''}`} key={field.id}>
+                <span>{field.label}{field.required && <em>Required</em>}</span>
+                <FieldInput field={field} value={detail?.value} onChange={(value) => updateDetail(setter, detail.editorId, { value })} />
+                {errors[errorKey] && <small>{errors[errorKey]}</small>}
+              </label>
+            )
+          })}
+        </div>
+      ) : details.map((detail) => (
         <div className="prototype-admin-detail-row" key={detail.editorId}>
           <label><span>Field</span><input value={detail.label} onChange={(event) => updateDetail(setter, detail.editorId, { label: event.target.value })} /></label>
           <label><span>Value</span><input value={detail.value} onChange={(event) => updateDetail(setter, detail.editorId, { value: event.target.value })} /></label>
@@ -890,7 +919,7 @@ function EditSessionSheet({ session, allSessions, state, remainingFormat, now, i
                 <label className={errors.checkoutAt ? 'has-error' : ''}><span>Date and time <em>Required</em></span><input type="datetime-local" step="60" value={checkoutAt} onChange={(event) => setCheckoutAt(event.target.value)} />{errors.checkoutAt && <small>{errors.checkoutAt}</small>}</label>
                 <label><span>Member</span><select value={checkoutActorId} onChange={(event) => setCheckoutActorId(event.target.value)}>{MOCK_USERS.map((user) => <option value={user.id} key={user.id}>{user.name}</option>)}</select></label>
               </div>
-              {renderDetails('Check-out details', checkoutDetails, setCheckoutDetails)}
+              {renderDetails('Check-out details', checkoutDetails, setCheckoutDetails, state.settings.checkoutFields, 'checkout')}
             </section>
 
             <section className="prototype-session-editor-section">
@@ -901,7 +930,7 @@ function EditSessionSheet({ session, allSessions, state, remainingFormat, now, i
                     <label className={errors.checkinAt ? 'has-error' : ''}><span>Date and time <em>Required</em></span><input type="datetime-local" step="60" value={checkinAt} onChange={(event) => setCheckinAt(event.target.value)} />{errors.checkinAt && <small>{errors.checkinAt}</small>}</label>
                     <label><span>Member</span><select value={checkinActorId} onChange={(event) => setCheckinActorId(event.target.value)}>{MOCK_USERS.map((user) => <option value={user.id} key={user.id}>{user.name}</option>)}</select></label>
                   </div>
-                  {renderDetails('Check-in details', checkinDetails, setCheckinDetails)}
+                  {renderDetails('Check-in details', checkinDetails, setCheckinDetails, state.settings.checkinFields, 'checkin')}
                 </>
               ) : <div className="prototype-session-open-note"><span className="prototype-pulse-dot" /> This session is active. Check in from the Timer page to create its end.</div>}
             </section>
