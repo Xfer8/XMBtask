@@ -60,7 +60,7 @@ button {
   position: relative;
   color: #f1f2ef;
   font-family: 'Roboto Slab', Georgia, serif;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.05em;
 }
@@ -74,7 +74,7 @@ button {
   margin-top: 5px;
   color: var(--prototype-dim);
   font-family: Inter, sans-serif;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -101,7 +101,7 @@ button {
   background: transparent;
   border: 1px solid transparent;
   border-radius: 9px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   text-align: left;
   transition: 140ms ease;
@@ -130,7 +130,7 @@ button {
 
 .prototype-sidebar-footer span {
   color: var(--prototype-yellow);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -138,7 +138,7 @@ button {
 
 .prototype-sidebar-footer strong {
   color: var(--prototype-muted);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   line-height: 1.45;
 }
@@ -167,7 +167,7 @@ button {
   align-items: center;
   gap: 9px;
   color: var(--prototype-muted);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.02em;
 }
@@ -194,7 +194,7 @@ button {
 
 .prototype-user-switcher > span {
   color: var(--prototype-dim);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -206,7 +206,7 @@ button {
   background: transparent;
   border: 0;
   outline: 0;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -224,7 +224,7 @@ button {
   background: color-mix(in srgb, var(--avatar-color) 14%, #202323);
   border: 1px solid color-mix(in srgb, var(--avatar-color) 36%, transparent);
   border-radius: 50%;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.04em;
 }
@@ -232,7 +232,7 @@ button {
 .prototype-avatar.is-small {
   width: 28px;
   height: 28px;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .prototype-main {
@@ -254,7 +254,7 @@ button {
   display: block;
   margin-bottom: 7px;
   color: var(--prototype-orange);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -263,7 +263,7 @@ button {
 .prototype-page-heading h1 {
   margin: 0;
   font-family: 'Roboto Slab', Georgia, serif;
-  font-size: clamp(26px, 4vw, 40px);
+  font-size: clamp(30px, 4vw, 44px);
   line-height: 1.1;
   letter-spacing: -0.04em;
 }
@@ -272,7 +272,7 @@ button {
   max-width: 620px;
   margin: 9px 0 0;
   color: var(--prototype-muted);
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.6;
 }
 
@@ -283,7 +283,7 @@ button {
   gap: 8px;
   padding: 0 12px;
   border-radius: 18px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -377,7 +377,7 @@ button {
 
 .prototype-timer-topline > span:first-child {
   color: var(--prototype-muted);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -389,7 +389,7 @@ button {
   background: rgba(226, 189, 76, 0.09);
   border: 1px solid rgba(226, 189, 76, 0.18);
   border-radius: 5px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -438,7 +438,7 @@ button {
 .prototype-timer-meta {
   margin-top: 10px;
   color: var(--prototype-dim);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 600;
 }
 
@@ -489,14 +489,14 @@ button {
 }
 
 .prototype-primary-action strong {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 800;
 }
 
 .prototype-primary-action small {
   margin-top: 3px;
   color: rgba(16, 32, 24, 0.68);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -507,7 +507,7 @@ button {
   gap: 8px;
   margin-top: 16px;
   color: var(--prototype-dim);
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .prototype-side-stack {
@@ -539,7 +539,7 @@ button {
 .prototype-danger-zone h2 {
   margin: 0;
   font-family: 'Roboto Slab', Georgia, serif;
-  font-size: 18px;
+  font-size: 20px;
   letter-spacing: -0.03em;
 }
 
@@ -548,7 +548,7 @@ button {
 .prototype-danger-zone p {
   margin: 8px 0 0;
   color: var(--prototype-muted);
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.65;
 }
 
@@ -571,7 +571,7 @@ button {
 
 .prototype-current-details dt {
   color: var(--prototype-dim);
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -580,7 +580,7 @@ button {
 .prototype-current-details dd {
   overflow: hidden;
   margin: 0;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   text-align: right;
   text-overflow: ellipsis;
@@ -597,14 +597,14 @@ button {
 
 .prototype-state-detail span {
   color: var(--prototype-dim);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .prototype-state-detail strong {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -637,13 +637,13 @@ button {
 }
 
 .prototype-schedule-panel strong {
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .prototype-schedule-panel small {
   margin-top: 3px;
   color: var(--prototype-dim);
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .prototype-recent-panel {
@@ -673,7 +673,7 @@ button {
   background: transparent;
   border-radius: 7px;
   cursor: pointer;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -718,7 +718,7 @@ button {
 }
 
 .prototype-event-copy div {
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .prototype-event-copy span {
@@ -726,7 +726,7 @@ button {
   overflow: hidden;
   margin-top: 3px;
   color: var(--prototype-dim);
-  font-size: 9px;
+  font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -734,7 +734,7 @@ button {
 .prototype-event-row time {
   color: var(--prototype-dim);
   font-family: 'DM Mono', monospace;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .prototype-activity-panel {
@@ -756,7 +756,7 @@ button {
   border: 1px solid transparent;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
 }
 
@@ -769,7 +769,7 @@ button {
 .prototype-activity-header,
 .prototype-activity-group {
   display: grid;
-  grid-template-columns: 112px 142px minmax(190px, 1fr) 104px 92px 126px;
+  grid-template-columns: 118px 142px minmax(190px, 1fr) 104px 92px 126px;
   align-items: center;
   gap: 16px;
   padding: 0 22px;
@@ -780,7 +780,7 @@ button {
   color: var(--prototype-dim);
   background: #1c1f1f;
   border-bottom: 1px solid var(--prototype-border);
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -789,26 +789,11 @@ button {
 .prototype-activity-group {
   position: relative;
   border-bottom: 1px solid var(--prototype-border);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .prototype-activity-group:last-child {
   border-bottom: 0;
-}
-
-.prototype-activity-group.is-cycle::before {
-  position: absolute;
-  top: 34px;
-  bottom: 34px;
-  left: 27px;
-  width: 1px;
-  background: linear-gradient(var(--prototype-orange), var(--prototype-green));
-  content: '';
-  opacity: 0.42;
-}
-
-.prototype-activity-group.is-open::before {
-  background: var(--prototype-orange);
 }
 
 .prototype-activity-row {
@@ -818,25 +803,42 @@ button {
 .prototype-activity-row > * {
   grid-row: var(--activity-row);
   min-width: 0;
-  min-height: 76px;
-}
-
-.prototype-activity-row + .prototype-activity-row > * {
-  border-top: 1px dashed rgba(255, 255, 255, 0.07);
+  min-height: 58px;
 }
 
 .prototype-activity-event {
   z-index: 1;
+  display: flex;
   grid-column: 1;
+  align-self: stretch;
+  align-items: center;
+  margin-left: -22px;
+  padding: 0 12px 0 22px;
+  border-left: 3px solid transparent;
+}
+
+.prototype-activity-event.is-checkout {
+  background: rgba(255, 157, 71, 0.12);
+  border-left-color: var(--prototype-orange);
+}
+
+.prototype-activity-event.is-checkin {
+  background: rgba(67, 218, 139, 0.12);
+  border-left-color: var(--prototype-green);
+}
+
+.prototype-activity-event.is-reset {
+  background: rgba(226, 189, 76, 0.1);
+  border-left-color: var(--prototype-yellow);
 }
 
 .prototype-event-badge {
   display: inline-flex;
-  min-height: 27px;
+  min-height: 0;
   align-items: center;
-  padding: 0 8px;
-  border-radius: 5px;
-  font-size: 8px;
+  padding: 0;
+  border-radius: 0;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -844,17 +846,17 @@ button {
 
 .prototype-event-badge.is-checkout {
   color: var(--prototype-orange);
-  background: var(--prototype-orange-soft);
+  background: transparent;
 }
 
 .prototype-event-badge.is-checkin {
   color: var(--prototype-green);
-  background: var(--prototype-green-soft);
+  background: transparent;
 }
 
 .prototype-event-badge.is-reset {
   color: var(--prototype-yellow);
-  background: rgba(226, 189, 76, 0.1);
+  background: transparent;
 }
 
 .prototype-member-cell {
@@ -872,7 +874,7 @@ button {
 .prototype-member-cell small {
   margin-top: 2px;
   color: var(--prototype-dim);
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .prototype-detail-cell {
@@ -891,9 +893,8 @@ button {
   place-content: center start;
   align-self: stretch;
   gap: 4px;
-  padding-left: 13px;
-  background: linear-gradient(90deg, rgba(67, 218, 139, 0.045), transparent);
-  border-left: 2px solid rgba(67, 218, 139, 0.34);
+  padding: 0 10px;
+  background: rgba(67, 218, 139, 0.045);
 }
 
 .prototype-duration-cell > span {
@@ -903,20 +904,19 @@ button {
 .prototype-duration-cell strong {
   color: var(--prototype-text);
   font-family: 'DM Mono', monospace;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .prototype-duration-cell small {
   color: var(--prototype-dim);
-  font-size: 7px;
+  font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .prototype-duration-cell.is-live {
-  background: linear-gradient(90deg, rgba(255, 142, 60, 0.07), transparent);
-  border-left-color: rgba(255, 142, 60, 0.55);
+  background: rgba(255, 142, 60, 0.07);
 }
 
 .prototype-duration-cell.is-live strong,
@@ -929,7 +929,7 @@ button {
   grid-column: 5;
   align-items: center;
   font-family: 'DM Mono', monospace;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .prototype-activity-row time {
@@ -937,7 +937,7 @@ button {
   grid-column: 6;
   align-items: center;
   color: var(--prototype-muted);
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .prototype-settings-grid {
@@ -959,7 +959,7 @@ button {
   display: grid;
   gap: 7px;
   color: var(--prototype-muted);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
@@ -979,7 +979,7 @@ button {
   border: 1px solid var(--prototype-border);
   border-radius: 7px;
   outline: 0;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .prototype-sheet-fields textarea {
@@ -1020,7 +1020,7 @@ button {
 
 .prototype-format-preview span {
   color: var(--prototype-dim);
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1028,7 +1028,7 @@ button {
 
 .prototype-format-preview strong {
   font-family: 'DM Mono', monospace;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .prototype-big-input > div {
@@ -1041,19 +1041,19 @@ button {
   max-width: 150px;
   height: 54px;
   font-family: 'DM Mono', monospace;
-  font-size: 22px;
+  font-size: 24px;
 }
 
 .prototype-big-input strong {
   color: var(--prototype-dim);
-  font-size: 10px;
+  font-size: 12px;
   text-transform: uppercase;
 }
 
 .prototype-help-copy {
   margin: 12px 0 0;
   color: var(--prototype-dim);
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.55;
 }
 
@@ -1074,7 +1074,7 @@ button {
   background: rgba(98, 191, 255, 0.07);
   border: 1px solid rgba(98, 191, 255, 0.13);
   border-radius: 7px;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .prototype-schedule-preview svg {
@@ -1112,7 +1112,7 @@ button {
   background: #262929;
   border-radius: 6px;
   font-family: 'DM Mono', monospace;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .prototype-options-field {
@@ -1153,7 +1153,7 @@ button {
   background: var(--prototype-green-soft);
   border: 1px solid rgba(67, 218, 139, 0.18);
   border-radius: 5px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
 }
 
@@ -1166,7 +1166,7 @@ button {
   border: 0;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1;
 }
 
@@ -1234,7 +1234,7 @@ button {
   background: #1b1e1e;
   border: 1px dashed var(--prototype-border-strong);
   border-radius: 8px;
-  font-size: 10px;
+  font-size: 12px;
   text-align: center;
 }
 
@@ -1299,13 +1299,13 @@ button {
 .prototype-sheet-header h2 {
   margin: 0;
   font-family: 'Roboto Slab', Georgia, serif;
-  font-size: 24px;
+  font-size: 26px;
 }
 
 .prototype-sheet-header p {
   margin: 6px 0 0;
   color: var(--prototype-muted);
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.55;
 }
 
@@ -1327,7 +1327,7 @@ button {
 
 .prototype-sheet-fields label em {
   color: var(--prototype-orange);
-  font-size: 8px;
+  font-size: 10px;
   font-style: normal;
   text-transform: uppercase;
 }
@@ -1340,7 +1340,7 @@ button {
 
 .prototype-sheet-fields label > small {
   color: #ff8c84;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .prototype-yes-no {
@@ -1379,7 +1379,7 @@ button {
   border: 0;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
 }
 
@@ -1413,7 +1413,7 @@ button {
   border: 1px solid rgba(67, 218, 139, 0.3);
   border-radius: 9px;
   box-shadow: 0 14px 42px rgba(0, 0, 0, 0.34);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   animation: prototype-toast-in 180ms ease;
 }
@@ -1439,6 +1439,11 @@ button {
 
   .prototype-countdown {
     font-size: clamp(42px, 6.2vw, 66px);
+  }
+
+  .prototype-activity-event {
+    margin-left: -16px;
+    padding-left: 16px;
   }
 }
 
@@ -1467,7 +1472,7 @@ button {
     background: rgba(226, 189, 76, 0.08);
     border: 1px solid rgba(226, 189, 76, 0.16);
     border-radius: 5px;
-    font-size: 8px;
+    font-size: 10px;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -1496,7 +1501,7 @@ button {
     color: var(--prototype-muted);
     background: transparent;
     border-radius: 7px;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
   }
 
@@ -1556,7 +1561,7 @@ button {
   }
 
   .prototype-sync-state {
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .prototype-user-switcher > span {
@@ -1570,7 +1575,7 @@ button {
 
   .prototype-user-switcher select {
     width: 68px;
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .prototype-nav-tablet {
@@ -1598,7 +1603,7 @@ button {
     color: var(--prototype-dim);
     background: transparent;
     border-radius: 7px;
-    font-size: 8px;
+    font-size: 10px;
     font-weight: 700;
   }
 
@@ -1616,18 +1621,18 @@ button {
   }
 
   .prototype-page-heading h1 {
-    font-size: 26px;
+    font-size: 29px;
   }
 
   .prototype-page-heading p {
     max-width: 270px;
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .prototype-live-pill {
     min-height: 28px;
     padding-inline: 9px;
-    font-size: 8px;
+    font-size: 10px;
   }
 
   .prototype-timer-card {
@@ -1642,11 +1647,11 @@ button {
   }
 
   .prototype-timer-topline > span:first-child {
-    font-size: 8px;
+    font-size: 10px;
   }
 
   .prototype-timer-meta {
-    font-size: 8px;
+    font-size: 10px;
   }
 
   .prototype-primary-action {
@@ -1748,6 +1753,9 @@ button {
   .prototype-activity-event {
     grid-column: 1;
     grid-row: 1;
+    min-height: 38px;
+    margin: -6px 0 0 -15px;
+    padding: 0 12px 0 15px;
   }
 
   .prototype-member-cell {
@@ -1785,7 +1793,7 @@ button {
   .prototype-duration-cell > span {
     display: block;
     color: var(--prototype-dim);
-    font-size: 8px;
+    font-size: 10px;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;

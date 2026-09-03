@@ -314,7 +314,7 @@ function ActivityTable({ events, allEvents = events, remainingFormat, now, label
         <section className={`prototype-activity-group ${group.cycle ? 'is-cycle' : 'is-single'} ${group.cycle?.status === 'open' ? 'is-open' : ''}`} role="rowgroup" key={group.id}>
           {group.events.map((event, index) => (
             <article className="prototype-activity-row" role="row" key={event.id} style={{ '--activity-row': index + 1 }}>
-              <div className="prototype-activity-event" role="cell"><EventBadge type={event.type} /></div>
+              <div className={`prototype-activity-event is-${event.type}`} role="cell"><EventBadge type={event.type} /></div>
               <div className="prototype-member-cell" role="cell"><Avatar user={event.actor} small /><span><strong>{event.actor.name}</strong><small>{event.actor.role}</small></span></div>
               <div className="prototype-detail-cell" role="cell">{eventSummary(event)}</div>
               <div className="prototype-remaining-cell" role="cell">{formatRemaining(event.remainingAfter, remainingFormat)}</div>
