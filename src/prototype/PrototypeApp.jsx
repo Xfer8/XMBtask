@@ -80,7 +80,7 @@ function createDefaultState() {
         },
       },
     ],
-    resets: [{ id: uniqueId('reset'), occurredAt: minutesAgo(2 * 24 * 60), actor: SYSTEM_USER, allowanceSeconds: 20 * 60 * 60 }],
+    resets: [],
   }
 }
 
@@ -93,7 +93,14 @@ function migrateLegacyEvents(events = []) {
     .sort((left, right) => new Date(left.occurredAt) - new Date(right.occurredAt))
     .forEach((event) => {
       if (event.type === 'reset') {
-        resets.push({ id: event.id, occurredAt: event.occurredAt, actor: event.actor ?? SYSTEM_USER, allowanceSeconds: event.remainingAfter })
+        const actor = event.actor ?? SYSTEM_USER
+        resets.push({
+          id: event.id,
+          occurredAt: event.occurredAt,
+          actor,
+          allowanceSeconds: event.remainingAfter,
+          kind: actor.id === SYSTEM_USER.id ? 'legacy-scheduled' : 'manual',
+        })
         return
       }
 
@@ -135,7 +142,12 @@ function normalizeState(parsed) {
       checkinFields: parsed?.settings?.checkinFields ?? defaults.settings.checkinFields,
     },
     sessions: hasSessionSchema || Array.isArray(parsed?.events) ? migrated.sessions : defaults.sessions,
-    resets: hasSessionSchema || Array.isArray(parsed?.events) ? migrated.resets : defaults.resets,
+    resets: hasSessionSchema || Array.isArray(parsed?.events)
+      ? migrated.resets.map((reset) => ({
+        ...reset,
+        kind: reset.kind ?? (reset.actor?.id === SYSTEM_USER.id ? 'legacy-scheduled' : 'manual'),
+      }))
+      : defaults.resets,
   }
 }
 
@@ -192,12 +204,70 @@ function getSessionDuration(session, now = Date.now()) {
   return Math.max(0, Math.floor((end - new Date(session.checkout.at).getTime()) / 1000))
 }
 
+function getZonedDateTimeParts(timestamp, timeZone) {
+  const parts = new Intl.DateTimeFormat('en-US-u-ca-gregory-nu-latn', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(new Date(timestamp))
+  const values = Object.fromEntries(parts.filter((part) => part.type !== 'literal').map((part) => [part.type, Number(part.value)]))
+  return values
+}
+
+function zonedDateTimeToTimestamp(dateTime, timeZone) {
+  const desiredAsUtc = Date.UTC(dateTime.year, dateTime.month - 1, dateTime.day, dateTime.hour, dateTime.minute, 0)
+  let guess = desiredAsUtc
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const actual = getZonedDateTimeParts(guess, timeZone)
+    const actualAsUtc = Date.UTC(actual.year, actual.month - 1, actual.day, actual.hour, actual.minute, actual.second)
+    const correction = desiredAsUtc - actualAsUtc
+    guess += correction
+    if (correction === 0) break
+  }
+
+  return guess
+}
+
+function getScheduledPeriodStart(settings, targetTime) {
+  const local = getZonedDateTimeParts(targetTime, settings.timezone)
+  const [resetHour, resetMinute] = settings.resetTime.split(':').map(Number)
+  const localWeekday = new Date(Date.UTC(local.year, local.month - 1, local.day)).getUTCDay()
+  let daysBack = (localWeekday - settings.resetDay + 7) % 7
+  const targetMinutes = local.hour * 60 + local.minute
+  const resetMinutes = resetHour * 60 + resetMinute
+  if (daysBack === 0 && targetMinutes < resetMinutes) daysBack = 7
+
+  const resetCalendarDate = new Date(Date.UTC(local.year, local.month - 1, local.day - daysBack))
+  return zonedDateTimeToTimestamp({
+    year: resetCalendarDate.getUTCFullYear(),
+    month: resetCalendarDate.getUTCMonth() + 1,
+    day: resetCalendarDate.getUTCDate(),
+    hour: resetHour,
+    minute: resetMinute,
+  }, settings.timezone)
+}
+
+function isManualReset(reset) {
+  return reset.kind === 'manual' || (!reset.kind && reset.actor?.id !== SYSTEM_USER.id)
+}
+
 function getPeriodContext(state, targetTime) {
+  const scheduledStartTime = getScheduledPeriodStart(state.settings, targetTime)
   const reset = [...state.resets]
-    .filter((item) => new Date(item.occurredAt).getTime() <= targetTime)
+    .filter((item) => isManualReset(item))
+    .filter((item) => {
+      const occurredAt = new Date(item.occurredAt).getTime()
+      return occurredAt >= scheduledStartTime && occurredAt <= targetTime
+    })
     .sort((left, right) => new Date(right.occurredAt) - new Date(left.occurredAt))[0]
   return {
-    startTime: reset ? new Date(reset.occurredAt).getTime() : 0,
+    startTime: reset ? new Date(reset.occurredAt).getTime() : scheduledStartTime,
     allowanceSeconds: reset?.allowanceSeconds ?? Math.round(state.settings.weeklyHours * 3600),
   }
 }
@@ -226,7 +296,7 @@ function getTimerSnapshot(state, now = Date.now()) {
 function getLatestActivityAt(state) {
   const values = [
     ...state.sessions.map((session) => sessionActivityAt(session)),
-    ...state.resets.map((reset) => reset.occurredAt),
+    ...state.resets.filter((reset) => isManualReset(reset)).map((reset) => reset.occurredAt),
   ].filter(Boolean)
   return values.sort((left, right) => new Date(right) - new Date(left))[0] ?? new Date().toISOString()
 }
@@ -684,7 +754,7 @@ function SettingsPage({ state, snapshot, setState, onStartNewWeek, onResetProtot
             <span>Hours available each week</span>
             <div><input type="number" min="1" max="168" step="0.5" value={settings.weeklyHours} onChange={(event) => updateSettings({ weeklyHours: Math.max(1, Number(event.target.value) || 1) })} /><strong>hours</strong></div>
           </label>
-          <p className="prototype-help-copy">The current week uses {Math.round(snapshot.allowance / 360) / 10} hours. Start a new week to apply this value immediately.</p>
+          <p className="prototype-help-copy">The current week uses {Math.round(snapshot.allowance / 360) / 10} hours. Changes apply immediately; start a new week to clear the time used so far.</p>
           <button type="button" className="prototype-secondary-button is-full" onClick={onStartNewWeek}><Icon name="spark" size={18} /> Start a new week now</button>
         </section>
 
@@ -1105,6 +1175,7 @@ export default function PrototypeApp() {
         occurredAt,
         actor: currentUser,
         allowanceSeconds,
+        kind: 'manual',
       }
       return { ...current, resets: [reset, ...current.resets] }
     })
