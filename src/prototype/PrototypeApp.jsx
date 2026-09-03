@@ -144,6 +144,58 @@ function formatRemaining(totalSeconds, format = 'clock') {
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
 }
 
+function formatElapsed(totalSeconds) {
+  const safe = Math.max(0, Math.floor(totalSeconds))
+  const totalMinutes = Math.floor(safe / 60)
+  if (safe > 0 && totalMinutes === 0) return '<1m'
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
+}
+
+function buildActivityGroups(visibleEvents, allEvents, now = Date.now()) {
+  const cycleByEvent = new Map()
+  let openCheckout = null
+
+  ;[...allEvents]
+    .sort((left, right) => new Date(left.occurredAt) - new Date(right.occurredAt))
+    .forEach((event) => {
+      if (event.type === 'checkout') {
+        openCheckout = event
+        cycleByEvent.set(event.id, {
+          id: event.id,
+          status: 'open',
+          durationSeconds: Math.max(0, Math.floor((now - new Date(event.occurredAt).getTime()) / 1000)),
+        })
+        return
+      }
+
+      if (event.type === 'checkin' && openCheckout) {
+        const cycle = {
+          id: openCheckout.id,
+          status: 'complete',
+          durationSeconds: Math.max(0, Math.floor((new Date(event.occurredAt) - new Date(openCheckout.occurredAt)) / 1000)),
+        }
+        cycleByEvent.set(openCheckout.id, cycle)
+        cycleByEvent.set(event.id, cycle)
+        openCheckout = null
+      }
+    })
+
+  const groups = new Map()
+  visibleEvents.forEach((event) => {
+    const cycle = cycleByEvent.get(event.id)
+    const groupId = cycle ? `cycle-${cycle.id}` : `event-${event.id}`
+    if (!groups.has(groupId)) groups.set(groupId, { id: groupId, cycle, events: [] })
+    groups.get(groupId).events.push(event)
+  })
+
+  return [...groups.values()].map((group) => ({
+    ...group,
+    events: [...group.events].sort((left, right) => new Date(left.occurredAt) - new Date(right.occurredAt)),
+  }))
+}
+
 function getTimerSnapshot(timer, now = Date.now()) {
   if (timer.status !== 'checked_out' || !timer.checkedOutAt) {
     return { remaining: timer.remainingSeconds, overtime: 0 }
@@ -245,30 +297,42 @@ function EventBadge({ type }) {
   return <span className={`prototype-event-badge is-${type}`}>{actionLabel(type)}</span>
 }
 
-function ActivityTable({ events, remainingFormat, label = 'Timer activity' }) {
+function ActivityTable({ events, allEvents = events, remainingFormat, now, label = 'Timer activity' }) {
+  const activityGroups = buildActivityGroups(events, allEvents, now)
+
   return (
     <div className="prototype-activity-table" role="table" aria-label={label}>
       <div className="prototype-activity-header" role="row">
         <span role="columnheader">Event</span>
         <span role="columnheader">Member</span>
         <span role="columnheader">Details</span>
+        <span role="columnheader">Duration</span>
         <span role="columnheader">Remaining</span>
         <span role="columnheader">Date & time</span>
       </div>
-      {events.map((event) => (
-        <article className="prototype-activity-row" role="row" key={event.id}>
-          <div className="prototype-activity-event" role="cell"><EventBadge type={event.type} /></div>
-          <div className="prototype-member-cell" role="cell"><Avatar user={event.actor} small /><span><strong>{event.actor.name}</strong><small>{event.actor.role}</small></span></div>
-          <div className="prototype-detail-cell" role="cell">{eventSummary(event)}</div>
-          <div className="prototype-remaining-cell" role="cell">{formatRemaining(event.remainingAfter, remainingFormat)}</div>
-          <time role="cell" dateTime={event.occurredAt}>{formatDateTime(event.occurredAt)}</time>
-        </article>
+      {activityGroups.map((group) => (
+        <section className={`prototype-activity-group ${group.cycle ? 'is-cycle' : 'is-single'} ${group.cycle?.status === 'open' ? 'is-open' : ''}`} role="rowgroup" key={group.id}>
+          {group.events.map((event, index) => (
+            <article className="prototype-activity-row" role="row" key={event.id} style={{ '--activity-row': index + 1 }}>
+              <div className="prototype-activity-event" role="cell"><EventBadge type={event.type} /></div>
+              <div className="prototype-member-cell" role="cell"><Avatar user={event.actor} small /><span><strong>{event.actor.name}</strong><small>{event.actor.role}</small></span></div>
+              <div className="prototype-detail-cell" role="cell">{eventSummary(event)}</div>
+              <div className="prototype-remaining-cell" role="cell">{formatRemaining(event.remainingAfter, remainingFormat)}</div>
+              <time role="cell" dateTime={event.occurredAt}>{formatDateTime(event.occurredAt)}</time>
+            </article>
+          ))}
+          <div className={`prototype-duration-cell ${group.cycle?.status === 'open' ? 'is-live' : ''}`} style={{ gridRow: `1 / span ${group.events.length}` }}>
+            <span>Duration</span>
+            <strong>{group.cycle ? formatElapsed(group.cycle.durationSeconds) : '—'}</strong>
+            <small>{group.cycle?.status === 'open' ? 'In progress' : group.cycle ? 'Complete session' : 'Not applicable'}</small>
+          </div>
+        </section>
       ))}
     </div>
   )
 }
 
-function RecentActivity({ events, onViewAll, remainingFormat, limit }) {
+function RecentActivity({ events, onViewAll, remainingFormat, limit, now }) {
   const rowLimit = Math.max(1, Number(limit) || 5)
   return (
     <section className="prototype-panel prototype-recent-panel">
@@ -280,7 +344,7 @@ function RecentActivity({ events, onViewAll, remainingFormat, limit }) {
         </div>
         <button type="button" className="prototype-text-button" onClick={onViewAll}>View all <Icon name="arrow" size={16} /></button>
       </div>
-      <ActivityTable events={events.slice(0, rowLimit)} remainingFormat={remainingFormat} label="Recent timer activity" />
+      <ActivityTable events={events.slice(0, rowLimit)} allEvents={events} remainingFormat={remainingFormat} now={now} label="Recent timer activity" />
     </section>
   )
 }
@@ -394,12 +458,13 @@ function TimerPage({ state, snapshot, now, onAction, setPage }) {
         onViewAll={() => setPage('activity')}
         remainingFormat={settings.remainingFormat ?? 'clock'}
         limit={settings.recentActivityLimit ?? 5}
+        now={now}
       />
     </>
   )
 }
 
-function ActivityPage({ events, remainingFormat }) {
+function ActivityPage({ events, remainingFormat, now }) {
   const [filter, setFilter] = useState('all')
   const visibleEvents = filter === 'all' ? events : events.filter((event) => event.type === filter)
 
@@ -419,7 +484,7 @@ function ActivityPage({ events, remainingFormat }) {
           ))}
         </div>
 
-        <ActivityTable events={visibleEvents} remainingFormat={remainingFormat} />
+        <ActivityTable events={visibleEvents} allEvents={events} remainingFormat={remainingFormat} now={now} />
       </section>
     </>
   )
@@ -818,7 +883,7 @@ export default function PrototypeApp() {
 
         <main className="prototype-main">
           {page === 'timer' && <TimerPage state={state} snapshot={snapshot} now={now} onAction={setActiveAction} setPage={setPage} />}
-          {page === 'activity' && <ActivityPage events={state.events} remainingFormat={state.settings.remainingFormat} />}
+          {page === 'activity' && <ActivityPage events={state.events} remainingFormat={state.settings.remainingFormat} now={now} />}
           {page === 'settings' && <SettingsPage state={state} setState={setState} onStartNewWeek={startNewWeek} onResetPrototype={resetPrototype} />}
         </main>
       </div>
