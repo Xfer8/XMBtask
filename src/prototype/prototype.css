@@ -316,6 +316,26 @@ button {
   background: var(--prototype-green);
 }
 
+.prototype-admin-pill {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 11px;
+  color: var(--prototype-muted);
+  background: var(--prototype-surface);
+  border: 1px solid var(--prototype-border);
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.prototype-admin-pill.is-enabled {
+  color: var(--prototype-blue);
+  background: rgba(98, 191, 255, 0.08);
+  border-color: rgba(98, 191, 255, 0.2);
+}
+
 .prototype-timer-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.65fr) minmax(250px, 0.75fr);
@@ -775,6 +795,12 @@ button {
   padding: 0 22px;
 }
 
+.prototype-activity-table.has-actions .prototype-activity-header,
+.prototype-activity-table.has-actions .prototype-activity-group {
+  grid-template-columns: 118px 132px minmax(170px, 1fr) 100px 88px 112px 38px;
+  gap: 0 13px;
+}
+
 .prototype-activity-header {
   min-height: 42px;
   color: var(--prototype-dim);
@@ -938,6 +964,31 @@ button {
   align-items: center;
   color: var(--prototype-muted);
   font-size: 11px;
+}
+
+.prototype-activity-actions {
+  display: flex;
+  grid-column: 7;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.prototype-activity-actions button {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  color: var(--prototype-muted);
+  background: #292c2c;
+  border: 1px solid var(--prototype-border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.prototype-activity-actions button:hover {
+  color: var(--prototype-blue);
+  background: rgba(98, 191, 255, 0.09);
+  border-color: rgba(98, 191, 255, 0.26);
 }
 
 .prototype-settings-grid {
@@ -1275,6 +1326,10 @@ button {
   box-shadow: 0 32px 100px rgba(0, 0, 0, 0.5);
 }
 
+.prototype-admin-sheet {
+  width: min(640px, 100%);
+}
+
 .prototype-sheet-accent {
   height: 3px;
 }
@@ -1285,6 +1340,10 @@ button {
 
 .prototype-sheet-accent.is-checkin {
   background: var(--prototype-green);
+}
+
+.prototype-sheet-accent.is-reset {
+  background: var(--prototype-yellow);
 }
 
 .prototype-sheet-header {
@@ -1343,6 +1402,93 @@ button {
   font-size: 10px;
 }
 
+.prototype-edit-event-summary {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 12px;
+  background: #191b1b;
+  border: 1px solid var(--prototype-border);
+  border-radius: 7px;
+}
+
+.prototype-edit-event-summary span:last-child {
+  color: var(--prototype-dim);
+  font-size: 11px;
+}
+
+.prototype-admin-two-fields,
+.prototype-admin-detail-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.prototype-admin-details {
+  display: grid;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.prototype-admin-details > div:first-child strong,
+.prototype-admin-details > div:first-child small {
+  display: block;
+}
+
+.prototype-admin-details > div:first-child strong {
+  font-size: 13px;
+}
+
+.prototype-admin-details > div:first-child small {
+  margin-top: 4px;
+  color: var(--prototype-dim);
+  font-size: 11px;
+}
+
+.prototype-admin-detail-row {
+  padding: 12px;
+  background: #1b1e1e;
+  border: 1px solid var(--prototype-border);
+  border-radius: 8px;
+}
+
+.prototype-admin-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 12px;
+  color: var(--prototype-muted);
+  background: rgba(226, 189, 76, 0.07);
+  border: 1px solid rgba(226, 189, 76, 0.16);
+  border-radius: 7px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.prototype-admin-warning svg {
+  flex: 0 0 auto;
+  color: var(--prototype-yellow);
+}
+
+.prototype-delete-guard {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 12px;
+  color: #ffaaa4;
+  background: rgba(255, 94, 84, 0.07);
+  border: 1px solid rgba(255, 94, 84, 0.18);
+  border-radius: 7px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.prototype-delete-guard svg {
+  flex: 0 0 auto;
+}
+
 .prototype-yes-no {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1369,6 +1515,39 @@ button {
   border-top: 1px solid var(--prototype-border);
 }
 
+.prototype-admin-sheet-actions > div {
+  display: flex;
+  gap: 9px;
+}
+
+.prototype-admin-delete-button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  color: #ff8c84;
+  background: rgba(255, 94, 84, 0.06);
+  border: 1px solid rgba(255, 94, 84, 0.2);
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.prototype-admin-delete-button:hover {
+  background: rgba(255, 94, 84, 0.12);
+}
+
+.prototype-admin-delete-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+}
+
+.prototype-admin-delete-button:disabled:hover {
+  background: rgba(255, 94, 84, 0.06);
+}
+
 .prototype-submit-button {
   display: inline-flex;
   min-height: 44px;
@@ -1389,6 +1568,10 @@ button {
 
 .prototype-submit-button.is-checkin {
   background: var(--prototype-green);
+}
+
+.prototype-submit-button.is-admin {
+  background: var(--prototype-blue);
 }
 
 .prototype-no-questions {
@@ -1439,6 +1622,12 @@ button {
 
   .prototype-countdown {
     font-size: clamp(42px, 6.2vw, 66px);
+  }
+
+  .prototype-activity-table.has-actions .prototype-activity-header,
+  .prototype-activity-table.has-actions .prototype-activity-group {
+    grid-template-columns: 100px 118px minmax(150px, 1fr) 88px 82px 106px 36px;
+    gap: 0 9px;
   }
 
   .prototype-activity-event {
@@ -1726,6 +1915,11 @@ button {
     border-radius: 9px;
   }
 
+  .prototype-activity-table.has-actions .prototype-activity-group {
+    min-width: 0;
+    grid-template-columns: 1fr;
+  }
+
   .prototype-activity-group.is-cycle::before {
     display: none;
   }
@@ -1813,6 +2007,16 @@ button {
     align-self: center;
   }
 
+  .prototype-activity-table.has-actions .prototype-detail-cell {
+    grid-column: 1;
+  }
+
+  .prototype-activity-actions {
+    grid-column: 2;
+    grid-row: 3;
+    align-items: end;
+  }
+
   .prototype-field-editor {
     grid-template-columns: 28px 1fr auto;
     align-items: end;
@@ -1865,6 +2069,11 @@ button {
     border-radius: 16px 16px 0 0;
   }
 
+  .prototype-admin-two-fields,
+  .prototype-admin-detail-row {
+    grid-template-columns: 1fr;
+  }
+
   .prototype-sheet-header {
     padding: 20px 16px 17px;
   }
@@ -1875,6 +2084,20 @@ button {
 
   .prototype-sheet-actions {
     padding: 14px 16px calc(18px + env(safe-area-inset-bottom));
+  }
+
+  .prototype-admin-sheet-actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .prototype-admin-sheet-actions > div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .prototype-admin-delete-button {
+    justify-content: center;
   }
 
   .prototype-toast {

@@ -153,7 +153,7 @@ function formatElapsed(totalSeconds) {
   return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
 }
 
-function buildActivityGroups(visibleEvents, allEvents, now = Date.now()) {
+function buildCycleIndex(allEvents, now = Date.now()) {
   const cycleByEvent = new Map()
   let openCheckout = null
 
@@ -166,6 +166,8 @@ function buildActivityGroups(visibleEvents, allEvents, now = Date.now()) {
           id: event.id,
           status: 'open',
           durationSeconds: Math.max(0, Math.floor((now - new Date(event.occurredAt).getTime()) / 1000)),
+          checkoutId: event.id,
+          checkinId: null,
         })
         return
       }
@@ -175,12 +177,20 @@ function buildActivityGroups(visibleEvents, allEvents, now = Date.now()) {
           id: openCheckout.id,
           status: 'complete',
           durationSeconds: Math.max(0, Math.floor((new Date(event.occurredAt) - new Date(openCheckout.occurredAt)) / 1000)),
+          checkoutId: openCheckout.id,
+          checkinId: event.id,
         }
         cycleByEvent.set(openCheckout.id, cycle)
         cycleByEvent.set(event.id, cycle)
         openCheckout = null
       }
     })
+
+  return cycleByEvent
+}
+
+function buildActivityGroups(visibleEvents, allEvents, now = Date.now()) {
+  const cycleByEvent = buildCycleIndex(allEvents, now)
 
   const groups = new Map()
   visibleEvents.forEach((event) => {
@@ -218,6 +228,49 @@ function formatDateTime(value) {
   }).format(new Date(value))
 }
 
+function toDateTimeLocal(value) {
+  const date = new Date(value)
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000)
+  return localDate.toISOString().slice(0, 16)
+}
+
+function parseRemaining(value) {
+  const match = String(value).trim().match(/^(\d+):([0-5]\d)$/)
+  if (!match) return null
+  return Number(match[1]) * 3600 + Number(match[2]) * 60
+}
+
+function synchronizeTimerWithEvents(timer, events) {
+  const newestFirst = [...events].sort((left, right) => new Date(right.occurredAt) - new Date(left.occurredAt))
+  const latestTransition = newestFirst.find((event) => event.type === 'checkout' || event.type === 'checkin')
+
+  if (!latestTransition) {
+    return {
+      ...timer,
+      status: 'checked_in',
+      checkedOutAt: null,
+      checkedOutBy: null,
+      checkoutDetails: [],
+      lastTransitionAt: newestFirst[0]?.occurredAt ?? timer.lastTransitionAt,
+    }
+  }
+
+  const latestReset = newestFirst.find((event) => event.type === 'reset')
+  const resetOccurredAfterTransition = latestReset && new Date(latestReset.occurredAt) > new Date(latestTransition.occurredAt)
+  const balanceEvent = resetOccurredAfterTransition ? latestReset : latestTransition
+  const isCheckedOut = latestTransition.type === 'checkout'
+
+  return {
+    ...timer,
+    status: isCheckedOut ? 'checked_out' : 'checked_in',
+    remainingSeconds: balanceEvent.remainingAfter,
+    checkedOutAt: isCheckedOut ? balanceEvent.occurredAt : null,
+    checkedOutBy: isCheckedOut ? latestTransition.actor.id : null,
+    checkoutDetails: isCheckedOut ? latestTransition.details : [],
+    lastTransitionAt: newestFirst[0]?.occurredAt ?? timer.lastTransitionAt,
+  }
+}
+
 function formatShortTime(value) {
   return new Intl.DateTimeFormat(undefined, {
     hour: 'numeric',
@@ -248,6 +301,7 @@ function Icon({ name, size = 20 }) {
   if (name === 'log-out') return <svg {...common}><path d="M9 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4M14 17l5-5-5-5M19 12H8"/></svg>
   if (name === 'close') return <svg {...common}><path d="m6 6 12 12M18 6 6 18"/></svg>
   if (name === 'plus') return <svg {...common}><path d="M12 5v14M5 12h14"/></svg>
+  if (name === 'edit') return <svg {...common}><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4L16.5 3.5Z"/></svg>
   if (name === 'trash') return <svg {...common}><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>
   if (name === 'spark') return <svg {...common}><path d="m12 3 1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4L12 3ZM18.5 15l.7 2.1 2.1.7-2.1.7-.7 2.1-.7-2.1-2.1-.7 2.1-.7.7-2.1Z"/></svg>
   return null
@@ -297,11 +351,11 @@ function EventBadge({ type }) {
   return <span className={`prototype-event-badge is-${type}`}>{actionLabel(type)}</span>
 }
 
-function ActivityTable({ events, allEvents = events, remainingFormat, now, label = 'Timer activity' }) {
+function ActivityTable({ events, allEvents = events, remainingFormat, now, label = 'Timer activity', canManage = false, onEditEvent }) {
   const activityGroups = buildActivityGroups(events, allEvents, now)
 
   return (
-    <div className="prototype-activity-table" role="table" aria-label={label}>
+    <div className={`prototype-activity-table ${canManage ? 'has-actions' : ''}`} role="table" aria-label={label}>
       <div className="prototype-activity-header" role="row">
         <span role="columnheader">Event</span>
         <span role="columnheader">Member</span>
@@ -309,6 +363,7 @@ function ActivityTable({ events, allEvents = events, remainingFormat, now, label
         <span role="columnheader">Duration</span>
         <span role="columnheader">Remaining</span>
         <span role="columnheader">Date & time</span>
+        {canManage && <span role="columnheader" aria-label="Actions" />}
       </div>
       {activityGroups.map((group) => (
         <section className={`prototype-activity-group ${group.cycle ? 'is-cycle' : 'is-single'} ${group.cycle?.status === 'open' ? 'is-open' : ''}`} role="rowgroup" key={group.id}>
@@ -319,6 +374,13 @@ function ActivityTable({ events, allEvents = events, remainingFormat, now, label
               <div className="prototype-detail-cell" role="cell">{eventSummary(event)}</div>
               <div className="prototype-remaining-cell" role="cell">{formatRemaining(event.remainingAfter, remainingFormat)}</div>
               <time role="cell" dateTime={event.occurredAt}>{formatDateTime(event.occurredAt)}</time>
+              {canManage && (
+                <div className="prototype-activity-actions" role="cell">
+                  <button type="button" onClick={() => onEditEvent(event.id)} aria-label={`Edit ${actionLabel(event.type)} from ${formatDateTime(event.occurredAt)}`} title="Edit event">
+                    <Icon name="edit" size={16} />
+                  </button>
+                </div>
+              )}
             </article>
           ))}
           <div className={`prototype-duration-cell ${group.cycle?.status === 'open' ? 'is-live' : ''}`} style={{ gridRow: `1 / span ${group.events.length}` }}>
@@ -464,13 +526,15 @@ function TimerPage({ state, snapshot, now, onAction, setPage }) {
   )
 }
 
-function ActivityPage({ events, remainingFormat, now }) {
+function ActivityPage({ events, remainingFormat, now, canManage, onEditEvent }) {
   const [filter, setFilter] = useState('all')
   const visibleEvents = filter === 'all' ? events : events.filter((event) => event.type === filter)
 
   return (
     <>
-      <PageHeading eyebrow="Shared history" title="Activity" description="Every timer transition is recorded with its user, time, and submitted details." />
+      <PageHeading eyebrow="Shared history" title="Activity" description="Every timer transition is recorded with its user, time, and submitted details.">
+        <div className={`prototype-admin-pill ${canManage ? 'is-enabled' : ''}`}><Icon name={canManage ? 'edit' : 'settings'} size={15} /> {canManage ? 'Owner editing enabled' : 'Owner editing only'}</div>
+      </PageHeading>
 
       <section className="prototype-panel prototype-activity-panel">
         <div className="prototype-filter-row">
@@ -484,7 +548,7 @@ function ActivityPage({ events, remainingFormat, now }) {
           ))}
         </div>
 
-        <ActivityTable events={visibleEvents} allEvents={events} remainingFormat={remainingFormat} now={now} />
+        <ActivityTable events={visibleEvents} allEvents={events} remainingFormat={remainingFormat} now={now} canManage={canManage} onEditEvent={onEditEvent} />
       </section>
     </>
   )
@@ -695,6 +759,107 @@ function FieldInput({ field, value, onChange }) {
   return <input type="text" value={value ?? ''} onChange={(event) => onChange(event.target.value)} />
 }
 
+function EditEventSheet({ activityEvent, onClose, onSave, onDelete, deleteBlockedReason }) {
+  const actorOptions = MOCK_USERS.some((user) => user.id === activityEvent.actor.id)
+    ? MOCK_USERS
+    : [activityEvent.actor, ...MOCK_USERS]
+  const [occurredAt, setOccurredAt] = useState(() => toDateTimeLocal(activityEvent.occurredAt))
+  const [actorId, setActorId] = useState(activityEvent.actor.id)
+  const [remaining, setRemaining] = useState(() => formatRemaining(activityEvent.remainingAfter, 'clock'))
+  const [details, setDetails] = useState(() => (activityEvent.details ?? []).map((detail, index) => ({
+    ...detail,
+    editorId: detail.id ?? `detail-${index}`,
+    value: typeof detail.value === 'boolean' ? (detail.value ? 'Yes' : 'No') : String(detail.value ?? ''),
+  })))
+  const [errors, setErrors] = useState({})
+
+  const updateDetail = (editorId, patch) => {
+    setDetails((current) => current.map((detail) => detail.editorId === editorId ? { ...detail, ...patch } : detail))
+  }
+
+  const submit = (submitEvent) => {
+    submitEvent.preventDefault()
+    const parsedDate = new Date(occurredAt)
+    const remainingSeconds = parseRemaining(remaining)
+    const nextErrors = {}
+    if (!occurredAt || Number.isNaN(parsedDate.getTime())) nextErrors.occurredAt = 'Enter a valid date and time.'
+    if (remainingSeconds === null) nextErrors.remaining = 'Use HH:MM, such as 18:30.'
+    setErrors(nextErrors)
+    if (Object.keys(nextErrors).length > 0) return
+
+    const actor = actorOptions.find((user) => user.id === actorId) ?? activityEvent.actor
+    onSave({
+      ...activityEvent,
+      occurredAt: parsedDate.toISOString(),
+      actor,
+      remainingAfter: remainingSeconds,
+      details: details
+        .filter((detail) => detail.label.trim())
+        .map((detail) => ({
+          id: detail.id,
+          label: detail.label.trim(),
+          value: detail.value,
+          ...(detail.showInCurrentState !== undefined ? { showInCurrentState: detail.showInCurrentState } : {}),
+        })),
+    })
+  }
+
+  const deleteEvent = () => {
+    if (deleteBlockedReason) return
+    if (window.confirm(`Permanently delete this ${actionLabel(activityEvent.type).toLowerCase()} event? This cannot be undone.`)) onDelete(activityEvent.id)
+  }
+
+  return (
+    <div className="prototype-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
+      <section className="prototype-action-sheet prototype-admin-sheet" role="dialog" aria-modal="true" aria-labelledby="edit-event-title">
+        <div className={`prototype-sheet-accent is-${activityEvent.type}`} />
+        <div className="prototype-sheet-header">
+          <div className="prototype-action-icon"><Icon name="edit" size={22} /></div>
+          <div><span className="prototype-kicker">Owner correction</span><h2 id="edit-event-title">Edit activity event</h2><p>Changes update the shared history, session pairing, and current timer state.</p></div>
+          <button type="button" className="prototype-icon-button" onClick={onClose} aria-label="Close"><Icon name="close" size={20} /></button>
+        </div>
+
+        <form onSubmit={submit}>
+          <div className="prototype-sheet-fields">
+            <div className="prototype-edit-event-summary"><EventBadge type={activityEvent.type} /><span>Created {formatDateTime(activityEvent.occurredAt)}</span></div>
+
+            <label className={errors.occurredAt ? 'has-error' : ''}>
+              <span>Date and time <em>Required</em></span>
+              <input type="datetime-local" step="60" value={occurredAt} onChange={(event) => setOccurredAt(event.target.value)} />
+              {errors.occurredAt && <small>{errors.occurredAt}</small>}
+            </label>
+
+            <div className="prototype-admin-two-fields">
+              <label><span>Member</span><select value={actorId} onChange={(event) => setActorId(event.target.value)}>{actorOptions.map((user) => <option value={user.id} key={user.id}>{user.name}</option>)}</select></label>
+              <label className={errors.remaining ? 'has-error' : ''}><span>Remaining after event</span><input value={remaining} onChange={(event) => setRemaining(event.target.value)} placeholder="HH:MM" />{errors.remaining && <small>{errors.remaining}</small>}</label>
+            </div>
+
+            {details.length > 0 && (
+              <div className="prototype-admin-details">
+                <div><strong>Submitted details</strong><small>Edit the values captured with this event.</small></div>
+                {details.map((detail) => (
+                  <div className="prototype-admin-detail-row" key={detail.editorId}>
+                    <label><span>Field</span><input value={detail.label} onChange={(event) => updateDetail(detail.editorId, { label: event.target.value })} /></label>
+                    <label><span>Value</span><input value={detail.value} onChange={(event) => updateDetail(detail.editorId, { value: event.target.value })} /></label>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="prototype-admin-warning"><Icon name="activity" size={17} /><span>Changing the timestamp can change which check-out and check-in events form a session.</span></div>
+            {deleteBlockedReason && <div className="prototype-delete-guard"><Icon name="settings" size={17} /><span>{deleteBlockedReason}</span></div>}
+          </div>
+
+          <div className="prototype-sheet-actions prototype-admin-sheet-actions">
+            <button type="button" className="prototype-admin-delete-button" onClick={deleteEvent} disabled={Boolean(deleteBlockedReason)} title={deleteBlockedReason || 'Delete event'}><Icon name="trash" size={17} /> Delete event</button>
+            <div><button type="button" className="prototype-cancel-button" onClick={onClose}>Cancel</button><button type="submit" className="prototype-submit-button is-admin">Save corrections <Icon name="check" size={18} /></button></div>
+          </div>
+        </form>
+      </section>
+    </div>
+  )
+}
+
 function ActionSheet({ mode, fields, actor, onClose, onSubmit }) {
   const [values, setValues] = useState(() => Object.fromEntries(fields.filter((field) => field.type === 'yes_no').map((field) => [field.id, false])))
   const [errors, setErrors] = useState({})
@@ -749,6 +914,7 @@ export default function PrototypeApp() {
     return NAV_ITEMS.some((item) => item.id === fromHash) ? fromHash : 'timer'
   })
   const [activeAction, setActiveAction] = useState(null)
+  const [editingEventId, setEditingEventId] = useState(null)
   const [toast, setToast] = useState('')
 
   useEffect(() => {
@@ -782,6 +948,13 @@ export default function PrototypeApp() {
   }
 
   const currentUser = MOCK_USERS.find((user) => user.id === state.currentUserId) ?? MOCK_USERS[0]
+  const canManageActivity = currentUser.role === 'Owner'
+  const editingEvent = state.events.find((event) => event.id === editingEventId)
+  const editingCycle = editingEvent ? buildCycleIndex(state.events, now).get(editingEvent.id) : null
+  const pairedCheckin = editingCycle?.checkinId ? state.events.find((event) => event.id === editingCycle.checkinId) : null
+  const deleteBlockedReason = editingEvent?.type === 'checkout' && pairedCheckin
+    ? `This check-out is paired with the check-in from ${formatDateTime(pairedCheckin.occurredAt)}. Delete that check-in first.`
+    : ''
   const snapshot = useMemo(() => getTimerSnapshot(state.timer, now), [state.timer, now])
 
   const completeAction = (values) => {
@@ -844,6 +1017,33 @@ export default function PrototypeApp() {
     setToast('A new mock week has started.')
   }
 
+  const saveEditedEvent = (updatedEvent) => {
+    setState((current) => {
+      const events = current.events
+        .map((event) => event.id === updatedEvent.id ? updatedEvent : event)
+        .sort((left, right) => new Date(right.occurredAt) - new Date(left.occurredAt))
+      return { ...current, events, timer: synchronizeTimerWithEvents(current.timer, events) }
+    })
+    setEditingEventId(null)
+    setToast('Activity event updated.')
+  }
+
+  const deleteActivityEvent = (eventId) => {
+    const targetEvent = state.events.find((event) => event.id === eventId)
+    const targetCycle = targetEvent ? buildCycleIndex(state.events).get(eventId) : null
+    if (targetEvent?.type === 'checkout' && targetCycle?.checkinId) {
+      setToast('Delete the paired check-in before deleting this check-out.')
+      return
+    }
+
+    setState((current) => {
+      const events = current.events.filter((event) => event.id !== eventId)
+      return { ...current, events, timer: synchronizeTimerWithEvents(current.timer, events) }
+    })
+    setEditingEventId(null)
+    setToast('Activity event deleted.')
+  }
+
   const resetPrototype = () => {
     if (!window.confirm('Reset all local prototype changes and restore the sample data?')) return
     setState(createDefaultState())
@@ -883,7 +1083,7 @@ export default function PrototypeApp() {
 
         <main className="prototype-main">
           {page === 'timer' && <TimerPage state={state} snapshot={snapshot} now={now} onAction={setActiveAction} setPage={setPage} />}
-          {page === 'activity' && <ActivityPage events={state.events} remainingFormat={state.settings.remainingFormat} now={now} />}
+          {page === 'activity' && <ActivityPage events={state.events} remainingFormat={state.settings.remainingFormat} now={now} canManage={canManageActivity} onEditEvent={setEditingEventId} />}
           {page === 'settings' && <SettingsPage state={state} setState={setState} onStartNewWeek={startNewWeek} onResetPrototype={resetPrototype} />}
         </main>
       </div>
@@ -897,6 +1097,16 @@ export default function PrototypeApp() {
           actor={currentUser}
           onClose={() => setActiveAction(null)}
           onSubmit={completeAction}
+        />
+      )}
+
+      {editingEvent && canManageActivity && (
+        <EditEventSheet
+          activityEvent={editingEvent}
+          onClose={() => setEditingEventId(null)}
+          onSave={saveEditedEvent}
+          onDelete={deleteActivityEvent}
+          deleteBlockedReason={deleteBlockedReason}
         />
       )}
 
