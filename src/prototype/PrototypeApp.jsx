@@ -507,7 +507,7 @@ function SessionStatus({ active }) {
 }
 
 function getDeviceDetail(session) {
-  return session.checkout.details?.find((detail) => detail.id === 'device' || detail.label?.trim().toLowerCase() === 'device')
+  return session?.checkout?.details?.find((detail) => detail.id === 'device' || detail.label?.trim().toLowerCase() === 'device')
 }
 
 function RemainingWheel({ remaining, allowance, compact = false }) {
