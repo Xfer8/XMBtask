@@ -470,10 +470,11 @@ function Avatar({ user, small = false }) {
   )
 }
 
-function Navigation({ page, setPage, variant = 'sidebar' }) {
+function Navigation({ page, setPage, variant = 'sidebar', showSettings = true }) {
+  const items = showSettings ? NAV_ITEMS : NAV_ITEMS.filter((item) => item.id !== 'settings')
   return (
     <nav className={`prototype-nav prototype-nav-${variant}`} aria-label="Primary navigation">
-      {NAV_ITEMS.map((item) => (
+      {items.map((item) => (
         <button
           type="button"
           key={item.id}
@@ -1196,6 +1197,7 @@ export default function PrototypeApp({
   }, [currentUser, live, model.sessions])
   const editingSession = model.sessions.find((session) => session.id === editingSessionId)
   const snapshot = useMemo(() => getTimerSnapshot(model, now), [model, now])
+  const visiblePage = live && !canManageActivity && page === 'settings' ? 'timer' : page
 
   const completeAction = (values) => {
     const mode = activeAction
@@ -1317,7 +1319,7 @@ export default function PrototypeApp({
     <div className="prototype-app">
       <aside className="prototype-sidebar">
         <div className="prototype-brand"><span>XMB</span>task<small>shared workspace</small></div>
-        <Navigation page={page} setPage={setPage} />
+        <Navigation page={visiblePage} setPage={setPage} showSettings={!live || canManageActivity} />
         <div className="prototype-sidebar-footer">
           <span>{live ? 'Private workspace' : 'Prototype mode'}</span>
           <strong>{live ? 'Firebase secured' : 'Stored on this device only'}</strong>
@@ -1349,16 +1351,16 @@ export default function PrototypeApp({
           )}
         </header>
 
-        <Navigation page={page} setPage={setPage} variant="tablet" />
+        <Navigation page={visiblePage} setPage={setPage} variant="tablet" showSettings={!live || canManageActivity} />
 
         <main className="prototype-main">
-          {page === 'timer' && <TimerPage state={model} snapshot={snapshot} now={now} onAction={setActiveAction} setPage={setPage} />}
-          {page === 'activity' && <ActivityPage state={model} remainingFormat={model.settings.remainingFormat} now={now} canManage={canManageActivity} onEditSession={setEditingSessionId} onAddSession={() => setNewSessionDraft(createHistoricalSessionDraft(model, currentUser, now))} />}
-          {page === 'settings' && <SettingsPage state={model} snapshot={snapshot} setState={setState} onStartNewWeek={startNewWeek} onResetPrototype={resetPrototype} live={live} />}
+          {visiblePage === 'timer' && <TimerPage state={model} snapshot={snapshot} now={now} onAction={setActiveAction} setPage={setPage} />}
+          {visiblePage === 'activity' && <ActivityPage state={model} remainingFormat={model.settings.remainingFormat} now={now} canManage={canManageActivity} onEditSession={setEditingSessionId} onAddSession={() => setNewSessionDraft(createHistoricalSessionDraft(model, currentUser, now))} />}
+          {visiblePage === 'settings' && canManageActivity && <SettingsPage state={model} snapshot={snapshot} setState={setState} onStartNewWeek={startNewWeek} onResetPrototype={resetPrototype} live={live} />}
         </main>
       </div>
 
-      <Navigation page={page} setPage={setPage} variant="bottom" />
+      <Navigation page={visiblePage} setPage={setPage} variant="bottom" showSettings={!live || canManageActivity} />
 
       {activeAction && (
         <ActionSheet

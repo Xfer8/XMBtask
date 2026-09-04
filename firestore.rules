@@ -4,18 +4,16 @@ service cloud.firestore {
     // ===============================================================
     // Assumed Data Model
     // ===============================================================
-    // Collection: xmbtask
-    // Document ID: state
-    // Fields:
-    //   schemaVersion: integer (required, exactly 3)
-    //   stateJson: string (required, 2-750,000 chars)
-    //   updatedAt: timestamp (required, server-generated)
-    //   updatedByUid: string (required, authenticated UID, max 128 chars)
-    //   updatedByName: string (required, Auth display name, max 100 chars)
+    // xmbtask/config: admin-managed settings JSON and writer metadata.
+    // xmbtask/runtime: the active session ID and server update timestamp.
+    // xmbtaskSessions/{sessionId}: one non-overlapping checkout/check-in block.
+    //   Required: checkoutAt, checkoutUid, checkoutName, device, createdAt,
+    //   updatedAt. Optional as one complete group: checkinAt, checkinUid,
+    //   checkinName.
+    // xmbtaskResets/{resetId}: immutable administrator-created manual reset.
     //
-    // The first production release has one administrator. The serialized state
-    // is intentionally admin-write-only until a non-admin mutation model is
-    // designed and reviewed.
+    // All timestamps are Firestore timestamps. UID/name/device/settings strings
+    // are length-limited. No email addresses are stored in shared documents.
     // ===============================================================
 
     function isAuthenticated() {
@@ -26,16 +24,16 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    function isDocOwner() {
-      return isAuthenticated() && resource.data.updatedByUid == request.auth.uid;
+    function isDocOwner(data) {
+      return isOwner(data.checkoutUid);
     }
 
-    function uidUnchanged() {
-      return request.resource.data.updatedByUid == request.auth.uid;
+    function uidUnchanged(data) {
+      return data.checkoutUid == request.auth.uid;
     }
 
-    function uidNotModified() {
-      return request.resource.data.updatedByUid == request.auth.uid;
+    function uidNotModified(before, after) {
+      return after.checkoutUid == before.checkoutUid;
     }
 
     function hasAccess() {
@@ -46,27 +44,156 @@ service cloud.firestore {
       return hasAccess() && request.auth.token.xmbtaskAdmin == true;
     }
 
-    function isValidState(data) {
+    function isValidName(name) {
+      return name is string && name.size() >= 1 && name.size() <= 100;
+    }
+
+    function isCurrentUserName(name) {
+      return isValidName(name) &&
+        (!('name' in request.auth.token) || name == request.auth.token.name);
+    }
+
+    function isRecent(time) {
+      return time is timestamp &&
+        time > request.time - duration.value(5, 'm') &&
+        time <= request.time;
+    }
+
+    function isValidConfig(data) {
       return data.keys().hasAll([
-          'schemaVersion', 'stateJson', 'updatedAt', 'updatedByUid', 'updatedByName'
+          'schemaVersion', 'settingsJson', 'updatedAt', 'updatedByUid', 'updatedByName'
         ]) &&
         data.keys().hasOnly([
-          'schemaVersion', 'stateJson', 'updatedAt', 'updatedByUid', 'updatedByName'
+          'schemaVersion', 'settingsJson', 'updatedAt', 'updatedByUid', 'updatedByName'
         ]) &&
-        data.schemaVersion is int && data.schemaVersion == 3 &&
-        data.stateJson is string && data.stateJson.size() >= 2 && data.stateJson.size() <= 750000 &&
+        data.schemaVersion is int && data.schemaVersion == 1 &&
+        data.settingsJson is string && data.settingsJson.size() >= 2 && data.settingsJson.size() <= 10000 &&
         data.updatedAt is timestamp && data.updatedAt == request.time &&
         data.updatedByUid is string && data.updatedByUid.size() >= 1 && data.updatedByUid.size() <= 128 &&
         isOwner(data.updatedByUid) &&
-        data.updatedByName is string && data.updatedByName.size() >= 1 && data.updatedByName.size() <= 100 &&
-        (!('name' in request.auth.token) || data.updatedByName == request.auth.token.name);
+        isCurrentUserName(data.updatedByName);
     }
 
-    match /xmbtask/state {
+    function isValidRuntime(data) {
+      return data.keys().hasAll(['activeSessionId', 'updatedAt']) &&
+        data.keys().hasOnly(['activeSessionId', 'updatedAt']) &&
+        data.activeSessionId is string && data.activeSessionId.size() <= 200 &&
+        data.updatedAt is timestamp && data.updatedAt == request.time;
+    }
+
+    function hasCheckin(data) {
+      return data.keys().hasAll(['checkinAt', 'checkinUid', 'checkinName']);
+    }
+
+    function isValidSession(data) {
+      let keys = data.keys();
+      let complete = hasCheckin(data);
+      return keys.hasAll([
+          'checkoutAt', 'checkoutUid', 'checkoutName', 'device', 'createdAt', 'updatedAt'
+        ]) &&
+        keys.hasOnly([
+          'checkoutAt', 'checkoutUid', 'checkoutName', 'device',
+          'checkinAt', 'checkinUid', 'checkinName', 'createdAt', 'updatedAt'
+        ]) &&
+        (complete || !keys.hasAny(['checkinAt', 'checkinUid', 'checkinName'])) &&
+        data.checkoutAt is timestamp && data.checkoutAt <= request.time &&
+        data.checkoutUid is string && data.checkoutUid.size() >= 1 && data.checkoutUid.size() <= 128 &&
+        isValidName(data.checkoutName) &&
+        data.device is string && data.device.size() >= 1 && data.device.size() <= 50 &&
+        data.createdAt is timestamp && data.createdAt <= request.time &&
+        data.updatedAt is timestamp && data.updatedAt == request.time &&
+        (!complete || (
+          data.checkinAt is timestamp && data.checkinAt > data.checkoutAt && data.checkinAt <= request.time &&
+          data.checkinUid is string && data.checkinUid.size() >= 1 && data.checkinUid.size() <= 128 &&
+          isValidName(data.checkinName)
+        ));
+    }
+
+    function isValidReset(data) {
+      return data.keys().hasAll([
+          'occurredAt', 'actorUid', 'actorName', 'allowanceSeconds', 'kind', 'createdAt'
+        ]) &&
+        data.keys().hasOnly([
+          'occurredAt', 'actorUid', 'actorName', 'allowanceSeconds', 'kind', 'createdAt'
+        ]) &&
+        data.occurredAt is timestamp && data.occurredAt <= request.time &&
+        data.actorUid is string && data.actorUid.size() >= 1 && data.actorUid.size() <= 128 &&
+        isValidName(data.actorName) &&
+        data.allowanceSeconds is int && data.allowanceSeconds >= 1 && data.allowanceSeconds <= 604800 &&
+        data.kind == 'manual' &&
+        data.createdAt is timestamp && data.createdAt == request.time;
+    }
+
+    function validMemberCheckout(sessionId) {
+      return uidUnchanged(request.resource.data) &&
+        isDocOwner(request.resource.data) &&
+        isCurrentUserName(request.resource.data.checkoutName) &&
+        isRecent(request.resource.data.checkoutAt) &&
+        request.resource.data.createdAt == request.time &&
+        !hasCheckin(request.resource.data) &&
+        get(/databases/$(database)/documents/xmbtask/runtime).data.activeSessionId == '' &&
+        getAfter(/databases/$(database)/documents/xmbtask/runtime).data.activeSessionId == sessionId;
+    }
+
+    function validMemberCheckin(sessionId) {
+      return !hasCheckin(resource.data) && hasCheckin(request.resource.data) &&
+        uidNotModified(resource.data, request.resource.data) &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'checkinAt', 'checkinUid', 'checkinName', 'updatedAt'
+        ]) &&
+        request.resource.data.checkinUid == request.auth.uid &&
+        isCurrentUserName(request.resource.data.checkinName) &&
+        isRecent(request.resource.data.checkinAt) &&
+        get(/databases/$(database)/documents/xmbtask/runtime).data.activeSessionId == sessionId &&
+        getAfter(/databases/$(database)/documents/xmbtask/runtime).data.activeSessionId == '';
+    }
+
+    function validMemberRuntimeTransition() {
+      let before = resource.data.activeSessionId;
+      let after = request.resource.data.activeSessionId;
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'activeSessionId', 'updatedAt'
+        ]) && (
+          (before == '' && after != '' &&
+            getAfter(/databases/$(database)/documents/xmbtaskSessions/$(after)).data.checkoutUid == request.auth.uid &&
+            !hasCheckin(getAfter(/databases/$(database)/documents/xmbtaskSessions/$(after)).data)) ||
+          (before != '' && after == '' &&
+            getAfter(/databases/$(database)/documents/xmbtaskSessions/$(before)).data.checkinUid == request.auth.uid)
+        );
+    }
+
+    match /xmbtask/config {
       allow read: if hasAccess();
-      allow create: if isAdmin() && uidUnchanged() && isValidState(request.resource.data);
-      allow update: if isAdmin() && isDocOwner() && uidNotModified() && isValidState(request.resource.data);
+      allow create: if isAdmin() && isValidConfig(request.resource.data);
+      allow update: if isAdmin() && isValidConfig(request.resource.data);
       allow delete: if false;
+    }
+
+    match /xmbtask/runtime {
+      allow read: if hasAccess();
+      allow create: if isAdmin() && isValidRuntime(request.resource.data);
+      allow update: if isValidRuntime(request.resource.data) &&
+        (isAdmin() || (hasAccess() && validMemberRuntimeTransition()));
+      allow delete: if false;
+    }
+
+    match /xmbtaskSessions/{sessionId} {
+      allow read: if hasAccess();
+      allow create: if isValidSession(request.resource.data) &&
+        ((isAdmin() && request.resource.data.createdAt == request.time) ||
+         (hasAccess() && validMemberCheckout(sessionId)));
+      allow update: if isValidSession(request.resource.data) &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        (isAdmin() || (hasAccess() && validMemberCheckin(sessionId)));
+      allow delete: if isAdmin() &&
+        getAfter(/databases/$(database)/documents/xmbtask/runtime).data.activeSessionId != sessionId;
+    }
+
+    match /xmbtaskResets/{resetId} {
+      allow read: if hasAccess();
+      allow create: if isAdmin() && isValidReset(request.resource.data);
+      allow update, delete: if false;
     }
 
     match /{document=**} {
