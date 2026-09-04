@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, googleProvider, db } from "../firebase";
+import { getIdTokenResult, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
+import { auth, googleProvider } from "../firebase";
 import { IS_DEMO_MODE } from "../demoMode";
 
 const AuthContext = createContext(null);
@@ -16,6 +15,7 @@ export function AuthProvider({ children }) {
   const [user,         setUser]         = useState(IS_DEMO_MODE ? DEMO_USER : undefined); // undefined = still loading
   const [error,        setError]        = useState(null);
   const [accessDenied, setAccessDenied] = useState(false);
+  const [hasAccess,    setHasAccess]    = useState(IS_DEMO_MODE);
   const [isAdmin,      setIsAdmin]      = useState(false);
   const [deniedUser,   setDeniedUser]   = useState(null); // { email, name } from rejected sign-in
 
@@ -24,31 +24,34 @@ export function AuthProvider({ children }) {
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
+        setHasAccess(false);
+        setIsAdmin(false);
         setUser(null);
         return;
       }
 
-      // Check whitelist
+      // Custom claims are assigned only by trusted Firebase administration.
+      // They form the same server-enforced whitelist used by Firestore Rules.
       try {
-        const snap = await getDoc(doc(db, "config", "allowedUsers"));
-        const allowed = snap.exists() ? (snap.data().emails ?? []) : [];
-
-        if (allowed.includes(firebaseUser.email)) {
-          const admins = snap.exists() ? (snap.data().admins ?? []) : [];
-          setIsAdmin(admins.includes(firebaseUser.email));
+        const token = await getIdTokenResult(firebaseUser, true);
+        if (token.claims.xmbtaskAccess === true) {
+          setHasAccess(true);
+          setIsAdmin(token.claims.xmbtaskAdmin === true);
           setAccessDenied(false);
           setUser(firebaseUser);
         } else {
           setDeniedUser({ email: firebaseUser.email, name: firebaseUser.displayName ?? "" });
           await signOut(auth);
+          setHasAccess(false);
           setIsAdmin(false);
           setAccessDenied(true);
           setUser(null);
         }
       } catch {
-        // If the whitelist can't be read, deny access to be safe
+        // If the access claim cannot be verified, deny access to be safe.
         setDeniedUser({ email: firebaseUser.email, name: firebaseUser.displayName ?? "" });
         await signOut(auth);
+        setHasAccess(false);
         setIsAdmin(false);
         setAccessDenied(true);
         setUser(null);
@@ -72,10 +75,11 @@ export function AuthProvider({ children }) {
   const signOutUser = () => IS_DEMO_MODE ? undefined : signOut(auth);
 
   return (
-    <AuthContext.Provider value={{ user, error, accessDenied, isAdmin, deniedUser, signInWithGoogle, signOutUser }}>
+    <AuthContext.Provider value={{ user, error, accessDenied, hasAccess, isAdmin, deniedUser, signInWithGoogle, signOutUser }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);

@@ -1,16 +1,45 @@
-# React + Vite
+# XMBtask
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+XMBtask is a private, shared weekly device timer. Members can check a device
+out and back in, while the app records the session, calculates its duration,
+and deducts it from a configurable weekly allowance.
 
-Currently, two official plugins are available:
+## Commands
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev              # production-mode app connected to Firebase
+npm run prototype        # local-only redesign sandbox with sample data
+npm run demo             # archived v1 task-management demo
+npm run build            # production build
+npm run build:prototype  # local prototype build
+```
 
-## React Compiler
+The local-only prototype is stored in browser `localStorage`. The production
+app stores its clean shared state in Firestore at `xmbtask/state`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Access control
 
-## Expanding the ESLint configuration
+Production uses Google Sign-In and Firebase custom claims:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- `xmbtaskAccess: true` permits access to the shared workspace.
+- `xmbtaskAdmin: true` permits writes and displays administrative controls.
+
+Claims must be assigned through trusted Firebase administration; the app has no
+public sign-up or access-request workflow. Firestore rules default to denying
+all paths except the single XMBtask state document, and Cloud Storage remains
+closed because this version does not use file uploads.
+
+## Deployment
+
+Firebase Hosting target `prod` serves the production build from `dist`.
+
+```bash
+npm run deploy:prod
+```
+
+The command builds the app and deploys production Hosting, Firestore Rules, and
+the closed Storage Rules to the Firebase project configured in `.firebaserc`.
+
+The previous task-management implementation and its sanitized sample data are
+retained through `npm run demo` and the files under `demo/` and `archive/`.

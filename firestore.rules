@@ -1,8 +1,74 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // XMBtask v1 is retired. Client access remains closed until the replacement
-    // application's server-enforced whitelist rules are ready to deploy.
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: xmbtask
+    // Document ID: state
+    // Fields:
+    //   schemaVersion: integer (required, exactly 3)
+    //   stateJson: string (required, 2-750,000 chars)
+    //   updatedAt: timestamp (required, server-generated)
+    //   updatedByUid: string (required, authenticated UID, max 128 chars)
+    //   updatedByName: string (required, Auth display name, max 100 chars)
+    //
+    // The first production release has one administrator. The serialized state
+    // is intentionally admin-write-only until a non-admin mutation model is
+    // designed and reviewed.
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && resource.data.updatedByUid == request.auth.uid;
+    }
+
+    function uidUnchanged() {
+      return request.resource.data.updatedByUid == request.auth.uid;
+    }
+
+    function uidNotModified() {
+      return request.resource.data.updatedByUid == request.auth.uid;
+    }
+
+    function hasAccess() {
+      return isAuthenticated() && request.auth.token.xmbtaskAccess == true;
+    }
+
+    function isAdmin() {
+      return hasAccess() && request.auth.token.xmbtaskAdmin == true;
+    }
+
+    function isValidState(data) {
+      return data.keys().hasAll([
+          'schemaVersion', 'stateJson', 'updatedAt', 'updatedByUid', 'updatedByName'
+        ]) &&
+        data.keys().hasOnly([
+          'schemaVersion', 'stateJson', 'updatedAt', 'updatedByUid', 'updatedByName'
+        ]) &&
+        data.schemaVersion is int && data.schemaVersion == 3 &&
+        data.stateJson is string && data.stateJson.size() >= 2 && data.stateJson.size() <= 750000 &&
+        data.updatedAt is timestamp && data.updatedAt == request.time &&
+        data.updatedByUid is string && data.updatedByUid.size() >= 1 && data.updatedByUid.size() <= 128 &&
+        isOwner(data.updatedByUid) &&
+        data.updatedByName is string && data.updatedByName.size() >= 1 && data.updatedByName.size() <= 100 &&
+        (!('name' in request.auth.token) || data.updatedByName == request.auth.token.name);
+    }
+
+    match /xmbtask/state {
+      allow read: if hasAccess();
+      allow create: if isAdmin() && uidUnchanged() && isValidState(request.resource.data);
+      allow update: if isAdmin() && isDocOwner() && uidNotModified() && isValidState(request.resource.data);
+      allow delete: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

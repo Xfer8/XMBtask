@@ -15,15 +15,26 @@ async function renderApp() {
     return
   }
 
-  const [{ default: App }, { AuthProvider }] = await Promise.all([
-    import('./App.jsx'),
-    import('./contexts/AuthContext.jsx'),
-  ])
+  const { AuthProvider } = await import('./contexts/AuthContext.jsx')
+
+  if (import.meta.env.MODE === 'demo') {
+    const { default: App } = await import('./App.jsx')
+    root.render(
+      <StrictMode>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </StrictMode>,
+    )
+    return
+  }
+
+  const { default: LiveTimerApp } = await import('./live/LiveTimerApp.jsx')
 
   root.render(
     <StrictMode>
       <AuthProvider>
-        <App />
+        <LiveTimerApp />
       </AuthProvider>
     </StrictMode>,
   )

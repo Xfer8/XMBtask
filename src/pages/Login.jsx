@@ -1,10 +1,7 @@
-import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import RequestAccessModal from "../components/RequestAccessModal";
 
 export default function Login() {
-  const { signInWithGoogle, error, accessDenied, deniedUser } = useAuth();
-  const [showRequestModal, setShowRequestModal] = useState(false);
+  const { signInWithGoogle, error, accessDenied } = useAuth();
 
   return (
     <div style={{
@@ -37,24 +34,14 @@ export default function Login() {
                 Your account isn't on the access list. Contact the app owner to request access.
               </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
-              <button onClick={signInWithGoogle} style={{
-                background: "none", border: "1px solid #3a3a3a", borderRadius: "8px",
-                cursor: "pointer", padding: "10px 20px",
-                fontSize: "13px", color: "#888890",
-                fontFamily: "inherit", width: "100%",
-              }}>
-                Try a different account
-              </button>
-              <button onClick={() => setShowRequestModal(true)} style={{
-                background: "#4ADE80", border: "none", borderRadius: "8px",
-                cursor: "pointer", padding: "10px 20px",
-                fontSize: "13px", fontWeight: 700, color: "#0a1a0f",
-                fontFamily: "inherit", width: "100%",
-              }}>
-                Request access
-              </button>
-            </div>
+            <button onClick={signInWithGoogle} style={{
+              background: "none", border: "1px solid #3a3a3a", borderRadius: "8px",
+              cursor: "pointer", padding: "10px 20px",
+              fontSize: "13px", color: "#888890",
+              fontFamily: "inherit", width: "100%",
+            }}>
+              Try a different account
+            </button>
           </>
         ) : (
           <>
@@ -90,14 +77,6 @@ export default function Login() {
           </div>
         )}
       </div>
-
-      {showRequestModal && (
-        <RequestAccessModal
-          initialEmail={deniedUser?.email ?? ""}
-          initialName={deniedUser?.name ?? ""}
-          onClose={() => setShowRequestModal(false)}
-        />
-      )}
     </div>
   );
 }

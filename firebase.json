@@ -8,7 +8,7 @@
   "hosting": [
     {
       "target": "prod",
-      "public": "decommissioned",
+      "public": "dist",
       "ignore": [
         "firebase.json",
         "**/.*",
