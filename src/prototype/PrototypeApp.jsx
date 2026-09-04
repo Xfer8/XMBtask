@@ -609,8 +609,8 @@ function SessionDayTimeline({ session, sessions, now }) {
   return (
     <div className="prototype-card-timeline">
       <div className="prototype-timeline-heading">
-        <span>6 AM–midnight</span>
-        <time dateTime={calendarDay.toISOString()}>{formatNumericDate(calendarDay)}</time>
+        <span>Start time: <time dateTime={session.checkout.at}>{formatShortTime(session.checkout.at)}</time></span>
+        <span>End time: <time dateTime={session.checkin?.at}>{session.checkin ? formatShortTime(session.checkin.at) : 'In progress'}</time></span>
       </div>
       <div className="prototype-timeline-labels" aria-hidden="true"><span>6a</span><span>12p</span><span>6p</span><span>12a</span></div>
       <div className="prototype-day-track" role="img" aria-label={`Sessions from 6 AM to midnight on ${formatNumericDate(calendarDay)}`}>
@@ -686,7 +686,7 @@ function DeviceUsageChart({ state, now, activeDevice }) {
   return (
     <section className="prototype-panel prototype-usage-panel" aria-labelledby="device-usage-title">
       <div className="prototype-usage-heading">
-        <span className="prototype-kicker" id="device-usage-title">Device usage</span>
+        <span className="prototype-kicker" id="device-usage-title">Device usage (hours)</span>
         <small>This week</small>
       </div>
       <div className="prototype-device-chart">
@@ -695,6 +695,7 @@ function DeviceUsageChart({ state, now, activeDevice }) {
           const isActive = activeDevice?.toLowerCase() === device.toLowerCase()
           return (
             <div className={`prototype-device-bar ${isActive ? 'is-active' : ''}`} key={device} title={`${device}: ${formatElapsed(seconds)} this week`}>
+              <strong className="prototype-device-hours">{(seconds / 3600).toFixed(1)}</strong>
               <div className="prototype-device-bar-track" aria-label={`${device}: ${formatElapsed(seconds)} this week`} role="img">
                 <span style={{ height: `${relativeHeight}%` }} />
               </div>
@@ -721,13 +722,7 @@ function TimerPage({ state, snapshot, now, onAction, setPage }) {
 
   return (
     <>
-      <PageHeading
-        title="Weekly device timer"
-      >
-        <div className={`prototype-live-pill ${isOut ? 'is-out' : 'is-in'}`}>
-          <span /> {isOut ? 'Live' : 'Paused'}
-        </div>
-      </PageHeading>
+      <PageHeading title="Weekly device timer" />
 
       <div className="prototype-timer-grid">
         <section className={`prototype-timer-card ${isOut ? 'is-running' : ''}`}>
@@ -778,7 +773,7 @@ function TimerPage({ state, snapshot, now, onAction, setPage }) {
           <section className="prototype-panel prototype-status-panel">
             <span className="prototype-kicker">Status</span>
             <div className="prototype-current-device-summary">
-              <div className={`prototype-state-icon ${isOut ? 'is-active' : ''}`}><DeviceIcon device={displayedDevice} size={68} /></div>
+              <div className={`prototype-state-icon ${isOut ? 'is-active' : ''}`}><DeviceIcon device={displayedDevice} size={102} /></div>
               <div className="prototype-current-device-heading">
                 <h2>{displayedDevice}</h2>
                 <strong className={`prototype-device-state ${isOut ? 'is-active' : ''}`}>{isOut ? 'Checked out' : 'Checked in'}</strong>

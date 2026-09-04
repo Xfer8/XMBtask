@@ -374,46 +374,6 @@ button {
   background: rgba(67, 218, 139, 0.17);
 }
 
-.prototype-live-pill {
-  display: flex;
-  min-height: 32px;
-  align-items: center;
-  gap: 8px;
-  padding: 0 12px;
-  border-radius: 18px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.prototype-live-pill span {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
-.prototype-live-pill.is-out {
-  color: var(--prototype-orange);
-  background: var(--prototype-orange-soft);
-  border: 1px solid rgba(255, 157, 71, 0.22);
-}
-
-.prototype-live-pill.is-out span {
-  background: var(--prototype-orange);
-  box-shadow: 0 0 8px rgba(255, 157, 71, 0.8);
-}
-
-.prototype-live-pill.is-in {
-  color: var(--prototype-green);
-  background: var(--prototype-green-soft);
-  border: 1px solid rgba(67, 218, 139, 0.2);
-}
-
-.prototype-live-pill.is-in span {
-  background: var(--prototype-green);
-}
-
 .prototype-admin-pill {
   display: inline-flex;
   min-height: 34px;
@@ -652,9 +612,9 @@ button {
 
 .prototype-state-icon {
   display: flex;
-  width: 82px;
-  height: 82px;
-  flex: 0 0 82px;
+  width: 116px;
+  height: 116px;
+  flex: 0 0 116px;
   align-items: center;
   justify-content: flex-start;
   color: var(--prototype-green);
@@ -793,10 +753,19 @@ button {
 .prototype-device-bar {
   display: grid;
   height: 100%;
-  grid-template-rows: minmax(0, 1fr) 28px;
+  grid-template-rows: 16px minmax(0, 1fr) 28px;
   place-items: end center;
-  gap: 6px;
+  gap: 4px;
   color: var(--prototype-muted);
+}
+
+.prototype-device-hours {
+  align-self: start;
+  color: var(--prototype-text);
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
 }
 
 .prototype-device-bar.is-active {
@@ -924,7 +893,6 @@ button {
 }
 
 .prototype-card-metric > span,
-.prototype-timeline-heading > span,
 .prototype-card-activity > span {
   color: var(--prototype-dim);
   font-size: 10px;
@@ -969,15 +937,20 @@ button {
 
 .prototype-timeline-heading {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 16px;
+  color: var(--prototype-muted);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .prototype-timeline-heading time {
-  color: var(--prototype-muted);
+  color: var(--prototype-text);
   font-family: 'DM Mono', monospace;
-  font-size: 10px;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .prototype-timeline-labels {
@@ -1828,14 +1801,19 @@ button {
 .prototype-sheet-fields select,
 .prototype-sheet-fields textarea {
   width: 100%;
-  min-height: 42px;
-  padding: 0 11px;
+  max-width: 100%;
+  min-width: 0;
+  height: 50px;
+  min-height: 50px;
+  box-sizing: border-box;
+  padding: 0 14px;
   color: var(--prototype-text);
   background: #191b1b;
   border: 1px solid var(--prototype-border);
   border-radius: 7px;
   outline: 0;
-  font-size: 13px;
+  font-size: 16px;
+  line-height: 1.25;
 }
 
 .prototype-sheet-fields textarea {
@@ -2296,14 +2274,21 @@ button {
 .prototype-admin-two-fields,
 .prototype-admin-detail-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
 .prototype-admin-three-fields {
   display: grid;
-  grid-template-columns: minmax(210px, 1.4fr) minmax(120px, .8fr) minmax(120px, .8fr);
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, .8fr) minmax(0, .8fr);
   gap: 12px;
+}
+
+.prototype-admin-two-fields > label,
+.prototype-admin-three-fields > label,
+.prototype-two-fields > label,
+.prototype-sheet-fields > label {
+  min-width: 0;
 }
 
 .prototype-admin-details {
@@ -2787,12 +2772,6 @@ button {
     justify-content: space-between;
   }
 
-  .prototype-live-pill {
-    min-height: 28px;
-    padding-inline: 9px;
-    font-size: 10px;
-  }
-
   .prototype-timer-card {
     min-height: 0;
     padding: 25px 18px;
@@ -2854,9 +2833,9 @@ button {
   }
 
   .prototype-state-icon {
-    width: 76px;
-    height: 76px;
-    flex-basis: 76px;
+    width: 110px;
+    height: 110px;
+    flex-basis: 110px;
   }
 
   .prototype-current-device-summary {
